@@ -1,11 +1,22 @@
 <template>
-  <!-- Contenedor principal del registro -->
-  <div class="flex flex-col items-center justify-center py-20">
+  <!-- Contenedor principal, centrado en pantalla con fondo -->
+  <div class="flex flex-col items-center justify-center min-h-screen bg-gray-50">
     <!-- Tarjeta / formulario -->
     <div class="w-full max-w-md bg-white shadow-md rounded px-8 py-6">
       <h1 class="text-2xl font-bold mb-4 text-center">Register</h1>
 
       <form @submit.prevent="handleRegister" class="space-y-6">
+        <!-- Campo Name -->
+        <div>
+          <label for="name" class="block text-gray-700 font-medium mb-1"> Name: </label>
+          <input
+            id="name"
+            v-model="form.name"
+            required
+            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
         <!-- Campo Email -->
         <div>
           <label for="email" class="block text-gray-700 font-medium mb-1"> Email: </label>
@@ -30,7 +41,21 @@
           />
         </div>
 
-        <!-- Botón de Enviar -->
+        <!-- Campo Confirm Password -->
+        <div>
+          <label for="password_confirmation" class="block text-gray-700 font-medium mb-1">
+            Confirm Password:
+          </label>
+          <input
+            id="password_confirmation"
+            type="password"
+            v-model="form.password_confirmation"
+            required
+            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <!-- Botón de registro -->
         <button
           type="submit"
           :disabled="isLoading"
@@ -57,11 +82,13 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from '@/axiosConfig'
-import { isAxiosError } from 'axios'
+import { AxiosError, isAxiosError } from 'axios'
 
 interface RegisterForm {
+  name: string
   email: string
   password: string
+  password_confirmation: string
 }
 
 export default {
@@ -69,7 +96,13 @@ export default {
   setup() {
     const router = useRouter()
 
-    const form = ref<RegisterForm>({ email: '', password: '' })
+    const form = ref<RegisterForm>({
+      name: '',
+      email: '',
+      password: '',
+      password_confirmation: '',
+    })
+
     const isLoading = ref(false)
     const errorMessage = ref<string | null>(null)
 
@@ -78,14 +111,16 @@ export default {
       errorMessage.value = null
 
       try {
-        // Si tu backend devuelve directamente el token tras registrarte:
+        // Enviamos todos los campos que el backend espera
         await axios.post('/register', form.value)
-        // localStorage.setItem("token", response.data.token); // <- Usa si devuelven token
         alert('Registro exitoso, ahora inicia sesión.')
         router.push('/login')
       } catch (error: unknown) {
-        if (isAxiosError(error) && error.response) {
-          errorMessage.value = error.response.data?.message || 'Registration failed.'
+        const axiosError = error as AxiosError
+        if (isAxiosError(axiosError) && axiosError.response) {
+          // Asumiendo que el backend devuelve un objeto con propiedad "message"
+          const data = axiosError.response.data as { message?: string }
+          errorMessage.value = data.message || 'Registration failed.'
         } else {
           errorMessage.value = 'Registration failed.'
         }
@@ -105,5 +140,10 @@ export default {
 </script>
 
 <style scoped>
-/* Si deseas añadir estilos personalizados adicionales, hazlo aquí */
+/* Aquí puedes sobrescribir o añadir detalles extra */
+.register {
+  /* Por si quieres un ancho máximo distinto, etc. */
+  max-width: 300px;
+  margin: 0 auto;
+}
 </style>
