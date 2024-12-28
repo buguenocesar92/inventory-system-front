@@ -56,7 +56,8 @@
 <script lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import axios, { AxiosError, isAxiosError } from 'axios'
+import { AxiosError, isAxiosError } from 'axios'
+import axiosInstance from '@/axiosConfig'
 
 interface LoginForm {
   email: string
@@ -78,7 +79,7 @@ export default {
 
       try {
         // Ajusta la URL o usa tu instancia de Axios con baseURL
-        const response = await axios.post('/login', form.value)
+        const response = await axiosInstance.post('/login', form.value)
         localStorage.setItem('token', response.data.token)
         router.push('/dashboard')
       } catch (error: unknown) {
