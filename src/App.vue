@@ -61,13 +61,6 @@ const toggleMobileMenu = () => {
         >
           Home
         </RouterLink>
-        <RouterLink
-          to="/about"
-          class="block px-2 py-1 text-gray-700 hover:text-blue-600 transition-colors md:inline-block"
-          active-class="text-blue-600 font-bold"
-        >
-          About
-        </RouterLink>
         <!-- Agrega más enlaces según tu app -->
       </nav>
     </header>
