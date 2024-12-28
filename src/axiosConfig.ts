@@ -3,7 +3,7 @@ import router from './router'
 
 // Crea una instancia de Axios
 const axiosInstance = axios.create({
-  baseURL: 'https://tu-api.com', // Cambia por tu URL base
+  baseURL: 'http://127.0.0.1:8000/api/auth',
   timeout: 5000,
 })
 
