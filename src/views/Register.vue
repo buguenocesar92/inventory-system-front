@@ -1,6 +1,6 @@
 <template>
   <!-- Contenedor principal, centrado en pantalla con fondo -->
-  <div class="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+  <div class="flex flex-col items-center justify-center py-20">
     <!-- Tarjeta / formulario -->
     <div class="w-full max-w-md bg-white shadow-md rounded px-8 py-6">
       <h1 class="text-2xl font-bold mb-4 text-center">Register</h1>
