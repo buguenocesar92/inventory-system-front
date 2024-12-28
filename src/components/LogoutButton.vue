@@ -12,7 +12,7 @@ export default defineComponent({
     const router = useRouter()
 
     const handleLogout = () => {
-      localStorage.removeItem('token')
+      localStorage.removeItem('access_token')
       router.push('/login')
     }
 
