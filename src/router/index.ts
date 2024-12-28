@@ -5,8 +5,18 @@ import Dashboard from '../views/Dashboard.vue'
 
 const routes = [
   { path: '/', redirect: '/login' },
-  { path: '/login', name: 'Login', component: Login },
-  { path: '/register', name: 'Register', component: Register },
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login,
+    meta: { requiresGuest: true },
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: Register,
+    meta: { requiresGuest: true },
+  },
   {
     path: '/dashboard',
     name: 'Dashboard',
@@ -20,12 +30,19 @@ const router = createRouter({
   routes,
 })
 
-// Protegemos las rutas que requieran auth
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token')
-  if (to.meta.requiresAuth && !token) {
+  const access_token = localStorage.getItem('access_token')
+
+  // Rutas protegidas
+  if (to.meta.requiresAuth && !access_token) {
     return next('/login')
   }
+
+  // Rutas de invitado
+  if (to.meta.requiresGuest && access_token) {
+    return next('/dashboard')
+  }
+
   next()
 })
 
