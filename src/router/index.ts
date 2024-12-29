@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import Dashboard from '../views/Dashboard.vue'
+import NotFound from '../views/NotFound.vue' // Componente para la página 404
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -23,6 +24,17 @@ const routes = [
     component: Dashboard,
     meta: { requiresAuth: true },
   },
+  // Ruta explícita para 404
+  {
+    path: '/404',
+    name: 'NotFound',
+    component: NotFound,
+  },
+  // Ruta de captura que redirige a /404
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/404',
+  },
 ]
 
 const router = createRouter({
@@ -41,6 +53,11 @@ router.beforeEach((to, from, next) => {
   // Rutas de invitado
   if (to.meta.requiresGuest && access_token) {
     return next('/dashboard')
+  }
+
+  // Redirige a /404 si no encuentra la ruta
+  if (!to.matched.length) {
+    return next('/404')
   }
 
   next()
