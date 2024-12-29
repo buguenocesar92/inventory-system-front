@@ -1,14 +1,12 @@
 <template>
-  <!-- Contenedor principal, centrado en pantalla con fondo -->
   <div class="flex flex-col items-center justify-center py-20">
-    <!-- Tarjeta / formulario -->
     <div class="w-full max-w-md bg-white shadow-md rounded px-8 py-6">
-      <h1 class="text-2xl font-bold mb-4 text-center">Register</h1>
+      <h1 class="text-2xl font-bold mb-4 text-center">Register Tenant</h1>
 
       <form @submit.prevent="handleRegister" class="space-y-6">
-        <!-- Campo Name -->
+        <!-- Campo Tenant Name -->
         <div>
-          <label for="name" class="block text-gray-700 font-medium mb-1"> Name: </label>
+          <label for="name" class="block text-gray-700 font-medium mb-1">Tenant Name:</label>
           <input
             id="name"
             v-model="form.name"
@@ -17,13 +15,36 @@
           />
         </div>
 
-        <!-- Campo Email -->
+        <!-- Campo Domain -->
         <div>
-          <label for="email" class="block text-gray-700 font-medium mb-1"> Email: </label>
+          <label for="domain" class="block text-gray-700 font-medium mb-1">Domain:</label>
           <input
-            id="email"
+            id="domain"
+            v-model="form.domain"
+            required
+            placeholder="e.g., acme.local"
+            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <!-- Campo Admin Name -->
+        <div>
+          <label for="user_name" class="block text-gray-700 font-medium mb-1">Admin Name:</label>
+          <input
+            id="user_name"
+            v-model="form.user_name"
+            required
+            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <!-- Campo Admin Email -->
+        <div>
+          <label for="user_email" class="block text-gray-700 font-medium mb-1">Admin Email:</label>
+          <input
+            id="user_email"
             type="email"
-            v-model="form.email"
+            v-model="form.user_email"
             required
             class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -31,7 +52,7 @@
 
         <!-- Campo Password -->
         <div>
-          <label for="password" class="block text-gray-700 font-medium mb-1"> Password: </label>
+          <label for="password" class="block text-gray-700 font-medium mb-1">Password:</label>
           <input
             id="password"
             type="password"
@@ -65,15 +86,7 @@
         </button>
       </form>
 
-      <!-- Mensaje de error -->
       <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>
-
-      <!-- Enlace a iniciar sesión -->
-      <p class="mt-4 text-center">
-        ¿Ya tienes una cuenta?
-        <router-link to="/login" class="text-blue-600 hover:underline"> Inicia sesión </router-link
-        >.
-      </p>
     </div>
   </div>
 </template>
@@ -81,24 +94,19 @@
 <script lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from '@/axiosConfig'
 import { AxiosError, isAxiosError } from 'axios'
-
-interface RegisterForm {
-  name: string
-  email: string
-  password: string
-  password_confirmation: string
-}
+import axios from '@/axiosConfig'
 
 export default {
-  name: 'UserRegister',
+  name: 'RegisterTenant',
   setup() {
     const router = useRouter()
 
-    const form = ref<RegisterForm>({
+    const form = ref({
       name: '',
-      email: '',
+      domain: '',
+      user_name: '',
+      user_email: '',
       password: '',
       password_confirmation: '',
     })
@@ -111,10 +119,9 @@ export default {
       errorMessage.value = null
 
       try {
-        // Enviamos todos los campos que el backend espera
-        await axios.post('/register', form.value)
-        alert('Registro exitoso, ahora inicia sesión.')
-        router.push('/login')
+        const response = await axios.post('/register-tenant', form.value)
+        localStorage.setItem('access_token', response.data.access_token)
+        //router.push('/dashboard')
       } catch (error: unknown) {
         const axiosError = error as AxiosError
         if (isAxiosError(axiosError) && axiosError.response) {
@@ -138,12 +145,3 @@ export default {
   },
 }
 </script>
-
-<style scoped>
-/* Aquí puedes sobrescribir o añadir detalles extra */
-.register {
-  /* Por si quieres un ancho máximo distinto, etc. */
-  max-width: 300px;
-  margin: 0 auto;
-}
-</style>
