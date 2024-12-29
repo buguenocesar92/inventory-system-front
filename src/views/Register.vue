@@ -97,12 +97,20 @@ import { useRouter } from 'vue-router'
 import { AxiosError, isAxiosError } from 'axios'
 import axios from '@/axiosConfig'
 
+interface RegisterForm {
+  name: string
+  domain: string
+  user_name: string
+  user_email: string
+  password: string
+  password_confirmation: string
+}
+
 export default {
   name: 'RegisterTenant',
   setup() {
     const router = useRouter()
-
-    const form = ref({
+    const form = ref<RegisterForm>({
       name: '',
       domain: '',
       user_name: '',
