@@ -56,7 +56,7 @@
 
 <script lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+//import { useRouter } from 'vue-router'
 import axios from '@/axiosConfig'
 import { AxiosError, isAxiosError } from 'axios'
 
@@ -69,7 +69,7 @@ interface RegisterForm {
 export default {
   name: 'RegisterUser',
   setup() {
-    const router = useRouter()
+    //const router = useRouter()
 
     const form = ref<RegisterForm>({
       name: '',
