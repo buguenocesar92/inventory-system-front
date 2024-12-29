@@ -3,6 +3,7 @@ import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import Dashboard from '../views/Dashboard.vue'
 import NotFound from '../views/NotFound.vue' // Componente para la página 404
+import RegisterUser from '../views/RegisterUser.vue'
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -22,6 +23,12 @@ const routes = [
     path: '/dashboard',
     name: 'Dashboard',
     component: Dashboard,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/register-user',
+    name: 'RegisterUser',
+    component: RegisterUser,
     meta: { requiresAuth: true },
   },
   // Ruta explícita para 404
