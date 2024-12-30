@@ -61,6 +61,13 @@ const toggleMobileMenu = () => {
         >
           Home
         </RouterLink>
+        <RouterLink
+          to="/roles-permissions"
+          class="block px-2 py-1 text-gray-700 hover:text-blue-600 transition-colors md:inline-block"
+          active-class="text-blue-600 font-bold"
+        >
+          Role and Permission
+        </RouterLink>
         <!-- Agrega más enlaces según tu app -->
       </nav>
     </header>
