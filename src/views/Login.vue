@@ -79,7 +79,7 @@ export default {
 
       try {
         // Ajusta la URL o usa tu instancia de Axios con baseURL
-        const response = await axiosInstance.post('/login', form.value)
+        const response = await axiosInstance.post('auth/login', form.value)
         localStorage.setItem('access_token', response.data.access_token)
         router.push('/dashboard')
       } catch (error: unknown) {

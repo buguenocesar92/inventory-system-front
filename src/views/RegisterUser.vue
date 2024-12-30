@@ -85,7 +85,7 @@ export default {
       errorMessage.value = null
 
       try {
-        await axios.post('/register', form.value)
+        await axios.post('auth/register', form.value)
         // Limpia el formulario
         alert('User registered successfully.')
         resetForm()
