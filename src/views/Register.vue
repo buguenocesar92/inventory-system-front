@@ -127,7 +127,7 @@ export default {
       errorMessage.value = null
 
       try {
-        const response = await axios.post('/register-tenant', form.value)
+        const response = await axios.post('tenants/register', form.value)
         localStorage.setItem('access_token', response.data.access_token)
         router.push('/dashboard')
       } catch (error: unknown) {
