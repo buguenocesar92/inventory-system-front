@@ -4,6 +4,8 @@ import Register from '../views/Register.vue'
 import Dashboard from '../views/Dashboard.vue'
 import NotFound from '../views/NotFound.vue' // Componente para la página 404
 import RegisterUser from '../views/RegisterUser.vue'
+import ListRolesPermissions from '../views/ListRolesPermissions.vue'
+import CreateRolePermission from '../views/CreateRolePermission.vue'
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -29,6 +31,18 @@ const routes = [
     path: '/register-user',
     name: 'RegisterUser',
     component: RegisterUser,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/roles-permissions',
+    name: 'ListRolesPermissions',
+    component: ListRolesPermissions,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/create-role-permission',
+    name: 'CreateRolePermission',
+    component: CreateRolePermission,
     meta: { requiresAuth: true },
   },
   // Ruta explícita para 404
