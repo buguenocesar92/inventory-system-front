@@ -16,7 +16,7 @@
         </div>
 
         <!-- Campo Domain -->
-        <div>
+        <!--         <div>
           <label for="domain" class="block text-gray-700 font-medium mb-1">Domain:</label>
           <input
             id="domain"
@@ -25,7 +25,7 @@
             placeholder="e.g., acme.local"
             class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-        </div>
+        </div> -->
 
         <!-- Campo Admin Name -->
         <div>
@@ -99,7 +99,7 @@ import axios from '@/axiosConfig'
 
 interface RegisterForm {
   name: string
-  domain: string
+  /*  subdomain: string */
   user_name: string
   user_email: string
   password: string
@@ -112,7 +112,7 @@ export default {
     const router = useRouter()
     const form = ref<RegisterForm>({
       name: '',
-      domain: '',
+      /*   subdomain: '', */
       user_name: '',
       user_email: '',
       password: '',
