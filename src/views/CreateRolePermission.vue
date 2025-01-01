@@ -103,7 +103,7 @@ export default {
     const fetchUsers = async () => {
       try {
         const response = await axios.get('/users/list-users-by-tenant') // Endpoint para obtener usuarios
-        users.value = response.data
+        users.value = response.data.users
       } catch (error) {
         console.error('Error al cargar los usuarios:', error)
       }
