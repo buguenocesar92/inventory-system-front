@@ -1,33 +1,62 @@
 <template>
   <div class="flex flex-col items-center justify-center py-20">
-    <div class="w-full max-w-md bg-white shadow-md rounded px-8 py-6">
-      <h1 class="text-2xl font-bold mb-4 text-center">Crear Rol o Permiso</h1>
+    <div class="w-full max-w-lg bg-white shadow-md rounded px-8 py-6">
+      <h1 class="text-2xl font-bold mb-4 text-center">Crear Rol</h1>
 
       <form @submit.prevent="handleCreate" class="space-y-6">
-        <!-- Tipo (Rol o Permiso) -->
+        <!-- Nombre del Rol -->
         <div>
-          <label for="type" class="block text-gray-700 font-medium mb-1">Tipo:</label>
-          <select
-            id="type"
-            v-model="form.type"
-            required
-            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <label for="role_name" class="block text-gray-700 font-medium mb-1"
+            >Nombre del Rol:</label
           >
-            <option value="role">Rol</option>
-            <option value="permission">Permiso</option>
-          </select>
-        </div>
-
-        <!-- Nombre del Rol o Permiso -->
-        <div>
-          <label for="name" class="block text-gray-700 font-medium mb-1">Nombre:</label>
           <input
-            id="name"
-            v-model="form.name"
+            id="role_name"
+            v-model="form.role_name"
             required
-            placeholder="Nombre del rol o permiso"
+            placeholder="Nombre del rol"
             class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+        </div>
+
+        <!-- Permisos -->
+        <div>
+          <label for="permissions" class="block text-gray-700 font-medium mb-1">Permisos:</label>
+          <div
+            v-for="(permission, index) in form.permissions"
+            :key="index"
+            class="flex items-center space-x-2 mb-2"
+          >
+            <input
+              v-model="form.permissions[index]"
+              placeholder="Nombre del permiso"
+              class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              @click.prevent="removePermission(index)"
+              class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition-colors"
+            >
+              X
+            </button>
+          </div>
+          <button
+            @click.prevent="addPermission"
+            class="bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition-colors"
+          >
+            Añadir Permiso
+          </button>
+        </div>
+
+        <!-- Usuarios -->
+        <div>
+          <label for="users" class="block text-gray-700 font-medium mb-1">Usuarios:</label>
+          <select
+            id="users"
+            v-model="form.users"
+            multiple
+            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+          </select>
         </div>
 
         <!-- Botón de creación -->
@@ -36,7 +65,7 @@
           :disabled="isLoading"
           class="w-full bg-blue-500 text-white font-medium py-2 rounded hover:bg-blue-600 transition-colors disabled:opacity-50"
         >
-          {{ isLoading ? 'Creando...' : 'Crear' }}
+          {{ isLoading ? 'Creando...' : 'Crear Rol' }}
         </button>
       </form>
 
@@ -47,26 +76,46 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { AxiosError, isAxiosError } from 'axios'
 import axios from '@/axiosConfig'
 
-interface CreateForm {
-  type: string
-  name: string
+interface CreateRoleForm {
+  role_name: string
+  permissions: string[]
+  users: number[]
 }
 
 export default {
-  name: 'CreateRolePermission',
+  name: 'CreateRole',
   setup() {
-    const form = ref<CreateForm>({
-      type: 'role', // Por defecto selecciona "Rol"
-      name: '',
+    const form = ref<CreateRoleForm>({
+      role_name: '',
+      permissions: [],
+      users: [],
     })
 
+    const users = ref<{ id: number; name: string }[]>([]) // Usuarios disponibles
     const isLoading = ref(false)
     const errorMessage = ref<string | null>(null)
     const successMessage = ref<string | null>(null)
+
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get('/users/list-users-by-tenant') // Endpoint para obtener usuarios
+        users.value = response.data
+      } catch (error) {
+        console.error('Error al cargar los usuarios:', error)
+      }
+    }
+
+    const addPermission = () => {
+      form.value.permissions.push('')
+    }
+
+    const removePermission = (index: number) => {
+      form.value.permissions.splice(index, 1)
+    }
 
     const handleCreate = async () => {
       isLoading.value = true
@@ -74,14 +123,11 @@ export default {
       successMessage.value = null
 
       try {
-        const endpoint =
-          form.value.type === 'role'
-            ? '/roles-permissions/roles' // Endpoint para roles
-            : '/roles-permissions/permissions' // Endpoint para permisos
-
-        await axios.post(endpoint, { name: form.value.name })
-        successMessage.value = `¡${form.value.type === 'role' ? 'Rol' : 'Permiso'} creado exitosamente!`
-        form.value.name = '' // Limpiar el campo de nombre
+        await axios.post('/roles-permissions/roles', form.value)
+        successMessage.value = '¡Rol creado exitosamente!'
+        form.value.role_name = ''
+        form.value.permissions = []
+        form.value.users = []
       } catch (error: unknown) {
         const axiosError = error as AxiosError
         if (isAxiosError(axiosError) && axiosError.response) {
@@ -95,11 +141,16 @@ export default {
       }
     }
 
+    onMounted(fetchUsers)
+
     return {
       form,
+      users,
       isLoading,
       errorMessage,
       successMessage,
+      addPermission,
+      removePermission,
       handleCreate,
     }
   },
@@ -107,5 +158,5 @@ export default {
 </script>
 
 <style scoped>
-/* Puedes agregar estilos adicionales aquí */
+/* Puedes agregar estilos personalizados aquí */
 </style>
