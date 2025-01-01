@@ -9,6 +9,8 @@
           <tr class="bg-blue-500 text-white">
             <th class="py-2 px-4 text-left">Rol</th>
             <th class="py-2 px-4 text-left">Permisos</th>
+            <th class="py-2 px-4 text-left">Usuarios</th>
+            <th class="py-2 px-4 text-center">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -17,13 +19,58 @@
             :key="role.id"
             class="even:bg-gray-100 hover:bg-blue-100 transition-colors"
           >
+            <!-- Rol -->
             <td class="py-2 px-4">{{ role.name }}</td>
+            <!-- Permisos -->
             <td class="py-2 px-4">
               <ul>
-                <li v-for="permission in role.permissions" :key="permission">
+                <li
+                  v-for="permission in role.permissions"
+                  :key="permission"
+                  class="flex justify-between items-center"
+                >
                   {{ permission }}
+                  <button
+                    class="ml-2 text-red-500 hover:text-red-700"
+                    @click="removePermission(role.id, permission)"
+                  >
+                    Eliminar
+                  </button>
                 </li>
               </ul>
+            </td>
+            <!-- Usuarios -->
+            <td class="py-2 px-4">
+              <ul>
+                <li
+                  v-for="user in role.users"
+                  :key="user.id"
+                  class="flex justify-between items-center"
+                >
+                  {{ user.name }} ({{ user.email }})
+                  <button
+                    class="ml-2 text-red-500 hover:text-red-700"
+                    @click="removeUserFromRole(role.id, user.id)"
+                  >
+                    Eliminar
+                  </button>
+                </li>
+              </ul>
+            </td>
+            <!-- Acciones -->
+            <td class="py-2 px-4 text-center">
+              <button
+                class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                @click="updateRole(role.id)"
+              >
+                Actualizar
+              </button>
+              <button
+                class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 ml-2"
+                @click="deleteRole(role.id)"
+              >
+                Eliminar
+              </button>
             </td>
           </tr>
         </tbody>
@@ -46,10 +93,17 @@ import { ref, onMounted } from 'vue'
 import axios from '@/axiosConfig'
 import { AxiosError, isAxiosError } from 'axios'
 
+interface User {
+  id: number
+  name: string
+  email: string
+}
+
 interface Role {
   id: number
   name: string
   permissions: string[]
+  users: User[]
 }
 
 export default {
@@ -77,6 +131,30 @@ export default {
       }
     }
 
+    const updateRole = (roleId: number) => {
+      console.log('Actualizar rol:', roleId)
+      // Aquí puedes abrir un modal o redirigir a un formulario de actualización
+    }
+
+    const deleteRole = async (roleId: number) => {
+      try {
+        await axios.delete(`/roles-permissions/roles/${roleId}`)
+        roles.value = roles.value.filter((role) => role.id !== roleId)
+      } catch (error) {
+        console.error('Error eliminando rol:', error)
+      }
+    }
+
+    const removePermission = async (roleId: number, permission: string) => {
+      console.log('Eliminar permiso:', permission, 'del rol:', roleId)
+      // Implementa la lógica de eliminación de permisos aquí
+    }
+
+    const removeUserFromRole = async (roleId: number, userId: number) => {
+      console.log('Eliminar usuario:', userId, 'del rol:', roleId)
+      // Implementa la lógica de eliminación de usuarios aquí
+    }
+
     onMounted(() => {
       fetchRolesWithPermissions()
     })
@@ -84,6 +162,10 @@ export default {
     return {
       roles,
       errorMessage,
+      updateRole,
+      deleteRole,
+      removePermission,
+      removeUserFromRole,
     }
   },
 }
