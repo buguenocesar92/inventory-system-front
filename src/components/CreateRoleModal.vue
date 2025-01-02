@@ -86,18 +86,12 @@
 
 <script lang="ts">
 import { ref, onMounted } from 'vue'
-import { AxiosError, isAxiosError } from 'axios'
-import axios from '@/axiosConfig'
-
-interface CreateRoleForm {
-  role_name: string
-  permissions: string[]
-  users: number[]
-}
+import { createRole, fetchUsersByTenant } from '@/services/RoleService'
+import type { CreateRoleForm, User } from '@/types/RoleTypes'
 
 export default {
   name: 'CreateRoleModal',
-  emits: ['close', 'created'], // Emitir eventos para cerrar y notificar creación exitosa
+  emits: ['close', 'created'],
   setup(_, { emit }) {
     const form = ref<CreateRoleForm>({
       role_name: '',
@@ -105,27 +99,22 @@ export default {
       users: [],
     })
 
-    const users = ref<{ id: number; name: string }[]>([]) // Usuarios disponibles
+    const users = ref<User[]>([])
     const isLoading = ref(false)
     const errorMessage = ref<string | null>(null)
     const successMessage = ref<string | null>(null)
 
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('/users/list-users-by-tenant')
-        users.value = response.data.users
-      } catch (error) {
-        console.error('Error al cargar los usuarios:', error)
+        users.value = await fetchUsersByTenant()
+      } catch {
+        console.error('Error al cargar los usuarios.')
       }
     }
 
-    const addPermission = () => {
-      form.value.permissions.push('')
-    }
+    const addPermission = () => form.value.permissions.push('')
 
-    const removePermission = (index: number) => {
-      form.value.permissions.splice(index, 1)
-    }
+    const removePermission = (index: number) => form.value.permissions.splice(index, 1)
 
     const handleCreate = async () => {
       isLoading.value = true
@@ -133,21 +122,12 @@ export default {
       successMessage.value = null
 
       try {
-        await axios.post('/roles-permissions/roles', form.value)
+        await createRole(form.value)
         successMessage.value = '¡Rol creado exitosamente!'
-        form.value.role_name = ''
-        form.value.permissions = []
-        form.value.users = []
-        emit('created') // Emitir evento para notificar que se creó un nuevo rol
-        emit('close') // Cerrar el modal
-      } catch (error: unknown) {
-        const axiosError = error as AxiosError
-        if (isAxiosError(axiosError) && axiosError.response) {
-          const data = axiosError.response.data as { message?: string }
-          errorMessage.value = data.message || 'Error al crear.'
-        } else {
-          errorMessage.value = 'Error al crear.'
-        }
+        emit('created')
+        emit('close')
+      } catch {
+        errorMessage.value = 'Error al crear el rol.'
       } finally {
         isLoading.value = false
       }
@@ -170,5 +150,5 @@ export default {
 </script>
 
 <style scoped>
-/* Opcional: Agrega estilos personalizados para el modal */
+/* Estilos opcionales */
 </style>
