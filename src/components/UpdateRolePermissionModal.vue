@@ -82,22 +82,18 @@
 
 <script lang="ts">
 import { ref, watch } from 'vue'
-import axios from '@/axiosConfig'
-
-interface UpdateRoleForm {
-  role_name: string
-  permissions: string[]
-  users: number[]
-}
+import { updateRole, fetchUsersByTenant } from '@/services/RoleService'
+import type { UpdateRoleForm, Role, User } from '@/types/RoleTypes'
 
 export default {
   name: 'UpdateRolePermissionModal',
   props: {
     role: {
-      type: Object,
+      type: Object as () => Role,
       required: true,
     },
   },
+  emits: ['close', 'updated'],
   setup(props, { emit }) {
     const form = ref<UpdateRoleForm>({
       role_name: '',
@@ -105,45 +101,39 @@ export default {
       users: [],
     })
 
-    const users = ref<{ id: number; name: string }[]>([]) // Lista de usuarios disponibles
+    const users = ref<User[]>([])
     const errorMessage = ref<string | null>(null)
     const successMessage = ref<string | null>(null)
 
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('/users/list-users-by-tenant')
-        users.value = response.data.users
-      } catch (error) {
-        console.error('Error al cargar usuarios:', error)
+        users.value = await fetchUsersByTenant()
+      } catch {
+        console.error('Error al cargar usuarios.')
       }
     }
 
-    const addPermission = () => {
-      form.value.permissions.push('')
-    }
+    const addPermission = () => form.value.permissions.push('')
 
-    const removePermission = (index: number) => {
-      form.value.permissions.splice(index, 1)
-    }
+    const removePermission = (index: number) => form.value.permissions.splice(index, 1)
 
     const handleUpdate = async () => {
       try {
-        await axios.put(`/roles-permissions/roles/${props.role.id}`, form.value)
+        await updateRole(props.role.id, form.value)
         successMessage.value = '¡Rol actualizado exitosamente!'
-        emit('updated') // Emitir evento para recargar datos
-        emit('close') // Cerrar el modal
+        emit('updated')
+        emit('close')
       } catch {
         errorMessage.value = 'Error al actualizar el rol.'
       }
     }
 
-    // Sincronizar datos del rol seleccionado
     watch(
       () => props.role,
       (newRole) => {
         form.value.role_name = newRole.name
         form.value.permissions = [...newRole.permissions]
-        form.value.users = newRole.users.map((user: { id: number }) => user.id)
+        form.value.users = newRole.users.map((user) => user.id)
       },
       { immediate: true },
     )
