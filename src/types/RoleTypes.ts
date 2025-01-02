@@ -24,3 +24,27 @@ export interface Role {
   permissions: string[]
   users: { id: number; name: string; email: string }[]
 }
+
+// src/types/RoleTypes.ts
+export interface CreateRoleForm {
+  role_name: string
+  permissions: string[]
+  users: number[]
+}
+
+export interface User {
+  id: number
+  name: string
+}
+
+// src/types/RoleTypes.ts
+export interface UpdateRoleForm {
+  role_name: string
+  permissions: string[]
+  users: number[]
+}
+
+export interface User {
+  id: number
+  name: string
+}
