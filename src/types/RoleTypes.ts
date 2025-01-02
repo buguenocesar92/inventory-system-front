@@ -39,8 +39,3 @@ export interface UpdateRoleForm {
   permissions: string[]
   users: number[]
 }
-
-export interface User {
-  id: number
-  name: string
-}
