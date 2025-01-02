@@ -171,15 +171,33 @@ export default {
     }
 
     // Confirmation logic
-    const confirmDelete = (type: string, data: any) => {
+    interface PermissionData {
+      roleId: number
+      permission: string
+    }
+
+    interface UserData {
+      roleId: number
+      userId: number
+    }
+
+    interface RoleData {
+      roleId: number
+    }
+
+    type ConfirmData = PermissionData | UserData | RoleData
+
+    const confirmDelete = (type: string, data: ConfirmData) => {
       switch (type) {
         case 'permission':
-          confirmMessage.value = `¿Estás seguro de eliminar el permiso "${data.permission}"?`
-          confirmAction.value = () => removePermission(data.roleId, data.permission)
+          confirmMessage.value = `¿Estás seguro de eliminar el permiso "${(data as PermissionData).permission}"?`
+          confirmAction.value = () =>
+            removePermission((data as PermissionData).roleId, (data as PermissionData).permission)
           break
         case 'user':
           confirmMessage.value = `¿Estás seguro de eliminar al usuario del rol?`
-          confirmAction.value = () => removeUserFromRole(data.roleId, data.userId)
+          confirmAction.value = () =>
+            removeUserFromRole((data as UserData).roleId, (data as UserData).userId)
           break
         case 'role':
           confirmMessage.value = `¿Estás seguro de eliminar el rol?`
