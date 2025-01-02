@@ -128,11 +128,11 @@ export default {
 
     const handleUpdate = async () => {
       try {
-        const response = await axios.put(`/roles-permissions/roles/${props.role.id}`, form.value)
+        await axios.put(`/roles-permissions/roles/${props.role.id}`, form.value)
         successMessage.value = '¡Rol actualizado exitosamente!'
         emit('updated') // Emitir evento para recargar datos
         emit('close') // Cerrar el modal
-      } catch (error) {
+      } catch {
         errorMessage.value = 'Error al actualizar el rol.'
       }
     }
@@ -143,7 +143,7 @@ export default {
       (newRole) => {
         form.value.role_name = newRole.name
         form.value.permissions = [...newRole.permissions]
-        form.value.users = newRole.users.map((user: any) => user.id)
+        form.value.users = newRole.users.map((user: { id: number }) => user.id)
       },
       { immediate: true },
     )
