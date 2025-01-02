@@ -263,6 +263,7 @@ export default {
       isCreateModalOpen,
       isConfirmModalOpen,
       confirmMessage,
+      errorMessage, // Asegúrate de incluir errorMessage aquí
       fetchRolesWithPermissions,
       confirmDelete,
       handleConfirm,
