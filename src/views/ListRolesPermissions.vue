@@ -115,6 +115,7 @@ export default {
     const roles = ref<Role[]>([])
     const errorMessage = ref<string | null>(null)
 
+    // Fetch roles and permissions
     const fetchRolesWithPermissions = async () => {
       errorMessage.value = null
       try {
@@ -131,11 +132,25 @@ export default {
       }
     }
 
-    const updateRole = (roleId: number) => {
-      console.log('Actualizar rol:', roleId)
-      // Aquí puedes abrir un modal o redirigir a un formulario de actualización
+    // Update role
+    const updateRole = async (roleId: number) => {
+      try {
+        // Simulate a modal or form submission with updated role data
+        const updatedRoleName = prompt('Ingrese el nuevo nombre del rol:')
+        if (!updatedRoleName) return
+
+        const response = await axios.put(`/roles-permissions/roles/${roleId}`, {
+          role_name: updatedRoleName,
+          permissions: [], // Puedes incluir permisos actualizados aquí
+        })
+        console.log(response.data.message)
+        await fetchRolesWithPermissions() // Recargar la lista de roles
+      } catch (error) {
+        console.error('Error actualizando el rol:', error)
+      }
     }
 
+    // Delete role
     const deleteRole = async (roleId: number) => {
       try {
         await axios.delete(`/roles-permissions/roles/${roleId}`)
@@ -145,14 +160,38 @@ export default {
       }
     }
 
+    // Remove permission from a role
     const removePermission = async (roleId: number, permission: string) => {
-      console.log('Eliminar permiso:', permission, 'del rol:', roleId)
-      // Implementa la lógica de eliminación de permisos aquí
+      try {
+        const confirmRemoval = confirm(
+          `¿Estás seguro de que deseas eliminar el permiso "${permission}" del rol?`,
+        )
+        if (!confirmRemoval) return
+
+        // Realiza la solicitud al backend para eliminar el permiso del rol
+        const response = await axios.delete(`/roles-permissions/roles/${roleId}/permissions`, {
+          data: { permission }, // Envía el permiso a eliminar en el cuerpo de la solicitud
+        })
+
+        console.log(response.data.message)
+        alert(`Permiso "${permission}" eliminado del rol exitosamente.`)
+
+        // Actualiza la lista de roles para reflejar los cambios
+        await fetchRolesWithPermissions()
+      } catch (error) {
+        console.error('Error eliminando permiso:', error)
+        alert('Ocurrió un error al intentar eliminar el permiso.')
+      }
     }
 
+    // Remove user from role
     const removeUserFromRole = async (roleId: number, userId: number) => {
-      console.log('Eliminar usuario:', userId, 'del rol:', roleId)
-      // Implementa la lógica de eliminación de usuarios aquí
+      try {
+        await axios.delete(`/roles-permissions/roles/${roleId}/users/${userId}`)
+        await fetchRolesWithPermissions() // Recargar la lista de roles
+      } catch (error) {
+        console.error('Error eliminando usuario del rol:', error)
+      }
     }
 
     onMounted(() => {
