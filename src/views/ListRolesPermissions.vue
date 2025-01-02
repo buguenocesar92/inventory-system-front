@@ -2,7 +2,12 @@
   <div class="flex flex-col items-center justify-center py-20">
     <div class="w-full max-w-4xl bg-white shadow-md rounded px-8 py-6">
       <h1 class="text-2xl font-bold mb-4 text-center">Roles y Permisos</h1>
-      <CreateRolePermissionButton />
+      <button
+        class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mb-4"
+        @click="isCreateModalOpen = true"
+      >
+        Crear Nuevo Rol
+      </button>
       <!-- Tabla -->
       <table class="min-w-full border border-gray-300">
         <thead>
@@ -31,8 +36,8 @@
                 >
                   {{ permission }}
                   <button
-                    class="ml-2 text-red-500 hover:text-red-700"
-                    @click="removePermission(role.id, permission)"
+                    class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 ml-2 my-2"
+                    @click="confirmDelete('permission', { roleId: role.id, permission })"
                   >
                     Eliminar
                   </button>
@@ -49,8 +54,8 @@
                 >
                   {{ user.name }} ({{ user.email }})
                   <button
-                    class="ml-2 text-red-500 hover:text-red-700"
-                    @click="removeUserFromRole(role.id, user.id)"
+                    class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 ml-2 my-2"
+                    @click="confirmDelete('user', { roleId: role.id, userId: user.id })"
                   >
                     Eliminar
                   </button>
@@ -61,16 +66,16 @@
             <td class="py-2 px-4 text-center">
               <button
                 class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                @click="updateRole(role.id)"
+                @click="selectRoleForUpdate(role)"
               >
                 Actualizar
               </button>
-              <button
+              <!--               <button
                 class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 ml-2"
-                @click="deleteRole(role.id)"
+                @click="confirmDelete('role', { roleId: role.id })"
               >
                 Eliminar
-              </button>
+              </button> -->
             </td>
           </tr>
         </tbody>
@@ -84,11 +89,36 @@
       <!-- Mensaje de error -->
       <p v-if="errorMessage" class="text-red-500 mt-4 text-center">{{ errorMessage }}</p>
     </div>
+
+    <!-- Modal de Creación -->
+    <CreateRoleModal
+      v-if="isCreateModalOpen"
+      @close="isCreateModalOpen = false"
+      @created="fetchRolesWithPermissions"
+    />
+
+    <!-- Modal de Actualización -->
+    <UpdateRolePermissionModal
+      v-if="selectedRole"
+      :role="selectedRole"
+      @close="selectedRole = null"
+      @updated="fetchRolesWithPermissions"
+    />
+
+    <!-- Modal de Confirmación -->
+    <ConfirmationModal
+      v-if="isConfirmModalOpen"
+      :message="confirmMessage"
+      @confirm="handleConfirm"
+      @cancel="isConfirmModalOpen = false"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import CreateRolePermissionButton from '@/components/CreateRolePermissionButton.vue'
+import CreateRoleModal from '@/components/CreateRoleModal.vue'
+import UpdateRolePermissionModal from '@/components/UpdateRolePermissionModal.vue'
+import ConfirmationModal from '@/components/ConfirmationModal.vue'
 import { ref, onMounted } from 'vue'
 import axios from '@/axiosConfig'
 import { AxiosError, isAxiosError } from 'axios'
@@ -109,10 +139,18 @@ interface Role {
 export default {
   name: 'ListRolesWithPermissions',
   components: {
-    CreateRolePermissionButton,
+    CreateRoleModal,
+    UpdateRolePermissionModal,
+    ConfirmationModal,
   },
   setup() {
     const roles = ref<Role[]>([])
+    const selectedRole = ref<Role | null>(null)
+    const isCreateModalOpen = ref(false)
+    const isConfirmModalOpen = ref(false)
+    const confirmMessage = ref('')
+    const confirmAction = ref<() => void>(() => {})
+
     const errorMessage = ref<string | null>(null)
 
     // Fetch roles and permissions
@@ -132,22 +170,36 @@ export default {
       }
     }
 
-    // Update role
-    const updateRole = async (roleId: number) => {
-      try {
-        // Simulate a modal or form submission with updated role data
-        const updatedRoleName = prompt('Ingrese el nuevo nombre del rol:')
-        if (!updatedRoleName) return
-
-        const response = await axios.put(`/roles-permissions/roles/${roleId}`, {
-          role_name: updatedRoleName,
-          permissions: [], // Puedes incluir permisos actualizados aquí
-        })
-        console.log(response.data.message)
-        await fetchRolesWithPermissions() // Recargar la lista de roles
-      } catch (error) {
-        console.error('Error actualizando el rol:', error)
+    // Confirmation logic
+    const confirmDelete = (type: string, data: any) => {
+      switch (type) {
+        case 'permission':
+          confirmMessage.value = `¿Estás seguro de eliminar el permiso "${data.permission}"?`
+          confirmAction.value = () => removePermission(data.roleId, data.permission)
+          break
+        case 'user':
+          confirmMessage.value = `¿Estás seguro de eliminar al usuario del rol?`
+          confirmAction.value = () => removeUserFromRole(data.roleId, data.userId)
+          break
+        case 'role':
+          confirmMessage.value = `¿Estás seguro de eliminar el rol?`
+          confirmAction.value = () => deleteRole(data.roleId)
+          break
+        default:
+          confirmMessage.value = 'Acción desconocida.'
+          confirmAction.value = () => {}
       }
+      isConfirmModalOpen.value = true
+    }
+
+    const handleConfirm = () => {
+      confirmAction.value()
+      isConfirmModalOpen.value = false
+    }
+
+    // Select role for updating
+    const selectRoleForUpdate = (role: Role) => {
+      selectedRole.value = role
     }
 
     // Delete role
@@ -163,24 +215,13 @@ export default {
     // Remove permission from a role
     const removePermission = async (roleId: number, permission: string) => {
       try {
-        const confirmRemoval = confirm(
-          `¿Estás seguro de que deseas eliminar el permiso "${permission}" del rol?`,
-        )
-        if (!confirmRemoval) return
-
-        // Realiza la solicitud al backend para eliminar el permiso del rol
         const response = await axios.delete(`/roles-permissions/roles/${roleId}/permissions`, {
-          data: { permission }, // Envía el permiso a eliminar en el cuerpo de la solicitud
+          data: { permission },
         })
-
         console.log(response.data.message)
-        alert(`Permiso "${permission}" eliminado del rol exitosamente.`)
-
-        // Actualiza la lista de roles para reflejar los cambios
         await fetchRolesWithPermissions()
       } catch (error) {
         console.error('Error eliminando permiso:', error)
-        alert('Ocurrió un error al intentar eliminar el permiso.')
       }
     }
 
@@ -188,7 +229,7 @@ export default {
     const removeUserFromRole = async (roleId: number, userId: number) => {
       try {
         await axios.delete(`/roles-permissions/roles/${roleId}/users/${userId}`)
-        await fetchRolesWithPermissions() // Recargar la lista de roles
+        await fetchRolesWithPermissions()
       } catch (error) {
         console.error('Error eliminando usuario del rol:', error)
       }
@@ -200,11 +241,14 @@ export default {
 
     return {
       roles,
-      errorMessage,
-      updateRole,
-      deleteRole,
-      removePermission,
-      removeUserFromRole,
+      selectedRole,
+      isCreateModalOpen,
+      isConfirmModalOpen,
+      confirmMessage,
+      fetchRolesWithPermissions,
+      confirmDelete,
+      handleConfirm,
+      selectRoleForUpdate,
     }
   },
 }
