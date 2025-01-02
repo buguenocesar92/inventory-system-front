@@ -1,5 +1,3 @@
-// src/types/RoleTypes.ts
-
 export interface PermissionData {
   roleId: number
   permission: string
@@ -25,7 +23,6 @@ export interface Role {
   users: { id: number; name: string; email: string }[]
 }
 
-// src/types/RoleTypes.ts
 export interface CreateRoleForm {
   role_name: string
   permissions: string[]
@@ -37,7 +34,6 @@ export interface User {
   name: string
 }
 
-// src/types/RoleTypes.ts
 export interface UpdateRoleForm {
   role_name: string
   permissions: string[]
