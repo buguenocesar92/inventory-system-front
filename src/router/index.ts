@@ -1,12 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore' // Importar el store de autenticación
+
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import Dashboard from '../views/Dashboard.vue'
 import NotFound from '../views/NotFound.vue' // Componente para la página 404
 import RegisterUser from '../views/RegisterUser.vue'
 import ListRolesPermissions from '../views/ListRolesPermissions.vue'
-/* import CreateRolePermission from '../components/CreateRolePermission.vue'
- */
+
+// Definición de rutas
 const routes = [
   { path: '/', redirect: '/login' },
   {
@@ -39,46 +41,38 @@ const routes = [
     component: ListRolesPermissions,
     meta: { requiresAuth: true },
   },
-  /*   {
-    path: '/create-role-permission',
-    name: 'CreateRolePermission',
-    component: CreateRolePermission,
-    meta: { requiresAuth: true },
-  }, */
-  // Ruta explícita para 404
   {
     path: '/404',
     name: 'NotFound',
     component: NotFound,
   },
-  // Ruta de captura que redirige a /404
   {
     path: '/:pathMatch(.*)*',
     redirect: '/404',
   },
 ]
 
+// Crear la instancia del router
 const router = createRouter({
   history: createWebHistory(),
   routes,
 })
 
+// Middleware de autenticación con Pinia
 router.beforeEach((to, from, next) => {
-  const access_token = localStorage.getItem('access_token')
+  const authStore = useAuthStore()
+
+  // Verificar autenticación al navegar
+  authStore.checkAuth()
 
   // Rutas protegidas
-  if (to.meta.requiresAuth && !access_token) {
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return next('/login')
   }
 
   // Rutas de invitado
-  if (to.meta.requiresGuest && access_token) {
+  if (to.meta.requiresGuest && authStore.isAuthenticated) {
     return next('/dashboard')
-  }
-
-  // Redirige a /404 si no encuentra la ruta
-  if (!to.matched.length) {
-    return next('/404')
   }
 
   next()
