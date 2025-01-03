@@ -1,30 +1,36 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import LogoutButton from '@/components/LogoutButton.vue'
+import { useAuthStore } from '@/stores/authStore'
+import { ref, onMounted, computed } from 'vue'
 
-/** Variable reactiva para controlar el estado del menú en móvil */
+/** Estado reactivo para controlar el menú móvil */
 const isMobileMenuOpen = ref(false)
 
 /** Función para mostrar/ocultar el menú en móvil */
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
 }
+
+/** Accede al store de autenticación */
+const authStore = useAuthStore()
+
+/** Computed para acceder al estado de autenticación */
+const isAuthenticated = computed(() => authStore.isAuthenticated)
+
+/** Verificar el estado de autenticación al montar el componente */
+onMounted(() => {
+  authStore.checkAuth()
+})
 </script>
 
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Navbar -->
     <header class="bg-gray-100 p-4 md:flex md:items-center md:justify-between">
-      <!-- Logo e ícono de menú (en móvil) -->
+      <!-- Logo y botón hamburguesa -->
       <div class="flex items-center justify-between">
-        <!-- Sección izquierda (Logo + HelloWorld) -->
-        <div class="flex items-center gap-4">
-          <img alt="Vue logo" src="@/assets/logo.svg" class="w-16 h-16 md:w-20 md:h-20" />
-          <HelloWorld msg="You did it!" />
-        </div>
-
-        <!-- Botón hamburguesa (solo se ve en móvil) -->
+        <img alt="Vue logo" src="@/assets/logo.svg" class="w-16 h-16 md:w-20 md:h-20" />
+        <!-- Botón hamburguesa (visible solo en móvil) -->
         <button
           class="md:hidden text-gray-700 hover:text-blue-600 transition-colors"
           @click="toggleMobileMenu"
@@ -48,27 +54,30 @@ const toggleMobileMenu = () => {
       </div>
 
       <!-- Menú de navegación -->
-      <!-- En móvil se muestra u oculta según isMobileMenuOpen -->
-      <!-- En pantallas md+ se muestra siempre -->
       <nav
-        class="mt-4 md:mt-0 md:flex md:items-center"
-        :class="isMobileMenuOpen ? 'block' : 'hidden md:block'"
+        :class="{
+          hidden: !isMobileMenuOpen,
+          block: isMobileMenuOpen,
+          'md:flex md:items-center': true,
+        }"
+        class="mt-4 md:mt-0"
       >
-        <RouterLink
-          to="/"
-          class="block px-2 py-1 text-gray-700 hover:text-blue-600 transition-colors md:inline-block"
-          active-class="text-blue-600 font-bold"
-        >
+        <!-- Enlace para todos -->
+        <RouterLink to="/" class="block px-2 py-1 text-gray-700 hover:text-blue-600">
           Home
         </RouterLink>
-        <RouterLink
-          to="/roles-permissions"
-          class="block px-2 py-1 text-gray-700 hover:text-blue-600 transition-colors md:inline-block"
-          active-class="text-blue-600 font-bold"
-        >
-          Role and Permission
+
+        <!-- Enlaces condicionales -->
+        <RouterLink v-if="isAuthenticated" to="/roles-permissions" class="block px-2 py-1">
+          Roles & Permissions
         </RouterLink>
-        <!-- Agrega más enlaces según tu app -->
+        <RouterLink v-if="!isAuthenticated" to="/login" class="block px-2 py-1"> Login </RouterLink>
+        <RouterLink v-if="!isAuthenticated" to="/register" class="block px-2 py-1">
+          Register
+        </RouterLink>
+
+        <!-- Botón para cerrar sesión -->
+        <LogoutButton v-if="isAuthenticated" />
       </nav>
     </header>
 
@@ -80,5 +89,5 @@ const toggleMobileMenu = () => {
 </template>
 
 <style scoped>
-/* Sin estilos adicionales, todo se maneja con Tailwind. */
+/* Estilos opcionales para el diseño general */
 </style>
