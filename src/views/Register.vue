@@ -9,14 +9,14 @@
           <label for="name" class="block text-gray-700 font-medium mb-1">Tenant Name:</label>
           <input
             id="name"
-            v-model="form.name"
+            v-model="form.tenant_id"
             required
             class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         <!-- Campo Domain -->
-        <!--         <div>
+        <div>
           <label for="domain" class="block text-gray-700 font-medium mb-1">Domain:</label>
           <input
             id="domain"
@@ -25,7 +25,7 @@
             placeholder="e.g., acme.local"
             class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-        </div> -->
+        </div>
 
         <!-- Campo Admin Name -->
         <div>
@@ -56,14 +56,14 @@
           <input
             id="password"
             type="password"
-            v-model="form.password"
+            v-model="form.user_password"
             required
             class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         <!-- Campo Confirm Password -->
-        <div>
+        <!--         <div>
           <label for="password_confirmation" class="block text-gray-700 font-medium mb-1">
             Confirm Password:
           </label>
@@ -74,7 +74,7 @@
             required
             class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-        </div>
+        </div> -->
 
         <!-- Botón de registro -->
         <button
@@ -98,12 +98,12 @@ import { AxiosError, isAxiosError } from 'axios'
 import axios from '@/axiosConfig'
 
 interface RegisterForm {
-  name: string
-  /*  subdomain: string */
+  tenant_id: string
+  domain: string
   user_name: string
   user_email: string
-  password: string
-  password_confirmation: string
+  user_password: string
+  /* password_confirmation: string */
 }
 
 export default {
@@ -111,12 +111,12 @@ export default {
   setup() {
     const router = useRouter()
     const form = ref<RegisterForm>({
-      name: '',
-      /*   subdomain: '', */
+      tenant_id: '',
+      domain: '',
       user_name: '',
       user_email: '',
-      password: '',
-      password_confirmation: '',
+      user_password: '',
+      /*       password_confirmation: '', */
     })
 
     const isLoading = ref(false)
