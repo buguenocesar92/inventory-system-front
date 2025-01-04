@@ -62,21 +62,6 @@
           />
         </div>
 
-        <!-- Campo Confirm Password -->
-        <!--         <div>
-          <label for="password_confirmation" class="block text-gray-700 font-medium mb-1">
-            Confirm Password:
-          </label>
-          <input
-            id="password_confirmation"
-            type="password"
-            v-model="form.password_confirmation"
-            required
-            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div> -->
-
-        <!-- Botón de registro -->
         <button
           type="submit"
           :disabled="isLoading"
@@ -103,7 +88,6 @@ interface RegisterForm {
   user_name: string
   user_email: string
   user_password: string
-  /* password_confirmation: string */
 }
 
 export default {
@@ -116,7 +100,6 @@ export default {
       user_name: '',
       user_email: '',
       user_password: '',
-      /*       password_confirmation: '', */
     })
 
     const isLoading = ref(false)
