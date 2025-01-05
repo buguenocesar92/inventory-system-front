@@ -74,7 +74,7 @@
           <a :href="loginUrl" class="text-blue-500 underline">{{ loginUrl }}</a>
         </p>
         <button
-          @click="showModal = false"
+          @click="handleCloseModal"
           class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
           Close
@@ -120,8 +120,8 @@ export default {
       try {
         const response = await axios.post('tenants/register', form.value)
 
-        // Mostrar la URL en el modal
-        loginUrl.value = response.data.frontend_url
+        // Mostrar la URL en el modal (convertida a minúsculas)
+        loginUrl.value = (response.data.frontend_url + '/login').toLowerCase()
         showModal.value = true
       } catch (error: unknown) {
         const axiosError = error as AxiosError
@@ -136,6 +136,22 @@ export default {
       }
     }
 
+    // Función para cerrar el modal y limpiar los campos
+    const handleCloseModal = () => {
+      showModal.value = false
+      resetForm()
+    }
+
+    // Función para limpiar los campos del formulario
+    const resetForm = () => {
+      form.value = {
+        tenant_id: '',
+        user_name: '',
+        user_email: '',
+        user_password: '',
+      }
+    }
+
     return {
       form,
       isLoading,
@@ -143,6 +159,7 @@ export default {
       showModal,
       loginUrl,
       handleRegister,
+      handleCloseModal,
     }
   },
 }
