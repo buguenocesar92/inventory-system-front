@@ -17,8 +17,19 @@ const authStore = useAuthStore()
 /** Computed para acceder al estado de autenticación */
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 
-/** Verificar el estado de autenticación al montar el componente */
+/** Detectar si estamos en un subdominio */
+const isSubdomain = () => {
+  const host = window.location.host // Ejemplo: "tenant.foo.localhost"
+  const parts = host.split('.')
+  return parts.length > 2 // Más de dos partes indica un subdominio
+}
+
+/** Estado reactivo para el dominio principal */
+const isMainDomain = ref(!isSubdomain())
+
+/** Verificar el estado de autenticación y dominio al montar el componente */
 onMounted(() => {
+  isMainDomain.value = !isSubdomain()
   authStore.checkAuth()
 })
 </script>
@@ -63,17 +74,19 @@ onMounted(() => {
         class="mt-4 md:mt-0"
       >
         <!-- Enlace para todos -->
-        <RouterLink to="/" class="block px-2 py-1 text-gray-700 hover:text-blue-600">
+        <!--         <RouterLink to="/" class="block px-2 py-1 text-gray-700 hover:text-blue-600">
           Home
-        </RouterLink>
+        </RouterLink> -->
 
         <!-- Enlaces condicionales -->
         <RouterLink v-if="isAuthenticated" to="/roles-permissions" class="block px-2 py-1">
           Roles & Permissions
         </RouterLink>
-        <RouterLink v-if="!isAuthenticated" to="/login" class="block px-2 py-1"> Login </RouterLink>
-        <RouterLink v-if="!isAuthenticated" to="/register" class="block px-2 py-1">
+        <RouterLink v-if="!isAuthenticated && isMainDomain" to="/register" class="block px-2 py-1">
           Register
+        </RouterLink>
+        <RouterLink v-if="!isAuthenticated && isSubdomain()" to="/login" class="block px-2 py-1">
+          Login
         </RouterLink>
 
         <!-- Botón para cerrar sesión -->
