@@ -71,7 +71,7 @@
         <h2 class="text-xl font-bold mb-4">Registration Successful</h2>
         <p class="mb-4">
           Your tenant has been registered. You can log in at:
-          <a :href="loginUrl" class="text-blue-500 underline">{{ loginUrl }}</a>
+          <a :href="loginUrl || '#'" class="text-blue-500 underline">{{ loginUrl }}</a>
         </p>
         <button
           @click="handleCloseModal"
@@ -86,20 +86,13 @@
 
 <script lang="ts">
 import { ref } from 'vue'
-import { AxiosError, isAxiosError } from 'axios'
-import axios from '@/axiosConfig'
-
-interface RegisterForm {
-  tenant_id: string
-  user_name: string
-  user_email: string
-  user_password: string
-}
+import { registerTenant } from '@/services/TenantService'
+import type { RegisterTenantPayload } from '@/types/TenantTypes'
 
 export default {
   name: 'RegisterTenant',
   setup() {
-    const form = ref<RegisterForm>({
+    const form = ref<RegisterTenantPayload>({
       tenant_id: '',
       user_name: '',
       user_email: '',
@@ -118,31 +111,19 @@ export default {
       errorMessage.value = null
 
       try {
-        const response = await axios.post('tenants/register', form.value)
-
-        // Mostrar la URL en el modal (convertida a minúsculas)
-        loginUrl.value = (response.data.frontend_url + '/login').toLowerCase()
+        const response = await registerTenant(form.value)
+        loginUrl.value = (response.frontend_url + '/login').toLowerCase()
         showModal.value = true
-      } catch (error: unknown) {
-        const axiosError = error as AxiosError
-        if (isAxiosError(axiosError) && axiosError.response) {
-          const data = axiosError.response.data as { message?: string }
-          errorMessage.value = data.message || 'Registration failed.'
-        } else {
-          errorMessage.value = 'Registration failed.'
-        }
-      } finally {
-        isLoading.value = false
+      } catch {
+        errorMessage.value = 'Error al cargar roles y permisos.'
       }
     }
 
-    // Función para cerrar el modal y limpiar los campos
     const handleCloseModal = () => {
       showModal.value = false
       resetForm()
     }
 
-    // Función para limpiar los campos del formulario
     const resetForm = () => {
       form.value = {
         tenant_id: '',
