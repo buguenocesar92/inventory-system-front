@@ -7,7 +7,7 @@
       <form @submit.prevent="handleLogin" class="space-y-6">
         <!-- Campo Email -->
         <div>
-          <label for="email" class="block text-gray-700 font-medium mb-1"> Email: </label>
+          <label for="email" class="block text-gray-700 font-medium mb-1">Email:</label>
           <input
             id="email"
             type="email"
@@ -19,7 +19,7 @@
 
         <!-- Campo Password -->
         <div>
-          <label for="password" class="block text-gray-700 font-medium mb-1"> Password: </label>
+          <label for="password" class="block text-gray-700 font-medium mb-1">Password:</label>
           <input
             id="password"
             type="password"
@@ -41,14 +41,6 @@
 
       <!-- Mensaje de error -->
       <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>
-
-      <!-- Enlace a registro -->
-      <!--       <p class="mt-4 text-center">
-        ¿No tienes cuenta?
-        <router-link to="/register" class="text-blue-600 hover:underline"
-          >Regístrate aquí</router-link
-        >.
-      </p> -->
     </div>
   </div>
 </template>
@@ -56,20 +48,15 @@
 <script lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { AxiosError, isAxiosError } from 'axios'
-import axiosInstance from '@/axiosConfig'
-
-interface LoginForm {
-  email: string
-  password: string
-}
+import { loginUser } from '@/services/AuthService'
+import type { LoginPayload } from '@/types/AuthTypes'
 
 export default {
   name: 'UserLogin',
   setup() {
     const router = useRouter()
 
-    const form = ref<LoginForm>({ email: '', password: '' })
+    const form = ref<LoginPayload>({ email: '', password: '' })
     const isLoading = ref(false)
     const errorMessage = ref<string | null>(null)
 
@@ -78,20 +65,11 @@ export default {
       errorMessage.value = null
 
       try {
-        // Ajusta la URL o usa tu instancia de Axios con baseURL
-        const response = await axiosInstance.post('auth/login', form.value)
-        localStorage.setItem('access_token', response.data.access_token)
+        const response = await loginUser(form.value)
+        localStorage.setItem('access_token', response.access_token)
         router.push('/dashboard')
-      } catch (error: unknown) {
-        const axiosError = error as AxiosError
-        if (isAxiosError(axiosError) && axiosError.response) {
-          errorMessage.value =
-            (axiosError.response.data as { message: string }).message || 'Login failed.'
-        } else {
-          errorMessage.value = 'Login failed.'
-        }
-      } finally {
-        isLoading.value = false
+      } catch {
+        errorMessage.value = 'Error al cargar roles y permisos.'
       }
     }
 
@@ -104,11 +82,3 @@ export default {
   },
 }
 </script>
-
-<!--
-  No es obligatorio definir estilos locales si ya utilizas Tailwind
-  para todo, pero si deseas añadir algún estilo puntual, puedes hacerlo.
--->
-<style scoped>
-/* Ejemplo: Ajustes específicos o animaciones extra */
-</style>
