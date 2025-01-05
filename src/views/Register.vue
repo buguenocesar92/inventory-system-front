@@ -15,18 +15,6 @@
           />
         </div>
 
-        <!-- Campo Domain -->
-        <!--         <div>
-          <label for="domain" class="block text-gray-700 font-medium mb-1">Domain:</label>
-          <input
-            id="domain"
-            v-model="form.domain"
-            required
-            placeholder="e.g., acme.local"
-            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div> -->
-
         <!-- Campo Admin Name -->
         <div>
           <label for="user_name" class="block text-gray-700 font-medium mb-1">Admin Name:</label>
@@ -73,18 +61,36 @@
 
       <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>
     </div>
+
+    <!-- Modal -->
+    <div
+      v-if="showModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+    >
+      <div class="bg-white rounded shadow-md p-6">
+        <h2 class="text-xl font-bold mb-4">Registration Successful</h2>
+        <p class="mb-4">
+          Your tenant has been registered. You can log in at:
+          <a :href="loginUrl" class="text-blue-500 underline">{{ loginUrl }}</a>
+        </p>
+        <button
+          @click="showModal = false"
+          class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Close
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { AxiosError, isAxiosError } from 'axios'
 import axios from '@/axiosConfig'
 
 interface RegisterForm {
   tenant_id: string
-  /*   domain: string */
   user_name: string
   user_email: string
   user_password: string
@@ -93,10 +99,8 @@ interface RegisterForm {
 export default {
   name: 'RegisterTenant',
   setup() {
-    const router = useRouter()
     const form = ref<RegisterForm>({
       tenant_id: '',
-      /*    domain: '', */
       user_name: '',
       user_email: '',
       user_password: '',
@@ -105,18 +109,23 @@ export default {
     const isLoading = ref(false)
     const errorMessage = ref<string | null>(null)
 
+    // Controlar el modal
+    const showModal = ref(false)
+    const loginUrl = ref<string | null>(null)
+
     const handleRegister = async () => {
       isLoading.value = true
       errorMessage.value = null
 
       try {
         const response = await axios.post('tenants/register', form.value)
-        localStorage.setItem('access_token', response.data.access_token)
-        router.push('/dashboard')
+
+        // Mostrar la URL en el modal
+        loginUrl.value = response.data.frontend_url
+        showModal.value = true
       } catch (error: unknown) {
         const axiosError = error as AxiosError
         if (isAxiosError(axiosError) && axiosError.response) {
-          // Asumiendo que el backend devuelve un objeto con propiedad "message"
           const data = axiosError.response.data as { message?: string }
           errorMessage.value = data.message || 'Registration failed.'
         } else {
@@ -131,6 +140,8 @@ export default {
       form,
       isLoading,
       errorMessage,
+      showModal,
+      loginUrl,
       handleRegister,
     }
   },
