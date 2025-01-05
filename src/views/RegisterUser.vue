@@ -56,22 +56,13 @@
 
 <script lang="ts">
 import { ref } from 'vue'
-//import { useRouter } from 'vue-router'
-import axios from '@/axiosConfig'
-import { AxiosError, isAxiosError } from 'axios'
-
-interface RegisterForm {
-  name: string
-  email: string
-  password: string
-}
+import { registerUser } from '@/services/UserService'
+import type { RegisterUser } from '@/types/UserTypes'
 
 export default {
   name: 'RegisterUser',
   setup() {
-    //const router = useRouter()
-
-    const form = ref<RegisterForm>({
+    const form = ref<RegisterUser>({
       name: '',
       email: '',
       password: '',
@@ -85,21 +76,11 @@ export default {
       errorMessage.value = null
 
       try {
-        await axios.post('auth/register', form.value)
-        // Limpia el formulario
+        await registerUser(form.value)
         alert('User registered successfully.')
         resetForm()
-        //router.push('/login')
-      } catch (error: unknown) {
-        const axiosError = error as AxiosError
-        if (isAxiosError(axiosError) && axiosError.response) {
-          const data = axiosError.response.data as { message?: string }
-          errorMessage.value = data.message || 'Registration failed.'
-        } else {
-          errorMessage.value = 'Registration failed.'
-        }
-      } finally {
-        isLoading.value = false
+      } catch {
+        errorMessage.value = 'Error al cargar roles y permisos.'
       }
     }
 
@@ -116,7 +97,3 @@ export default {
   },
 }
 </script>
-
-<style scoped>
-/* Personaliza estilos si lo necesitas */
-</style>
