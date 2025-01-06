@@ -7,6 +7,7 @@ import Dashboard from '../views/Dashboard.vue'
 import NotFound from '../views/NotFound.vue' // Componente para la página 404
 import RegisterUser from '../views/RegisterUser.vue'
 import ListRolesPermissions from '../views/ListRolesPermissions.vue'
+import InventoryMovementForm from '../views/InventoryMovementForm.vue'
 
 // Función para detectar si estamos en un subdominio
 const isSubdomain = () => {
@@ -46,6 +47,12 @@ const routes = [
     path: '/roles-permissions',
     name: 'ListRolesPermissions',
     component: ListRolesPermissions,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/inventory-movement-form',
+    name: 'InventoryMovementForm',
+    component: InventoryMovementForm,
     meta: { requiresAuth: true },
   },
   {
