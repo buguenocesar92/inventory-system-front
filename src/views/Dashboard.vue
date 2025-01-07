@@ -7,18 +7,18 @@
     <GoToRegisterButton />
 
     <!-- Botón de Logout -->
-    <LogoutButton />
+    <!-- <LogoutButton /> -->
   </div>
 </template>
 
 <script lang="ts">
-import LogoutButton from '@/components/LogoutButton.vue'
+/* import LogoutButton from '@/components/LogoutButton.vue' */
 import GoToRegisterButton from '@/components/GoToRegisterButton.vue'
 
 export default {
   name: 'UserDashboard',
   components: {
-    LogoutButton,
+    /* LogoutButton, */
     GoToRegisterButton, // Registra el nuevo componente
   },
 }
