@@ -50,6 +50,7 @@ import { useRouter } from 'vue-router'
 import { loginUser } from '@/services/AuthService'
 import FormInput from '@/components/FormInput.vue'
 import type { LoginPayload } from '@/types/AuthTypes'
+import type { ValidationErrorResponse } from '@/types/ValidationErrorResponse'
 
 export default {
   name: 'UserLogin',
@@ -81,9 +82,10 @@ export default {
           return
         }
 
-        const { response } = error as AxiosError
-        if (response?.status === 400) {
-          errors.value = response.data as { [key: string]: string[] }
+        const { response } = error as AxiosError<ValidationErrorResponse>
+        if (response?.status === 422) {
+          errors.value = response.data.errors as { [key: string]: string[] }
+          errorMessage.value = response.data.message || 'Validation error occurred.'
           return
         }
 
