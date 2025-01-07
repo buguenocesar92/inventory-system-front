@@ -6,36 +6,24 @@
       <h1 class="text-2xl font-bold mb-4 text-center">Login</h1>
       <form @submit.prevent="handleLogin" class="space-y-6">
         <!-- Campo Email -->
-        <div>
-          <label for="email" class="block text-gray-700 font-medium mb-1">Email:</label>
-          <input
-            id="email"
-            type="email"
-            v-model="form.email"
-            required
-            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <!-- Mostrar errores de email -->
-          <p v-if="errors.email" class="text-red-500 text-sm">
-            {{ errors.email[0] }}
-          </p>
-        </div>
+        <FormInput
+          id="email"
+          label="Email"
+          v-model="form.email"
+          type="email"
+          :error="errors.email ? errors.email[0] : null"
+          required
+        />
 
         <!-- Campo Password -->
-        <div>
-          <label for="password" class="block text-gray-700 font-medium mb-1">Password:</label>
-          <input
-            id="password"
-            type="password"
-            v-model="form.password"
-            required
-            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <!-- Mostrar errores de password -->
-          <p v-if="errors.password" class="text-red-500 text-sm">
-            {{ errors.password[0] }}
-          </p>
-        </div>
+        <FormInput
+          id="password"
+          label="Password"
+          v-model="form.password"
+          type="password"
+          :error="errors.password ? errors.password[0] : null"
+          required
+        />
 
         <!-- Botón de Enviar -->
         <button
@@ -60,10 +48,12 @@ import { ref } from 'vue'
 import axios, { AxiosError } from 'axios'
 import { useRouter } from 'vue-router'
 import { loginUser } from '@/services/AuthService'
+import FormInput from '@/components/FormInput.vue'
 import type { LoginPayload } from '@/types/AuthTypes'
 
 export default {
   name: 'UserLogin',
+  components: { FormInput },
   setup() {
     const router = useRouter()
 

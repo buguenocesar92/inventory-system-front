@@ -5,58 +5,42 @@
 
       <form @submit.prevent="handleRegister" class="space-y-6">
         <!-- Campo Tenant Name -->
-        <div>
-          <label for="tenant_id" class="block text-gray-700 font-medium mb-1">Name:</label>
-          <input
-            id="tenant_id"
-            v-model="form.tenant_id"
-            required
-            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <p v-if="errors.tenant_id" class="text-red-500 text-sm">
-            {{ errors.tenant_id[0] }}
-          </p>
-        </div>
+        <FormInput
+          id="tenant_id"
+          label="Tenant Name"
+          v-model="form.tenant_id"
+          :error="errors.tenant_id ? errors.tenant_id[0] : null"
+          required
+        />
 
         <!-- Campo Admin Name -->
-        <div>
-          <label for="user_name" class="block text-gray-700 font-medium mb-1">Admin Name:</label>
-          <input
-            id="user_name"
-            v-model="form.user_name"
-            required
-            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <p v-if="errors.user_name" class="text-red-500 text-sm">{{ errors.user_name[0] }}</p>
-        </div>
+        <FormInput
+          id="user_name"
+          label="Admin Name"
+          v-model="form.user_name"
+          :error="errors.user_name ? errors.user_name[0] : null"
+          required
+        />
 
         <!-- Campo Admin Email -->
-        <div>
-          <label for="user_email" class="block text-gray-700 font-medium mb-1">Admin Email:</label>
-          <input
-            id="user_email"
-            type="email"
-            v-model="form.user_email"
-            required
-            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <p v-if="errors.user_email" class="text-red-500 text-sm">{{ errors.user_email[0] }}</p>
-        </div>
+        <FormInput
+          id="user_email"
+          label="Admin Email"
+          v-model="form.user_email"
+          :error="errors.user_email ? errors.user_email[0] : null"
+          type="email"
+          required
+        />
 
         <!-- Campo Password -->
-        <div>
-          <label for="user_password" class="block text-gray-700 font-medium mb-1">Password:</label>
-          <input
-            id="user_password"
-            type="password"
-            v-model="form.user_password"
-            required
-            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <p v-if="errors.user_password" class="text-red-500 text-sm">
-            {{ errors.user_password[0] }}
-          </p>
-        </div>
+        <FormInput
+          id="user_password"
+          label="Password"
+          v-model="form.user_password"
+          :error="errors.user_password ? errors.user_password[0] : null"
+          type="password"
+          required
+        />
 
         <button
           type="submit"
@@ -96,10 +80,12 @@
 import { ref } from 'vue'
 import axios, { AxiosError } from 'axios'
 import { registerTenant } from '@/services/TenantService'
+import FormInput from '@/components/FormInput.vue'
 import type { RegisterTenantPayload } from '@/types/TenantTypes'
 
 export default {
   name: 'RegisterTenant',
+  components: { FormInput },
   setup() {
     const form = ref<RegisterTenantPayload>({
       tenant_id: '',
@@ -110,11 +96,7 @@ export default {
 
     const isLoading = ref(false)
     const errorMessage = ref<string | null>(null)
-
-    // Controlar errores específicos para cada campo
     const errors = ref<{ [key: string]: string[] }>({})
-
-    // Controlar el modal
     const showModal = ref(false)
     const loginUrl = ref<string | null>(null)
 
@@ -125,7 +107,7 @@ export default {
 
       try {
         const { frontend_url } = await registerTenant(form.value)
-        loginUrl.value = (frontend_url + '/login').toLowerCase()
+        loginUrl.value = `${frontend_url.toLowerCase()}/login`
         showModal.value = true
       } catch (error) {
         if (!axios.isAxiosError(error)) {
