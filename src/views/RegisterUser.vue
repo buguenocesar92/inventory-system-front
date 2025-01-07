@@ -5,39 +5,33 @@
 
       <form @submit.prevent="handleRegister" class="space-y-6">
         <!-- Campo Name -->
-        <div>
-          <label for="name" class="block text-gray-700 font-medium mb-1">Name:</label>
-          <input
-            id="name"
-            v-model="form.name"
-            required
-            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        <FormInput
+          id="name"
+          label="Name"
+          v-model="form.name"
+          :error="errors.name ? errors.name[0] : undefined"
+          required
+        />
 
         <!-- Campo Email -->
-        <div>
-          <label for="email" class="block text-gray-700 font-medium mb-1">Email:</label>
-          <input
-            id="email"
-            type="email"
-            v-model="form.email"
-            required
-            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        <FormInput
+          id="email"
+          label="Email"
+          v-model="form.email"
+          :error="errors.email ? errors.email[0] : undefined"
+          type="email"
+          required
+        />
 
         <!-- Campo Password -->
-        <div>
-          <label for="password" class="block text-gray-700 font-medium mb-1">Password:</label>
-          <input
-            id="password"
-            type="password"
-            v-model="form.password"
-            required
-            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        <FormInput
+          id="password"
+          label="Password"
+          v-model="form.password"
+          :error="errors.password ? errors.password[0] : undefined"
+          type="password"
+          required
+        />
 
         <!-- Botón de registro -->
         <button
@@ -49,18 +43,22 @@
         </button>
       </form>
 
-      <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>
+      <!-- Mensaje de error general -->
+      <p v-if="errorMessage" class="text-red-500 mt-2 text-center">{{ errorMessage }}</p>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { ref } from 'vue'
+import axios, { AxiosError } from 'axios'
+import FormInput from '@/components/FormInput.vue'
 import { registerUser } from '@/services/UserService'
 import type { RegisterUser } from '@/types/UserTypes'
 
 export default {
   name: 'RegisterUser',
+  components: { FormInput },
   setup() {
     const form = ref<RegisterUser>({
       name: '',
@@ -69,18 +67,31 @@ export default {
     })
 
     const isLoading = ref(false)
+    const errors = ref<{ [key: string]: string[] }>({})
     const errorMessage = ref<string | null>(null)
 
     const handleRegister = async () => {
       isLoading.value = true
       errorMessage.value = null
+      errors.value = {} // Resetear errores por campo
 
       try {
         await registerUser(form.value)
         alert('User registered successfully.')
         resetForm()
-      } catch {
-        errorMessage.value = 'Error al cargar roles y permisos.'
+      } catch (error) {
+        if (!axios.isAxiosError(error)) {
+          errorMessage.value = 'An unexpected error occurred.'
+          return
+        }
+        const { response } = error as AxiosError
+        if (response?.status === 400) {
+          errors.value = response.data as { [key: string]: string[] }
+          return
+        }
+        errorMessage.value = 'Unexpected error occurred. Please try again later.'
+      } finally {
+        isLoading.value = false
       }
     }
 
@@ -91,6 +102,7 @@ export default {
     return {
       form,
       isLoading,
+      errors,
       errorMessage,
       handleRegister,
     }

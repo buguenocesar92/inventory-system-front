@@ -11,10 +11,3 @@ export default {
   name: 'NotFound',
 }
 </script>
-
-<style scoped>
-.not-found {
-  text-align: center;
-  padding: 2rem;
-}
-</style>

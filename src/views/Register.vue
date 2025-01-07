@@ -1,54 +1,46 @@
 <template>
   <div class="flex flex-col items-center justify-center py-20">
     <div class="w-full max-w-md bg-white shadow-md rounded px-8 py-6">
-      <h1 class="text-2xl font-bold mb-4 text-center">Register Tenant</h1>
+      <h1 class="text-2xl font-bold mb-4 text-center">Register</h1>
 
       <form @submit.prevent="handleRegister" class="space-y-6">
         <!-- Campo Tenant Name -->
-        <div>
-          <label for="name" class="block text-gray-700 font-medium mb-1">Tenant Name:</label>
-          <input
-            id="name"
-            v-model="form.tenant_id"
-            required
-            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        <FormInput
+          id="tenant_id"
+          label="Tenant Name"
+          v-model="form.tenant_id"
+          :error="errors.tenant_id ? errors.tenant_id[0] : undefined"
+          required
+        />
 
         <!-- Campo Admin Name -->
-        <div>
-          <label for="user_name" class="block text-gray-700 font-medium mb-1">Admin Name:</label>
-          <input
-            id="user_name"
-            v-model="form.user_name"
-            required
-            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        <FormInput
+          id="user_name"
+          label="Admin Name"
+          v-model="form.user_name"
+          :error="errors.user_name ? errors.user_name[0] : undefined"
+          required
+        />
 
         <!-- Campo Admin Email -->
-        <div>
-          <label for="user_email" class="block text-gray-700 font-medium mb-1">Admin Email:</label>
-          <input
-            id="user_email"
-            type="email"
-            v-model="form.user_email"
-            required
-            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        <FormInput
+          id="user_email"
+          label="Admin Email"
+          v-model="form.user_email"
+          :error="errors.user_email ? errors.user_email[0] : undefined"
+          type="email"
+          required
+        />
 
         <!-- Campo Password -->
-        <div>
-          <label for="password" class="block text-gray-700 font-medium mb-1">Password:</label>
-          <input
-            id="password"
-            type="password"
-            v-model="form.user_password"
-            required
-            class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        <FormInput
+          id="user_password"
+          label="Password"
+          v-model="form.user_password"
+          :error="errors.user_password ? errors.user_password[0] : undefined"
+          type="password"
+          required
+        />
 
         <button
           type="submit"
@@ -86,11 +78,14 @@
 
 <script lang="ts">
 import { ref } from 'vue'
+import axios, { AxiosError } from 'axios'
 import { registerTenant } from '@/services/TenantService'
+import FormInput from '@/components/FormInput.vue'
 import type { RegisterTenantPayload } from '@/types/TenantTypes'
 
 export default {
   name: 'RegisterTenant',
+  components: { FormInput },
   setup() {
     const form = ref<RegisterTenantPayload>({
       tenant_id: '',
@@ -101,21 +96,34 @@ export default {
 
     const isLoading = ref(false)
     const errorMessage = ref<string | null>(null)
-
-    // Controlar el modal
+    const errors = ref<{ [key: string]: string[] }>({})
     const showModal = ref(false)
     const loginUrl = ref<string | null>(null)
 
     const handleRegister = async () => {
       isLoading.value = true
       errorMessage.value = null
+      errors.value = {}
 
       try {
-        const response = await registerTenant(form.value)
-        loginUrl.value = (response.frontend_url + '/login').toLowerCase()
+        const { frontend_url } = await registerTenant(form.value)
+        loginUrl.value = `${frontend_url.toLowerCase()}/login`
         showModal.value = true
-      } catch {
-        errorMessage.value = 'Error al cargar roles y permisos.'
+      } catch (error) {
+        if (!axios.isAxiosError(error)) {
+          errorMessage.value = 'An unexpected error occurred.'
+          return
+        }
+
+        const { response } = error as AxiosError
+        if (response?.status === 400) {
+          errors.value = response.data as { [key: string]: string[] }
+          return
+        }
+
+        errorMessage.value = 'Unexpected error occurred. Please try again later.'
+      } finally {
+        isLoading.value = false
       }
     }
 
@@ -137,6 +145,7 @@ export default {
       form,
       isLoading,
       errorMessage,
+      errors,
       showModal,
       loginUrl,
       handleRegister,

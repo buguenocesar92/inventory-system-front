@@ -50,12 +50,6 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/inventory-movement-form',
-    name: 'InventoryMovementForm',
-    component: InventoryMovementForm,
-    meta: { requiresAuth: true },
-  },
-  {
     path: '/404',
     name: 'NotFound',
     component: NotFound,
