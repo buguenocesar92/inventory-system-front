@@ -5,16 +5,30 @@
 
       <form @submit.prevent="handleRegister" class="space-y-6">
         <!-- Campo Name -->
-        <FormInput id="name" label="Name" v-model="form.name" required />
+        <FormInput
+          id="name"
+          label="Name"
+          v-model="form.name"
+          :error="errors.name ? errors.name[0] : undefined"
+          required
+        />
 
         <!-- Campo Email -->
-        <FormInput id="email" label="Email" v-model="form.email" type="email" required />
+        <FormInput
+          id="email"
+          label="Email"
+          v-model="form.email"
+          :error="errors.email ? errors.email[0] : undefined"
+          type="email"
+          required
+        />
 
         <!-- Campo Password -->
         <FormInput
           id="password"
           label="Password"
           v-model="form.password"
+          :error="errors.password ? errors.password[0] : undefined"
           type="password"
           required
         />
@@ -29,6 +43,7 @@
         </button>
       </form>
 
+      <!-- Mensaje de error general -->
       <p v-if="errorMessage" class="text-red-500 mt-2 text-center">{{ errorMessage }}</p>
     </div>
   </div>
@@ -36,6 +51,7 @@
 
 <script lang="ts">
 import { ref } from 'vue'
+import axios, { AxiosError } from 'axios'
 import FormInput from '@/components/FormInput.vue'
 import { registerUser } from '@/services/UserService'
 import type { RegisterUser } from '@/types/UserTypes'
@@ -51,19 +67,29 @@ export default {
     })
 
     const isLoading = ref(false)
+    const errors = ref<{ [key: string]: string[] }>({})
     const errorMessage = ref<string | null>(null)
 
     const handleRegister = async () => {
       isLoading.value = true
       errorMessage.value = null
+      errors.value = {} // Resetear errores por campo
 
       try {
         await registerUser(form.value)
         alert('User registered successfully.')
         resetForm()
       } catch (error) {
-        console.error('Error registering user:', error)
-        errorMessage.value = 'An error occurred while registering the user. Please try again.'
+        if (!axios.isAxiosError(error)) {
+          errorMessage.value = 'An unexpected error occurred.'
+          return
+        }
+        const { response } = error as AxiosError
+        if (response?.status === 400) {
+          errors.value = response.data as { [key: string]: string[] }
+          return
+        }
+        errorMessage.value = 'Unexpected error occurred. Please try again later.'
       } finally {
         isLoading.value = false
       }
@@ -76,6 +102,7 @@ export default {
     return {
       form,
       isLoading,
+      errors,
       errorMessage,
       handleRegister,
     }
