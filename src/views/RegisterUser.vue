@@ -55,6 +55,7 @@ import axios, { AxiosError } from 'axios'
 import FormInput from '@/components/FormInput.vue'
 import { registerUser } from '@/services/UserService'
 import type { RegisterUser } from '@/types/UserTypes'
+import type { ValidationErrorResponse } from '@/types/ValidationErrorResponse'
 
 export default {
   name: 'RegisterUser',
@@ -84,9 +85,10 @@ export default {
           errorMessage.value = 'An unexpected error occurred.'
           return
         }
-        const { response } = error as AxiosError
-        if (response?.status === 400) {
-          errors.value = response.data as { [key: string]: string[] }
+        const { response } = error as AxiosError<ValidationErrorResponse>
+        if (response?.status === 422) {
+          errors.value = response.data.errors as { [key: string]: string[] }
+          errorMessage.value = response.data.message || 'Validation error occurred.'
           return
         }
         errorMessage.value = 'Unexpected error occurred. Please try again later.'
