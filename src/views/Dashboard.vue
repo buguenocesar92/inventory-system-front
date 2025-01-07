@@ -5,20 +5,15 @@
 
     <!-- Botón para ir al formulario de creación de usuarios -->
     <GoToRegisterButton />
-
-    <!-- Botón de Logout -->
-    <!-- <LogoutButton /> -->
   </div>
 </template>
 
 <script lang="ts">
-/* import LogoutButton from '@/components/LogoutButton.vue' */
 import GoToRegisterButton from '@/components/GoToRegisterButton.vue'
 
 export default {
   name: 'UserDashboard',
   components: {
-    /* LogoutButton, */
     GoToRegisterButton, // Registra el nuevo componente
   },
 }
