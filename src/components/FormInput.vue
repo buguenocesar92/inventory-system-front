@@ -22,7 +22,7 @@ export default defineComponent({
     id: { type: String, required: true },
     label: { type: String, required: true },
     modelValue: { type: String, required: true },
-    error: { type: String, default: null },
+    error: { type: String },
     type: { type: String, default: 'text' },
     required: { type: Boolean, default: false },
   },
