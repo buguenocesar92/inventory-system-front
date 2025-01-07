@@ -82,6 +82,7 @@ import axios, { AxiosError } from 'axios'
 import { registerTenant } from '@/services/TenantService'
 import FormInput from '@/components/FormInput.vue'
 import type { RegisterTenantPayload } from '@/types/TenantTypes'
+import type { ValidationErrorResponse } from '@/types/ValidationErrorResponse'
 
 export default {
   name: 'RegisterTenant',
@@ -115,9 +116,12 @@ export default {
           return
         }
 
-        const { response } = error as AxiosError
-        if (response?.status === 400) {
-          errors.value = response.data as { [key: string]: string[] }
+        const { response } = error as AxiosError<ValidationErrorResponse>
+
+        if (response?.status === 422) {
+          // Manejar nuevos errores del backend
+          errors.value = response.data.errors as { [key: string]: string[] }
+          errorMessage.value = response.data.message || 'Validation error occurred.'
           return
         }
 
