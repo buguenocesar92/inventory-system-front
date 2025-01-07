@@ -73,11 +73,6 @@ onMounted(() => {
         }"
         class="mt-4 md:mt-0"
       >
-        <!-- Enlace para todos -->
-        <!--         <RouterLink to="/" class="block px-2 py-1 text-gray-700 hover:text-blue-600">
-          Home
-        </RouterLink> -->
-
         <!-- Enlaces condicionales -->
         <RouterLink v-if="isAuthenticated" to="/roles-permissions" class="block px-2 py-1">
           Roles & Permissions

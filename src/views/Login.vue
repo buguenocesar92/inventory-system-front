@@ -15,6 +15,10 @@
             required
             class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          <!-- Mostrar errores de email -->
+          <p v-if="errors.email" class="text-red-500 text-sm">
+            {{ errors.email[0] }}
+          </p>
         </div>
 
         <!-- Campo Password -->
@@ -27,6 +31,10 @@
             required
             class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          <!-- Mostrar errores de password -->
+          <p v-if="errors.password" class="text-red-500 text-sm">
+            {{ errors.password[0] }}
+          </p>
         </div>
 
         <!-- Botón de Enviar -->
@@ -39,14 +47,17 @@
         </button>
       </form>
 
-      <!-- Mensaje de error -->
-      <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>
+      <!-- Mensaje de error general -->
+      <p v-if="errorMessage" class="text-red-500 mt-2 text-center">
+        {{ errorMessage }}
+      </p>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { ref } from 'vue'
+import axios, { AxiosError } from 'axios'
 import { useRouter } from 'vue-router'
 import { loginUser } from '@/services/AuthService'
 import type { LoginPayload } from '@/types/AuthTypes'
@@ -56,26 +67,46 @@ export default {
   setup() {
     const router = useRouter()
 
+    // Estado del formulario
     const form = ref<LoginPayload>({ email: '', password: '' })
     const isLoading = ref(false)
+
+    // Manejo de errores
+    const errors = ref<{ [key: string]: string[] }>({})
     const errorMessage = ref<string | null>(null)
 
+    // Función para manejar el login
     const handleLogin = async () => {
       isLoading.value = true
-      errorMessage.value = null
+      errors.value = {} // Resetear errores por campo
+      errorMessage.value = null // Resetear mensaje general
 
       try {
-        const response = await loginUser(form.value)
-        localStorage.setItem('access_token', response.access_token)
+        const { access_token } = await loginUser(form.value)
+        localStorage.setItem('access_token', access_token)
         router.push('/dashboard')
-      } catch {
-        errorMessage.value = 'Error al cargar roles y permisos.'
+      } catch (error) {
+        if (!axios.isAxiosError(error)) {
+          errorMessage.value = 'An unexpected error occurred.'
+          return
+        }
+
+        const { response } = error as AxiosError
+        if (response?.status === 400) {
+          errors.value = response.data as { [key: string]: string[] }
+          return
+        }
+
+        errorMessage.value = 'Unexpected error occurred. Please try again later.'
+      } finally {
+        isLoading.value = false
       }
     }
 
     return {
       form,
       isLoading,
+      errors,
       errorMessage,
       handleLogin,
     }
