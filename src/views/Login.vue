@@ -11,7 +11,7 @@
           label="Email"
           v-model="form.email"
           type="email"
-          :error="errors.email ? errors.email[0] : null"
+          :error="errors.email ? errors.email[0] : undefined"
           required
         />
 
@@ -21,7 +21,7 @@
           label="Password"
           v-model="form.password"
           type="password"
-          :error="errors.password ? errors.password[0] : null"
+          :error="errors.password ? errors.password[0] : undefined"
           required
         />
 
