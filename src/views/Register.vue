@@ -9,7 +9,7 @@
           id="tenant_id"
           label="Tenant Name"
           v-model="form.tenant_id"
-          :error="errors.tenant_id ? errors.tenant_id[0] : null"
+          :error="errors.tenant_id ? errors.tenant_id[0] : undefined"
           required
         />
 
@@ -18,7 +18,7 @@
           id="user_name"
           label="Admin Name"
           v-model="form.user_name"
-          :error="errors.user_name ? errors.user_name[0] : null"
+          :error="errors.user_name ? errors.user_name[0] : undefined"
           required
         />
 
@@ -27,7 +27,7 @@
           id="user_email"
           label="Admin Email"
           v-model="form.user_email"
-          :error="errors.user_email ? errors.user_email[0] : null"
+          :error="errors.user_email ? errors.user_email[0] : undefined"
           type="email"
           required
         />
@@ -37,7 +37,7 @@
           id="user_password"
           label="Password"
           v-model="form.user_password"
-          :error="errors.user_password ? errors.user_password[0] : null"
+          :error="errors.user_password ? errors.user_password[0] : undefined"
           type="password"
           required
         />
