@@ -6,9 +6,8 @@ import Register from '../views/Register.vue'
 import Dashboard from '../views/Dashboard.vue'
 import NotFound from '../views/NotFound.vue' // Componente para la página 404
 import RegisterUser from '../views/RegisterUser.vue'
-/* import ListRolesPermissions from '../views/ListRolesPermissions.vue' */
-/* import InventoryMovementForm from '../views/InventoryMovementForm.vue'
- */
+import AddProduct from '../views/Products/AddProduct.vue'
+
 // Función para detectar si estamos en un subdominio
 const isSubdomain = () => {
   const host = window.location.host // Ejemplo: "tenant.foo.localhost"
@@ -43,12 +42,12 @@ const routes = [
     component: RegisterUser,
     meta: { requiresAuth: true },
   },
-/*   {
-    path: '/roles-permissions',
-    name: 'ListRolesPermissions',
-    component: ListRolesPermissions,
+  {
+    path: '/add-product',
+    name: 'AddProduct',
+    component: AddProduct,
     meta: { requiresAuth: true },
-  }, */
+  },
   {
     path: '/404',
     name: 'NotFound',
