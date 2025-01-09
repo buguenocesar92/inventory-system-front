@@ -15,13 +15,14 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
 
 export default defineComponent({
   name: 'FormInput',
   props: {
     id: { type: String, required: true },
     label: { type: String, required: true },
-    modelValue: { type: String, required: true },
+    modelValue: { type: [String, Number] as PropType<string | number>, required: true },
     error: { type: String },
     type: { type: String, default: 'text' },
     required: { type: Boolean, default: false },
