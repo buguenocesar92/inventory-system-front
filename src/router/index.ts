@@ -7,6 +7,9 @@ import Dashboard from '../views/Dashboard.vue'
 import NotFound from '../views/NotFound.vue' // Componente para la página 404
 import RegisterUser from '../views/RegisterUser.vue'
 import AddProduct from '../views/Products/AddProduct.vue'
+import ProductList from '../views/Products/ProductList.vue'
+import EditProduct from '../views/Products/EditProduct.vue' // Asegúrate de importar la vista de edición de productos
+
 
 // Función para detectar si estamos en un subdominio
 const isSubdomain = () => {
@@ -46,6 +49,19 @@ const routes = [
     path: '/add-product',
     name: 'AddProduct',
     component: AddProduct,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/edit-product/:id',
+    name: 'EditProduct',
+    component: EditProduct,
+    meta: { requiresAuth: true },
+    props: true, // Esto permitirá que el parámetro `id` sea pasado como prop al componente
+  },
+  {
+    path: '/list-product',
+    name: 'ProductList',
+    component: ProductList,
     meta: { requiresAuth: true },
   },
   {
