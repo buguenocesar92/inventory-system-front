@@ -74,8 +74,8 @@ onMounted(() => {
         class="mt-4 md:mt-0"
       >
         <!-- Enlaces condicionales -->
-        <RouterLink v-if="isAuthenticated" to="/inventory" class="block px-2 py-1">
-          Inventory
+        <RouterLink v-if="isAuthenticated" to="/add-product" class="block px-2 py-1">
+          Add Product
         </RouterLink>
         <RouterLink v-if="!isAuthenticated && isMainDomain" to="/register" class="block px-2 py-1">
           Register
