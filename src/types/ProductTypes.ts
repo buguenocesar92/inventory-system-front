@@ -5,6 +5,7 @@ export interface Product {
 
 
 export interface ProductPayload {
+  id?: number
   name: string
   category: string
   brand: string
