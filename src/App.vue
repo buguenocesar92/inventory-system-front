@@ -77,6 +77,9 @@ onMounted(() => {
         <RouterLink v-if="isAuthenticated" to="/add-product" class="block px-2 py-1">
           Add Product
         </RouterLink>
+        <RouterLink v-if="isAuthenticated" to="/list-product" class="block px-2 py-1">
+          Products
+        </RouterLink>
         <RouterLink v-if="!isAuthenticated && isMainDomain" to="/register" class="block px-2 py-1">
           Register
         </RouterLink>
