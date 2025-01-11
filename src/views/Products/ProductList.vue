@@ -2,37 +2,28 @@
   <div class="container mx-auto">
     <h1 class="text-2xl font-bold mb-4">Product List</h1>
 
-    <table class="table-auto w-full border-collapse border border-gray-400">
-      <thead>
-        <tr>
-          <th class="border border-gray-300 px-4 py-2">Name</th>
-          <th class="border border-gray-300 px-4 py-2">Category</th>
-          <th class="border border-gray-300 px-4 py-2">Unit Price</th>
-          <th class="border border-gray-300 px-4 py-2">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="product in products" :key="product.id">
-          <td class="border border-gray-300 px-4 py-2">{{ product.name }}</td>
-          <td class="border border-gray-300 px-4 py-2">{{ product.category }}</td>
-          <td class="border border-gray-300 px-4 py-2">${{ product.unit_price }}</td>
-          <td class="border border-gray-300 px-4 py-2 flex space-x-2">
-            <RouterLink
-              :to="{ name: 'EditProduct', params: { id: product.id } }"
-              class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-            >
-              Edit
-            </RouterLink>
-            <button
-              class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-              @click="product.id !== undefined && deleteProduct(product.id)"
-            >
-              Delete
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <v-data-table
+      :headers="headers"
+      :items="products"
+      item-value="id"
+      class="elevation-1"
+      dense
+      :loading="isLoading"
+      loading-text="Loading products..."
+    >
+      <template #item.actions="{ item }">
+        <v-btn
+          icon
+          color="primary"
+          @click="$router.push({ name: 'EditProduct', params: { id: item.id } })"
+        >
+          <v-icon>mdi-pencil</v-icon>
+        </v-btn>
+        <v-btn icon color="error" @click="deleteProduct(item.id)">
+          <v-icon>mdi-delete</v-icon>
+        </v-btn>
+      </template>
+    </v-data-table>
   </div>
 </template>
 
@@ -46,6 +37,14 @@ export default {
   setup() {
     const products = ref<ProductPayload[]>([])
     const isLoading = ref(false)
+
+    const headers = ref([
+  { text: 'Name', value: 'name', class: 'text-black' },
+  { text: 'Category', value: 'category', class: 'text-black' },
+  { text: 'Unit Price', value: 'unit_price', class: 'text-black' },
+  { text: 'Actions', value: 'actions', class: 'text-black', sortable: false },
+])
+
 
     const fetchProductList = async () => {
       try {
@@ -71,6 +70,7 @@ export default {
     onMounted(fetchProductList)
 
     return {
+      headers,
       products,
       isLoading,
       fetchProductList,
