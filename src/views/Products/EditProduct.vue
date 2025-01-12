@@ -56,24 +56,24 @@
       />
 
       <!-- Campo Stock Actual -->
-      <FormInput
+<!--       <FormInput
         id="current_stock"
         label="Current Stock"
         v-model="form.current_stock"
         :error="errors.current_stock ? errors.current_stock[0] : undefined"
         type="number"
         required
-      />
+      /> -->
 
       <!-- Campo Punto de Reorden -->
-      <FormInput
+<!--       <FormInput
         id="reorder_point"
         label="Reorder Point"
         v-model="form.reorder_point"
         :error="errors.reorder_point ? errors.reorder_point[0] : undefined"
         type="number"
         required
-      />
+      /> -->
 
       <!-- Campo Precio Unitario -->
       <FormInput
@@ -122,8 +122,8 @@ export default {
       barcode: '',
       description: '',
       image_url: '',
-      current_stock: 0,
-      reorder_point: 0,
+/*       current_stock: 0,
+      reorder_point: 0, */
       unit_price: 0,
     });
 

@@ -12,10 +12,11 @@ export interface ProductPayload {
   barcode: string
   description: string
   image_url: string
-  current_stock: number
-  reorder_point: number
+/*   current_stock: number
+  reorder_point: number */
   unit_price: number
 }
+
 
 export interface FetchProductsResponse {
   items: ProductPayload[];

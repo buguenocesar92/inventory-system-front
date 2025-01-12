@@ -1,6 +1,6 @@
 <template>
   <div class="container mx-auto">
-    <h1 class="text-2xl font-bold mb-4">Edit Product</h1>
+    <h1 class="text-2xl font-bold mb-4">Agregar/Quitar Stock</h1>
 
     <form @submit.prevent="handleUpdateStock" class="space-y-6">
       <!-- Campo Nombre del Producto -->
@@ -10,6 +10,7 @@
         v-model="form.movement_type"
         :error="errors.movement_type ? errors.movement_type[0] : undefined"
         required
+        hidden
       />
 
       <!-- Campo Categoría -->
