@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/valid-v-slot -->
 <template>
   <div class="container mx-auto">
     <h1 class="text-2xl font-bold mb-4">Product List</h1>
@@ -11,12 +12,12 @@
       :loading="isLoading"
       loading-text="Loading products..."
     >
-      <template #item.actions="{ item }">
+    <template v-slot:item.actions="{ item }">
         <!-- Botón Editar -->
         <v-btn
           icon
           color="primary"
-          @click="$router.push({ name: 'EditProduct', params: { id: item.id } })"
+          @click="router.push({ name: 'EditProduct', params: { id: item.id } })"
         >
           <v-icon>mdi-pencil</v-icon>
         </v-btn>
@@ -30,7 +31,7 @@
         <v-btn
           icon
           color="success"
-          @click="$router.push({
+          @click="router.push({
             name: 'MovementForm',
             params: { id: item.id, movementType: 'entry' }
           })"
@@ -42,7 +43,7 @@
         <v-btn
           icon
           color="warning"
-          @click="$router.push({
+          @click="router.push({
             name: 'MovementForm',
             params: { id: item.id, movementType: 'exit' }
           })"
@@ -55,6 +56,7 @@
 </template>
 
 <script lang="ts">
+import { useRouter } from 'vue-router'; // Importar useRouter
 import { ref, onMounted } from 'vue'
 import { fetchProducts, deleteProduct } from '@/services/ProductService'
 import type { ProductPayload } from '@/types/ProductTypes'
@@ -62,14 +64,15 @@ import type { ProductPayload } from '@/types/ProductTypes'
 export default {
   name: 'ProductList',
   setup() {
+    const router = useRouter(); // Instancia de router
     const products = ref<ProductPayload[]>([])
     const isLoading = ref(false)
 
     const headers = ref([
-      { text: 'Name', value: 'name', class: 'text-black' },
-      { text: 'Category', value: 'category', class: 'text-black' },
-      { text: 'Unit Price', value: 'unit_price', class: 'text-black' },
-      { text: 'Actions', value: 'actions', class: 'text-black', sortable: false },
+      { title: 'Name', value: 'name'},
+      { title: 'Category', value: 'category'},
+      { title: 'Unit Price', value: 'unit_price'},
+      { title: 'Actions', value: 'actions' },
     ])
 
     const fetchProductList = async () => {
@@ -101,14 +104,8 @@ export default {
       isLoading,
       fetchProductList,
       deleteProduct: deleteProductHandler,
+      router
     }
   },
 }
 </script>
-
-<style scoped>
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-}
-</style>
