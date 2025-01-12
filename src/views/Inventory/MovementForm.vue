@@ -52,7 +52,7 @@ import type { InventoryMovementPayload } from '@/types/InventoryMovementTypes';
 import type { ValidationErrorResponse } from '@/types/ValidationErrorResponse'
 
 export default {
-  name: 'EditProduct',
+  name: 'MovementForm',
   components: { FormInput },
   setup() {
     const route = useRoute();
