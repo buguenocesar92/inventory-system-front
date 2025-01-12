@@ -1,51 +1,8 @@
-<script setup lang="ts">
-import LogoutButton from '@/components/LogoutButton.vue';
-import { useAuthStore } from '@/stores/authStore';
-import { ref, onMounted, computed } from 'vue';
-
-/** Estado reactivo para controlar el menú móvil (navbar) */
-const isMobileMenuOpen = ref(false);
-
-/** Función para mostrar/ocultar el menú en móvil */
-/* const toggleMobileMenu = () => {
-  isMobileMenuOpen.value = !isMobileMenuOpen.value;
-}; */
-
-/** Estado reactivo para controlar el sidebar */
-const isSidebarOpen = ref(false);
-
-/** Función para mostrar/ocultar el sidebar */
-const toggleSidebar = () => {
-  isSidebarOpen.value = !isSidebarOpen.value;
-};
-
-/** Accede al store de autenticación */
-const authStore = useAuthStore();
-
-/** Computed para acceder al estado de autenticación */
-const isAuthenticated = computed(() => authStore.isAuthenticated);
-
-/** Detectar si estamos en un subdominio */
-const isSubdomain = () => {
-  const host = window.location.host; // Ejemplo: "tenant.foo.localhost"
-  const parts = host.split('.');
-  return parts.length > 2; // Más de dos partes indica un subdominio
-};
-
-/** Estado reactivo para el dominio principal */
-const isMainDomain = ref(!isSubdomain());
-
-/** Verificar el estado de autenticación y dominio al montar el componente */
-onMounted(() => {
-  isMainDomain.value = !isSubdomain();
-  authStore.checkAuth();
-});
-</script>
-
 <template>
   <div class="flex">
-    <!-- Sidebar -->
-    <aside v-if="isAuthenticated"
+    <!-- Sidebar (versión desktop) -->
+    <aside
+      v-if="isAuthenticated"
       class="hidden md:block w-64 bg-gray-800 text-white h-screen"
     >
       <div class="p-4">
@@ -64,23 +21,28 @@ onMounted(() => {
       <div class="border-t border-gray-700"></div>
       <nav class="mt-4">
         <ul>
-          <li v-if="isAuthenticated">
-            <RouterLink to="/add-product" class="flex items-center px-4 py-2 hover:bg-gray-700">
-              <span class="mdi mdi-home-city mr-3"></span> Add Product
+          <!-- Iteramos los links en lugar de duplicar -->
+          <li v-for="item in navItems" :key="item.to">
+            <RouterLink
+              :to="item.to"
+              class="flex items-center px-4 py-2 hover:bg-gray-700"
+            >
+              <span :class="['mdi', item.icon, 'mr-3']"></span>
+              {{ item.label }}
             </RouterLink>
           </li>
+
+          <!-- Botón de Logout sólo si está autenticado -->
           <li v-if="isAuthenticated">
-            <RouterLink to="/list-product" class="flex items-center px-4 py-2 hover:bg-gray-700">
-              <span class="mdi mdi-account mr-3"></span> Products
-            </RouterLink>
+            <LogoutButton />
           </li>
         </ul>
       </nav>
     </aside>
 
-    <!-- Main Content -->
+    <!-- Contenido principal -->
     <div class="flex-1">
-      <!-- Navbar -->
+      <!-- Navbar (encabezado) -->
       <nav class="bg-white border-gray-200 dark:bg-gray-900 dark:border-gray-700">
         <div class="max-w-screen-xl flex items-center justify-between mx-auto p-4">
           <!-- Logo -->
@@ -95,7 +57,7 @@ onMounted(() => {
             </span>
           </a>
 
-          <!-- Botón hamburguesa -->
+          <!-- Botón hamburguesa (para abrir sidebar en móvil) -->
           <button
             class="md:hidden text-gray-700 hover:text-blue-600"
             @click="toggleSidebar"
@@ -116,38 +78,20 @@ onMounted(() => {
             </svg>
           </button>
 
-          <!-- Menú principal -->
+          <!-- Menú principal (desktop y mobile) -->
           <div
             :class="{ hidden: !isMobileMenuOpen, block: isMobileMenuOpen }"
             class="hidden md:block md:w-auto"
           >
             <ul class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-8">
-              <li v-if="isAuthenticated">
-                <RouterLink to="/add-product" class="hover:text-blue-600">
-                  Add Product
+              <!-- Iteramos la lista de enlaces -->
+              <li v-for="item in navItems" :key="item.to">
+                <RouterLink :to="item.to" class="hover:text-blue-600">
+                  {{ item.label }}
                 </RouterLink>
               </li>
-              <li v-if="isAuthenticated">
-                <RouterLink to="/list-product" class="hover:text-blue-600">
-                  Products
-                </RouterLink>
-              </li>
-              <li v-if="!isAuthenticated && isMainDomain">
-                <RouterLink
-                  to="/register"
-                  class="hover:text-blue-600"
-                >
-                  Register
-                </RouterLink>
-              </li>
-              <li v-if="!isAuthenticated && isSubdomain()">
-                <RouterLink
-                  to="/login"
-                  class="hover:text-blue-600"
-                >
-                  Login
-                </RouterLink>
-              </li>
+
+              <!-- Botón de Logout -->
               <li v-if="isAuthenticated">
                 <LogoutButton />
               </li>
@@ -156,28 +100,30 @@ onMounted(() => {
         </div>
       </nav>
 
-      <!-- Content -->
+      <!-- Contenido del router (vistas) -->
       <main class="p-4">
         <RouterView />
       </main>
     </div>
 
-    <!-- Mobile Sidebar -->
+    <!-- Overlay oscuro (para cerrar sidebar móvil) -->
     <div
       class="fixed inset-0 bg-gray-800 bg-opacity-75 z-40 md:hidden"
       v-if="isSidebarOpen"
       @click="toggleSidebar"
     ></div>
+
+    <!-- Sidebar (versión móvil) -->
     <aside
       class="fixed inset-y-0 left-0 bg-gray-800 text-white w-64 p-4 z-50 transform transition-transform"
-      :class="{ '-translate-x-full': !isSidebarOpen, 'translate-x-0': isSidebarOpen }"
+      :class="{
+        '-translate-x-full': !isSidebarOpen,
+        'translate-x-0': isSidebarOpen
+      }"
     >
       <div class="flex justify-between items-center mb-4">
         <h2 class="font-bold">Menu</h2>
-        <button
-          class="text-gray-400 hover:text-white"
-          @click="toggleSidebar"
-        >
+        <button class="text-gray-400 hover:text-white" @click="toggleSidebar">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-6 w-6"
@@ -196,26 +142,19 @@ onMounted(() => {
       </div>
       <nav>
         <ul>
-          <li v-if="isAuthenticated">
-            <RouterLink to="/add-product" class="flex items-center px-4 py-2 hover:bg-gray-700">
-              <span class="mdi mdi-home-city mr-3"></span> Add Product
+          <!-- Usamos los mismos enlaces en la versión móvil -->
+          <li v-for="item in navItems" :key="item.to">
+            <RouterLink
+              :to="item.to"
+              class="flex items-center px-4 py-2 hover:bg-gray-700"
+              @click="toggleSidebar"
+            >
+              <span :class="['mdi', item.icon, 'mr-3']"></span>
+              {{ item.label }}
             </RouterLink>
           </li>
-          <li v-if="isAuthenticated">
-            <RouterLink to="/list-product" class="flex items-center px-4 py-2 hover:bg-gray-700">
-              <span class="mdi mdi-account mr-3"></span> Products
-            </RouterLink>
-          </li>
-          <li v-if="!isAuthenticated && isMainDomain">
-            <RouterLink to="/register" class="flex items-center px-4 py-2 hover:bg-gray-700">
-              <span class="mdi mdi-account mr-3"></span> Register
-            </RouterLink>
-          </li>
-          <li v-if="!isAuthenticated && isSubdomain()">
-            <RouterLink to="/login" class="flex items-center px-4 py-2 hover:bg-gray-700">
-              <span class="mdi mdi-login mr-3"></span> Login
-            </RouterLink>
-          </li>
+
+          <!-- Botón de Logout en móvil -->
           <li v-if="isAuthenticated">
             <LogoutButton />
           </li>
@@ -225,8 +164,94 @@ onMounted(() => {
   </div>
 </template>
 
+<script setup lang="ts">
+import LogoutButton from '@/components/LogoutButton.vue';
+import { useAuthStore } from '@/stores/authStore';
+import { ref, computed, onMounted } from 'vue';
+
+/**
+ * Estado y método para abrir/cerrar el menú móvil (navbar)
+ */
+const isMobileMenuOpen = ref(false);
+const toggleMobileMenu = () => {
+  isMobileMenuOpen.value = !isMobileMenuOpen.value;
+};
+
+/**
+ * Estado y método para abrir/cerrar el sidebar
+ */
+const isSidebarOpen = ref(false);
+const toggleSidebar = () => {
+  isSidebarOpen.value = !isSidebarOpen.value;
+};
+
+/**
+ * Accedemos al store de autenticación
+ */
+const authStore = useAuthStore();
+const isAuthenticated = computed(() => authStore.isAuthenticated);
+
+/**
+ * Detectar si estamos en un subdominio
+ */
+function isSubdomain() {
+  const host = window.location.host; // p.ej: "tenant.foo.localhost"
+  const parts = host.split('.');
+  return parts.length > 2; // si hay más de 2 partes, es subdominio
+}
+
+/**
+ * Verificar si es dominio principal
+ */
+const isMainDomain = ref(!isSubdomain());
+
+/**
+ * Al montar, checamos autenticación y dominio
+ */
+onMounted(() => {
+  isMainDomain.value = !isSubdomain();
+  authStore.checkAuth();
+});
+
+/**
+ * Computed con la lista de enlaces
+ * Se construye en base a isAuthenticated, isMainDomain, etc.
+ */
+const navItems = computed(() => {
+  const items: Array<{ label: string; to: string; icon: string }> = [];
+
+  // Si está autenticado
+  if (isAuthenticated.value) {
+    items.push(
+      { label: 'Add Product', to: '/add-product', icon: 'mdi-home-city' },
+      { label: 'Products', to: '/list-product', icon: 'mdi-account' }
+    );
+  }
+
+  // Si NO está autenticado y es dominio principal => Register
+  if (!isAuthenticated.value && isMainDomain.value) {
+    items.push({
+      label: 'Register',
+      to: '/register',
+      icon: 'mdi-account'
+    });
+  }
+
+  // Si NO está autenticado y es subdominio => Login
+  if (!isAuthenticated.value && isSubdomain()) {
+    items.push({
+      label: 'Login',
+      to: '/login',
+      icon: 'mdi-login'
+    });
+  }
+
+  return items;
+});
+</script>
+
 <style scoped>
-/* Sidebar mobile transition */
+/* Transiciones para sidebar móvil */
 .translate-x-full {
   transform: translateX(100%);
 }
@@ -234,4 +259,3 @@ onMounted(() => {
   transform: translateX(0);
 }
 </style>
-

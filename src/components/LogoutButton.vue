@@ -1,36 +1,42 @@
 <template>
-  <button @click="handleLogout">Logout</button>
+  <button
+    @click="handleLogout"
+    class="flex items-center px-4 py-2 hover:bg-gray-700 text-left w-full"
+  >
+    <span class="mdi mdi-logout mr-3"></span>
+    Logout
+  </button>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { useAuthStore } from '@/stores/authStore'
-import { useRouter } from 'vue-router'
-import { logoutUser } from '@/services/AuthService'
+import { defineComponent } from 'vue';
+import { useAuthStore } from '@/stores/authStore';
+import { useRouter } from 'vue-router';
+import { logoutUser } from '@/services/AuthService';
 
 export default defineComponent({
   name: 'LogoutButton',
   setup() {
-    const authStore = useAuthStore()
-    const router = useRouter()
+    const authStore = useAuthStore();
+    const router = useRouter();
 
     const handleLogout = async () => {
       try {
         // Llama al backend para cerrar sesión
-        await logoutUser()
+        await logoutUser();
 
         // Limpia el estado del usuario en el store
-        authStore.logout()
+        authStore.logout();
 
         // Redirige al usuario al login
-        router.push('/login')
+        router.push('/login');
       } catch (error) {
-        console.error('Error during logout:', error)
-        alert('Failed to log out. Please try again.')
+        console.error('Error during logout:', error);
+        alert('Failed to log out. Please try again.');
       }
-    }
+    };
 
-    return { handleLogout }
+    return { handleLogout };
   },
-})
+});
 </script>
