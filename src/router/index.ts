@@ -1,15 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@/stores/authStore' // Importar el store de autenticación
+import { useAuthStore } from '@/stores/authStore'
 
+// Importaciones de vistas
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import Dashboard from '../views/Dashboard.vue'
-import NotFound from '../views/NotFound.vue' // Componente para la página 404
+import NotFound from '../views/NotFound.vue'
 import RegisterUser from '../views/RegisterUser.vue'
 import AddProduct from '../views/Products/AddProduct.vue'
 import ProductList from '../views/Products/ProductList.vue'
-import EditProduct from '../views/Products/EditProduct.vue' // Asegúrate de importar la vista de edición de productos
-
+import EditProduct from '../views/Products/EditProduct.vue'
+// Importa tu componente para movimientos
+import MovementForm from '../views/Inventory/MovementForm.vue'
 
 // Función para detectar si estamos en un subdominio
 const isSubdomain = () => {
@@ -56,12 +58,18 @@ const routes = [
     name: 'EditProduct',
     component: EditProduct,
     meta: { requiresAuth: true },
-    props: true, // Esto permitirá que el parámetro `id` sea pasado como prop al componente
+    props: true,
   },
   {
     path: '/list-product',
     name: 'ProductList',
     component: ProductList,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/movement/:id/:movementType?',
+    name: 'MovementForm',
+    component: MovementForm,
     meta: { requiresAuth: true },
   },
   {
@@ -84,17 +92,15 @@ const router = createRouter({
 // Middleware de autenticación con Pinia
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
-
-  // Verificar autenticación al navegar
   authStore.checkAuth()
 
   // Bloquear el acceso a /login si no es un subdominio
   if (to.name === 'Login' && !isSubdomain()) {
-    return next('/404') // Redirigir a 404 o una página personalizada
+    return next('/404')
   }
 
   if (to.name === 'Register' && isSubdomain()) {
-    return next('/404') // Redirigir a 404 o una página personalizada
+    return next('/404')
   }
 
   // Rutas protegidas
