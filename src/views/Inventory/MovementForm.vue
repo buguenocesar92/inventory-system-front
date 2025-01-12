@@ -44,13 +44,14 @@
 </template>
 
 <script lang="ts">
-import axios, { AxiosError } from 'axios'
+import axios, { AxiosError } from 'axios';
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import Swal from 'sweetalert2';
 import { updateStockMovement } from '@/services/InventoryMovementService';
 import FormInput from '@/components/FormInput.vue';
 import type { InventoryMovementPayload } from '@/types/InventoryMovementTypes';
-import type { ValidationErrorResponse } from '@/types/ValidationErrorResponse'
+import type { ValidationErrorResponse } from '@/types/ValidationErrorResponse';
 
 export default {
   name: 'MovementForm',
@@ -74,33 +75,40 @@ export default {
     const errors = ref<{ [key: string]: string[] }>({});
 
     const handleUpdateStock = async () => {
-      isLoading.value = true
-      errorMessage.value = null
-      errors.value = {}
+      isLoading.value = true;
+      errorMessage.value = null;
+      errors.value = {};
       try {
-        await updateStockMovement(form.value)
-        alert('Product updated successfully.')
-        router.push('/list-product')
+        await updateStockMovement(form.value);
+
+        // Mostrar alerta de éxito con SweetAlert2
+        await Swal.fire({
+          title: 'Success!',
+          text: `Stock updated successfully as ${form.value.movement_type.toUpperCase()}.`,
+          icon: 'success',
+          confirmButtonText: 'OK',
+        });
+
+        router.push('/list-product');
       } catch (error) {
         if (!axios.isAxiosError(error)) {
-          errorMessage.value = 'An unexpected error occurred.'
-          return
+          errorMessage.value = 'An unexpected error occurred.';
+          return;
         }
 
-        const { response } = error as AxiosError<ValidationErrorResponse>
+        const { response } = error as AxiosError<ValidationErrorResponse>;
 
         if (response?.status === 422) {
-          // Manejar nuevos errores del backend
-          errors.value = response.data.errors as { [key: string]: string[] }
-          errorMessage.value = response.data.message || 'Validation error occurred.'
-          return
+          errors.value = response.data.errors as { [key: string]: string[] };
+          errorMessage.value = response.data.message || 'Validation error occurred.';
+          return;
         }
 
-        errorMessage.value = 'Unexpected error occurred. Please try again later.'
+        errorMessage.value = 'Unexpected error occurred. Please try again later.';
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
-    }
+    };
 
     return {
       form,

@@ -56,26 +56,6 @@
           type="url"
         />
 
-        <!-- Campo Stock Actual -->
-<!--         <FormInput
-          id="current_stock"
-          label="Current Stock"
-          v-model="form.current_stock"
-          :error="errors.current_stock ? errors.current_stock[0] : undefined"
-          type="number"
-          required
-        /> -->
-
-        <!-- Campo Punto de Reorden -->
-<!--         <FormInput
-          id="reorder_point"
-          label="Reorder Point"
-          v-model="form.reorder_point"
-          :error="errors.reorder_point ? errors.reorder_point[0] : undefined"
-          type="number"
-          required
-        /> -->
-
         <!-- Campo Precio Unitario -->
         <FormInput
           id="unit_price"
@@ -97,87 +77,72 @@
 
       <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>
     </div>
-
-    <!-- Modal -->
-    <div
-      v-if="showModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
-    >
-      <div class="bg-white rounded shadow-md p-6">
-        <h2 class="text-xl font-bold mb-4">Product Added</h2>
-        <p class="mb-4">The product has been successfully added.</p>
-        <button
-          @click="handleCloseModal"
-          class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Close
-        </button>
-      </div>
-    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { ref } from 'vue'
-import axios, { AxiosError } from 'axios'
-import { addProduct } from '@/services/ProductService'
-import FormInput from '@/components/FormInput.vue'
-import type { ProductPayload } from '@/types/ProductTypes'
-import type { ValidationErrorResponse } from '@/types/ValidationErrorResponse'
+import { ref } from 'vue';
+import axios, { AxiosError } from 'axios';
+import { addProduct } from '@/services/ProductService';
+import FormInput from '@/components/FormInput.vue';
+import Swal from 'sweetalert2';
+import type { ProductPayload } from '@/types/ProductTypes';
+import type { ValidationErrorResponse } from '@/types/ValidationErrorResponse';
 
 export default {
   name: 'AddProduct',
   components: { FormInput },
   setup() {
     const form = ref<ProductPayload>({
-      name: '', // Valor predeterminado como string
+      name: '',
       category: '',
-      brand: '', // Ensure brand is always a string
+      brand: '',
       barcode: '',
       description: '',
       image_url: '',
-/*       current_stock: 0, */
-/*       reorder_point: 0, */
       unit_price: 0,
-    })
+    });
 
-    const isLoading = ref(false)
-    const errorMessage = ref<string | null>(null)
-    const errors = ref<{ [key: string]: string[] }>({})
-    const showModal = ref(false)
+    const isLoading = ref(false);
+    const errorMessage = ref<string | null>(null);
+    const errors = ref<{ [key: string]: string[] }>({});
 
     const handleAddProduct = async () => {
-      isLoading.value = true
-      errorMessage.value = null
-      errors.value = {}
+      isLoading.value = true;
+      errorMessage.value = null;
+      errors.value = {};
 
       try {
-        await addProduct(form.value)
-        showModal.value = true
+        await addProduct(form.value);
+
+        // Mostrar alerta de éxito con SweetAlert2
+        await Swal.fire({
+          title: 'Success!',
+          text: 'The product has been added successfully.',
+          icon: 'success',
+          confirmButtonText: 'OK',
+        });
+
+        resetForm();
       } catch (error) {
         if (!axios.isAxiosError(error)) {
-          errorMessage.value = 'An unexpected error occurred.'
-          return
+          errorMessage.value = 'An unexpected error occurred.';
+          return;
         }
 
-        const { response } = error as AxiosError<ValidationErrorResponse>
+        const { response } = error as AxiosError<ValidationErrorResponse>;
 
         if (response?.status === 422) {
-          errors.value = response.data.errors as { [key: string]: string[] }
-          errorMessage.value = response.data.message || 'Validation error occurred.'
-          return
+          errors.value = response.data.errors as { [key: string]: string[] };
+          errorMessage.value = response.data.message || 'Validation error occurred.';
+          return;
         }
 
-        errorMessage.value = 'Unexpected error occurred. Please try again later.'
+        errorMessage.value = 'Unexpected error occurred. Please try again later.';
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
-    }
-
-    const handleCloseModal = () => {
-      showModal.value = false
-      resetForm()
-    }
+    };
 
     const resetForm = () => {
       form.value = {
@@ -187,21 +152,17 @@ export default {
         barcode: '',
         description: '',
         image_url: '',
-/*         current_stock: 0,
-        reorder_point: 0, */
         unit_price: 0,
-      }
-    }
+      };
+    };
 
     return {
       form,
       isLoading,
       errorMessage,
       errors,
-      showModal,
       handleAddProduct,
-      handleCloseModal,
-    }
+    };
   },
-}
+};
 </script>

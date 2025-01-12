@@ -55,26 +55,6 @@
         type="url"
       />
 
-      <!-- Campo Stock Actual -->
-<!--       <FormInput
-        id="current_stock"
-        label="Current Stock"
-        v-model="form.current_stock"
-        :error="errors.current_stock ? errors.current_stock[0] : undefined"
-        type="number"
-        required
-      /> -->
-
-      <!-- Campo Punto de Reorden -->
-<!--       <FormInput
-        id="reorder_point"
-        label="Reorder Point"
-        v-model="form.reorder_point"
-        :error="errors.reorder_point ? errors.reorder_point[0] : undefined"
-        type="number"
-        required
-      /> -->
-
       <!-- Campo Precio Unitario -->
       <FormInput
         id="unit_price"
@@ -104,6 +84,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { fetchProduct, updateProduct } from '@/services/ProductService';
 import FormInput from '@/components/FormInput.vue';
+import Swal from 'sweetalert2';
 import type { ProductPayload } from '@/types/ProductTypes';
 import type { ValidationErrorResponse } from '@/types/ValidationErrorResponse';
 
@@ -122,8 +103,6 @@ export default {
       barcode: '',
       description: '',
       image_url: '',
-/*       current_stock: 0,
-      reorder_point: 0, */
       unit_price: 0,
     });
 
@@ -156,7 +135,15 @@ export default {
 
       try {
         await updateProduct(productId, form.value);
-        alert('Product updated successfully.');
+
+        // Mostrar alerta de éxito con SweetAlert2
+        await Swal.fire({
+          title: 'Success!',
+          text: 'Product updated successfully.',
+          icon: 'success',
+          confirmButtonText: 'OK',
+        });
+
         router.push('/list-product');
       } catch (error) {
         if (!axios.isAxiosError(error)) {
@@ -167,7 +154,6 @@ export default {
         const { response } = error as AxiosError<ValidationErrorResponse>;
 
         if (response?.status === 422) {
-          // Manejar nuevos errores del backend
           errors.value = response.data.errors as { [key: string]: string[] };
           errorMessage.value = response.data.message || 'Validation error occurred.';
           return;
@@ -191,11 +177,3 @@ export default {
   },
 };
 </script>
-
-
-<style scoped>
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-}
-</style>
