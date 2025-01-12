@@ -25,51 +25,56 @@
       dense
       loading-text="Loading products..."
     >
-      <template v-slot:item.actions="{ item }">
-        <!-- Botón Editar -->
-        <v-btn
-          icon
-          color="primary"
-          @click="router.push({ name: 'EditProduct', params: { id: item.id } })"
-        >
-          <v-icon>mdi-pencil</v-icon>
-        </v-btn>
+    <template v-slot:item.actions="{ item }">
+      <!-- Botón Editar -->
+      <v-btn
+        color="primary"
+        @click="router.push({ name: 'EditProduct', params: { id: item.id } })"
+        class="ma-2"
+      >
+        <v-icon start>mdi-pencil</v-icon>
+        Edit
+      </v-btn>
 
-        <!-- Botón Eliminar -->
-        <v-btn
-          icon
-          color="error"
-          :disabled="deletingProductId === item.id"
-          @click="deleteProduct(item.id)"
-        >
-          <v-icon>
-            <template v-if="deletingProductId === item.id">
-              mdi-loading
-            </template>
-            <template v-else>
-              mdi-delete
-            </template>
-          </v-icon>
-        </v-btn>
+      <!-- Botón Eliminar -->
+      <v-btn
+        color="error"
+        :disabled="deletingProductId === item.id"
+        @click="deleteProduct(item.id)"
+        class="ma-2"
+      >
+        <v-icon start>
+          <template v-if="deletingProductId === item.id">
+            mdi-loading
+          </template>
+          <template v-else>
+            mdi-delete
+          </template>
+        </v-icon>
+        Delete
+      </v-btn>
 
-        <!-- Botón Agregar Stock -->
-        <v-btn
-          icon
-          color="success"
-          @click="router.push({ name: 'MovementForm', params: { id: item.id, movementType: 'entry' } })"
-        >
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
+      <!-- Botón Agregar Stock -->
+      <v-btn
+        color="success"
+        @click="router.push({ name: 'MovementForm', params: { id: item.id, movementType: 'entry' } })"
+        class="ma-2"
+      >
+        <v-icon start>mdi-plus</v-icon>
+        Add Stock
+      </v-btn>
 
-        <!-- Botón Quitar Stock -->
-        <v-btn
-          icon
-          color="warning"
-          @click="router.push({ name: 'MovementForm', params: { id: item.id, movementType: 'exit' } })"
-        >
-          <v-icon>mdi-minus</v-icon>
-        </v-btn>
-      </template>
+      <!-- Botón Quitar Stock -->
+      <v-btn
+        color="warning"
+        @click="router.push({ name: 'MovementForm', params: { id: item.id, movementType: 'exit' } })"
+        class="ma-2"
+      >
+        <v-icon start>mdi-minus</v-icon>
+        Remove Stock
+      </v-btn>
+    </template>
+
     </v-data-table-server>
   </div>
 </template>
