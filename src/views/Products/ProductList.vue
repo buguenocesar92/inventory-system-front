@@ -22,6 +22,7 @@
           <v-icon>mdi-pencil</v-icon>
         </v-btn>
 
+
         <!-- Botón Eliminar -->
         <v-btn icon color="error" @click="deleteProduct(item.id)">
           <v-icon>mdi-delete</v-icon>

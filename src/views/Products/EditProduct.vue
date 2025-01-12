@@ -99,22 +99,22 @@
 </template>
 
 <script lang="ts">
-import axios, { AxiosError } from 'axios'
-import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { fetchProducts, updateProduct } from '@/services/ProductService'
-import FormInput from '@/components/FormInput.vue'
-import type { ProductPayload } from '@/types/ProductTypes'
-import type { ValidationErrorResponse } from '@/types/ValidationErrorResponse'
+import axios, { AxiosError } from 'axios';
+import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { fetchProduct, updateProduct } from '@/services/ProductService';
+import FormInput from '@/components/FormInput.vue';
+import type { ProductPayload } from '@/types/ProductTypes';
+import type { ValidationErrorResponse } from '@/types/ValidationErrorResponse';
 
 export default {
   name: 'EditProduct',
   components: { FormInput },
   setup() {
-    const route = useRoute()
-    const router = useRouter()
+    const route = useRoute();
+    const router = useRouter();
 
-    const productId = Number(route.params.id)
+    const productId = Number(route.params.id);
     const form = ref<ProductPayload>({
       name: '',
       category: '',
@@ -125,62 +125,61 @@ export default {
       current_stock: 0,
       reorder_point: 0,
       unit_price: 0,
-    })
+    });
 
-    const isLoading = ref(false)
-    const errorMessage = ref<string | null>(null)
-    const errors = ref<{ [key: string]: string[] }>({})
+    const isLoading = ref(false);
+    const errorMessage = ref<string | null>(null);
+    const errors = ref<{ [key: string]: string[] }>({});
 
     // Fetch the product data when the component is mounted
-    const fetchProduct = async () => {
+    const fetchProductData = async () => {
       try {
-        isLoading.value = true
-        const product = await fetchProducts()
-        const currentProduct = product.find(p => p.id === productId)
-        if (currentProduct) {
-          form.value = currentProduct
+        isLoading.value = true;
+        const product = await fetchProduct(productId);
+        if (product) {
+          form.value = product;
         } else {
-          router.push('/404')
+          router.push('/404');
         }
       } catch (error) {
-        errorMessage.value = 'Error loading product details.'
-        console.error('Error fetching product:', error)
+        errorMessage.value = 'Error loading product details.';
+        console.error('Error fetching product:', error);
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
-    }
+    };
 
     const handleEditProduct = async () => {
-      isLoading.value = true
-      errorMessage.value = null
-      errors.value = {}
+      isLoading.value = true;
+      errorMessage.value = null;
+      errors.value = {};
 
       try {
-        await updateProduct(productId, form.value)
-        alert('Product updated successfully.')
-        router.push('/list-product')
+        await updateProduct(productId, form.value);
+        alert('Product updated successfully.');
+        router.push('/list-product');
       } catch (error) {
         if (!axios.isAxiosError(error)) {
-          errorMessage.value = 'An unexpected error occurred.'
-          return
+          errorMessage.value = 'An unexpected error occurred.';
+          return;
         }
 
-        const { response } = error as AxiosError<ValidationErrorResponse>
+        const { response } = error as AxiosError<ValidationErrorResponse>;
 
         if (response?.status === 422) {
           // Manejar nuevos errores del backend
-          errors.value = response.data.errors as { [key: string]: string[] }
-          errorMessage.value = response.data.message || 'Validation error occurred.'
-          return
+          errors.value = response.data.errors as { [key: string]: string[] };
+          errorMessage.value = response.data.message || 'Validation error occurred.';
+          return;
         }
 
-        errorMessage.value = 'Unexpected error occurred. Please try again later.'
+        errorMessage.value = 'Unexpected error occurred. Please try again later.';
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
-    }
+    };
 
-    onMounted(fetchProduct)
+    onMounted(fetchProductData);
 
     return {
       form,
@@ -188,10 +187,11 @@ export default {
       errorMessage,
       errors,
       handleEditProduct,
-    }
+    };
   },
-}
+};
 </script>
+
 
 <style scoped>
 .container {
