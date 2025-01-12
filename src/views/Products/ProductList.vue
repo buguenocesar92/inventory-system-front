@@ -12,6 +12,7 @@
       loading-text="Loading products..."
     >
       <template #item.actions="{ item }">
+        <!-- Botón Editar -->
         <v-btn
           icon
           color="primary"
@@ -19,8 +20,34 @@
         >
           <v-icon>mdi-pencil</v-icon>
         </v-btn>
+
+        <!-- Botón Eliminar -->
         <v-btn icon color="error" @click="deleteProduct(item.id)">
           <v-icon>mdi-delete</v-icon>
+        </v-btn>
+
+        <!-- Botón Agregar Stock -->
+        <v-btn
+          icon
+          color="success"
+          @click="$router.push({
+            name: 'MovementForm',
+            params: { id: item.id, movementType: 'entry' }
+          })"
+        >
+          <v-icon>mdi-plus</v-icon>
+        </v-btn>
+
+        <!-- Botón Quitar Stock -->
+        <v-btn
+          icon
+          color="warning"
+          @click="$router.push({
+            name: 'MovementForm',
+            params: { id: item.id, movementType: 'exit' }
+          })"
+        >
+          <v-icon>mdi-minus</v-icon>
         </v-btn>
       </template>
     </v-data-table>
@@ -39,12 +66,11 @@ export default {
     const isLoading = ref(false)
 
     const headers = ref([
-  { text: 'Name', value: 'name', class: 'text-black' },
-  { text: 'Category', value: 'category', class: 'text-black' },
-  { text: 'Unit Price', value: 'unit_price', class: 'text-black' },
-  { text: 'Actions', value: 'actions', class: 'text-black', sortable: false },
-])
-
+      { text: 'Name', value: 'name', class: 'text-black' },
+      { text: 'Category', value: 'category', class: 'text-black' },
+      { text: 'Unit Price', value: 'unit_price', class: 'text-black' },
+      { text: 'Actions', value: 'actions', class: 'text-black', sortable: false },
+    ])
 
     const fetchProductList = async () => {
       try {
