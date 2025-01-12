@@ -25,59 +25,60 @@
       dense
       loading-text="Loading products..."
     >
-    <template v-slot:item.actions="{ item }">
-      <!-- Botón Editar -->
-      <v-btn
-        color="primary"
-        @click="router.push({ name: 'EditProduct', params: { id: item.id } })"
-        class="ma-2"
-      >
-        <v-icon start>mdi-pencil</v-icon>
-        Edit
-      </v-btn>
+      <!-- Columna de acciones -->
+      <template v-slot:item.actions="{ item }">
+        <!-- Botón Editar -->
+        <v-btn
+          color="primary"
+          @click="router.push({ name: 'EditProduct', params: { id: item.id } })"
+          class="ma-2"
+        >
+          <v-icon start>mdi-pencil</v-icon>
+          Edit
+        </v-btn>
 
-      <!-- Botón Eliminar -->
-      <v-btn
-        color="error"
-        :disabled="deletingProductId === item.id"
-        @click="deleteProduct(item.id)"
-        class="ma-2"
-      >
-        <v-icon start>
-          <template v-if="deletingProductId === item.id">
-            mdi-loading
-          </template>
-          <template v-else>
-            mdi-delete
-          </template>
-        </v-icon>
-        Delete
-      </v-btn>
+        <!-- Botón Eliminar -->
+        <v-btn
+          color="error"
+          :disabled="deletingProductId === item.id"
+          @click="deleteProduct(item.id)"
+          class="ma-2"
+        >
+          <v-icon start>
+            <template v-if="deletingProductId === item.id">
+              mdi-loading
+            </template>
+            <template v-else>
+              mdi-delete
+            </template>
+          </v-icon>
+          Delete
+        </v-btn>
 
-      <!-- Botón Agregar Stock -->
-      <v-btn
-        color="success"
-        @click="router.push({ name: 'MovementForm', params: { id: item.id, movementType: 'entry' } })"
-        class="ma-2"
-      >
-        <v-icon start>mdi-plus</v-icon>
-        Add Stock
-      </v-btn>
+        <!-- Botón Agregar Stock -->
+        <v-btn
+          color="success"
+          @click="router.push({ name: 'MovementForm', params: { id: item.id, movementType: 'entry' } })"
+          class="ma-2"
+        >
+          <v-icon start>mdi-plus</v-icon>
+          Add Stock
+        </v-btn>
 
-      <!-- Botón Quitar Stock -->
-      <v-btn
-        color="warning"
-        @click="router.push({ name: 'MovementForm', params: { id: item.id, movementType: 'exit' } })"
-        class="ma-2"
-      >
-        <v-icon start>mdi-minus</v-icon>
-        Remove Stock
-      </v-btn>
-    </template>
-
+        <!-- Botón Quitar Stock -->
+        <v-btn
+          color="warning"
+          @click="router.push({ name: 'MovementForm', params: { id: item.id, movementType: 'exit' } })"
+          class="ma-2"
+        >
+          <v-icon start>mdi-minus</v-icon>
+          Remove Stock
+        </v-btn>
+      </template>
     </v-data-table-server>
   </div>
 </template>
+
 
 
 <script lang="ts">
@@ -92,24 +93,22 @@ export default {
     const router = useRouter();
     const itemsPerPage = ref(5);
     const isLoading = ref(false);
-    const serverItems = ref<ProductPayload[]>([]);
+    const serverItems = ref<ProductPayload[]>([]); // Los productos del servidor
     const totalItems = ref(0); // Total de productos disponibles
     const search = ref('');
     const deletingProductId = ref<number | null>(null); // ID del producto en proceso de eliminación
 
+    // Definición de los encabezados de la tabla
     const headers = ref([
       { title: 'Name', value: 'name', sortable: true },
       { title: 'Category', value: 'category', sortable: true },
       { title: 'Unit Price', value: 'unit_price', sortable: true },
+      { title: 'Current Stock', value: 'current_stock', sortable: true }, // Nueva columna
       { title: 'Actions', value: 'actions', sortable: false },
     ]);
 
     // Cargar productos del servidor
-    const loadItems = async ({
-      page,
-      itemsPerPage,
-      sortBy,
-    }: {
+    const loadItems = async (params: {
       page: number;
       itemsPerPage: number;
       sortBy: { key: string; order: string }[];
@@ -117,9 +116,9 @@ export default {
       isLoading.value = true;
       try {
         const { items, total }: FetchProductsResponse = await fetchProducts({
-          page,
-          itemsPerPage,
-          sortBy,
+          page: params.page,
+          itemsPerPage: params.itemsPerPage,
+          sortBy: params.sortBy,
           search: search.value,
         });
         serverItems.value = items;
