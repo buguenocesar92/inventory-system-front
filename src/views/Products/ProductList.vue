@@ -3,13 +3,22 @@
   <div class="container mx-auto">
     <h1 class="text-2xl font-bold mb-4">Product List</h1>
 
+    <!-- Barra de búsqueda -->
+    <v-text-field
+      v-model="search"
+      label="Search"
+      class="mb-4"
+      outlined
+      dense
+      @input="loadItems({ page: 1, itemsPerPage, sortBy: [] })"
+    ></v-text-field>
+
     <v-data-table-server
       v-model:items-per-page="itemsPerPage"
       :headers="headers"
       :items="serverItems"
       :items-length="totalItems"
       :loading="isLoading"
-      :search="search"
       item-value="id"
       @update:options="loadItems"
       class="elevation-1"
@@ -65,6 +74,7 @@
   </div>
 </template>
 
+
 <script lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -83,14 +93,18 @@ export default {
     const deletingProductId = ref<number | null>(null); // ID del producto en proceso de eliminación
 
     const headers = ref([
-      { title: 'Name', value: 'name' },
-      { title: 'Category', value: 'category' },
-      { title: 'Unit Price', value: 'unit_price' },
+      { title: 'Name', value: 'name', sortable: true },
+      { title: 'Category', value: 'category', sortable: true },
+      { title: 'Unit Price', value: 'unit_price', sortable: true },
       { title: 'Actions', value: 'actions', sortable: false },
     ]);
 
     // Cargar productos del servidor
-    const loadItems = async (params: {
+    const loadItems = async ({
+      page,
+      itemsPerPage,
+      sortBy,
+    }: {
       page: number;
       itemsPerPage: number;
       sortBy: { key: string; order: string }[];
@@ -98,9 +112,9 @@ export default {
       isLoading.value = true;
       try {
         const { items, total }: FetchProductsResponse = await fetchProducts({
-          page: params.page,
-          itemsPerPage: params.itemsPerPage,
-          sortBy: params.sortBy,
+          page,
+          itemsPerPage,
+          sortBy,
           search: search.value,
         });
         serverItems.value = items;
@@ -141,4 +155,5 @@ export default {
   },
 };
 </script>
+
 
