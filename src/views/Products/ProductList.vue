@@ -3,16 +3,20 @@
   <div class="container mx-auto">
     <h1 class="text-2xl font-bold mb-4">Product List</h1>
 
-    <v-data-table
+    <v-data-table-server
+      v-model:items-per-page="itemsPerPage"
       :headers="headers"
-      :items="products"
+      :items="serverItems"
+      :items-length="totalItems"
+      :loading="isLoading"
+      :search="search"
       item-value="id"
+      @update:options="loadItems"
       class="elevation-1"
       dense
-      :loading="isLoading"
       loading-text="Loading products..."
     >
-    <template v-slot:item.actions="{ item }">
+      <template v-slot:item.actions="{ item }">
         <!-- Botón Editar -->
         <v-btn
           icon
@@ -21,7 +25,6 @@
         >
           <v-icon>mdi-pencil</v-icon>
         </v-btn>
-
 
         <!-- Botón Eliminar -->
         <v-btn icon color="error" @click="deleteProduct(item.id)">
@@ -32,10 +35,7 @@
         <v-btn
           icon
           color="success"
-          @click="router.push({
-            name: 'MovementForm',
-            params: { id: item.id, movementType: 'entry' }
-          })"
+          @click="router.push({ name: 'MovementForm', params: { id: item.id, movementType: 'entry' } })"
         >
           <v-icon>mdi-plus</v-icon>
         </v-btn>
@@ -44,69 +44,89 @@
         <v-btn
           icon
           color="warning"
-          @click="router.push({
-            name: 'MovementForm',
-            params: { id: item.id, movementType: 'exit' }
-          })"
+          @click="router.push({ name: 'MovementForm', params: { id: item.id, movementType: 'exit' } })"
         >
           <v-icon>mdi-minus</v-icon>
         </v-btn>
       </template>
-    </v-data-table>
+    </v-data-table-server>
   </div>
 </template>
 
 <script lang="ts">
-import { useRouter } from 'vue-router'; // Importar useRouter
-import { ref, onMounted } from 'vue'
-import { fetchProducts, deleteProduct } from '@/services/ProductService'
-import type { ProductPayload } from '@/types/ProductTypes'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { fetchProducts, deleteProduct } from '@/services/ProductService';
+import type { ProductPayload, FetchProductsResponse } from '@/types/ProductTypes';
 
 export default {
-  name: 'ProductList',
+  name: 'ProductListServer',
   setup() {
-    const router = useRouter(); // Instancia de router
-    const products = ref<ProductPayload[]>([])
-    const isLoading = ref(false)
+    const router = useRouter();
+    const itemsPerPage = ref(5);
+    const isLoading = ref(false);
+    const serverItems = ref<ProductPayload[]>([]);
+    const totalItems = ref(0); // Total de productos disponibles
+    const search = ref('');
 
     const headers = ref([
-      { title: 'Name', value: 'name'},
-      { title: 'Category', value: 'category'},
-      { title: 'Unit Price', value: 'unit_price'},
-      { title: 'Actions', value: 'actions' },
-    ])
+      { text: 'Name', value: 'name' },
+      { text: 'Category', value: 'category' },
+      { text: 'Unit Price', value: 'unit_price' },
+      { text: 'Actions', value: 'actions', sortable: false },
+    ]);
 
-    const fetchProductList = async () => {
+    // Cargar productos del servidor
+    const loadItems = async ({
+      page,
+      itemsPerPage,
+      sortBy,
+    }: {
+      page: number;
+      itemsPerPage: number;
+      sortBy: { key: string; order: string }[];
+    }) => {
+      isLoading.value = true;
       try {
-        isLoading.value = true
-        products.value = await fetchProducts()
+        const { items, total }: FetchProductsResponse = await fetchProducts({
+          page,
+          itemsPerPage,
+          sortBy,
+          search: search.value,
+        });
+        serverItems.value = items;
+        totalItems.value = total; // Asignar total de elementos
       } catch (error) {
-        console.error('Error fetching products:', error)
+        console.error('Error fetching products:', error);
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
-    }
+    };
 
+    // Eliminar un producto
     const deleteProductHandler = async (id: number) => {
       try {
-        await deleteProduct(id)
-        products.value = products.value.filter(product => product.id !== id)
-        console.log(`Product with ID ${id} deleted.`)
+        await deleteProduct(id);
+        serverItems.value = serverItems.value.filter((product) => product.id !== id);
+        console.log(`Product with ID ${id} deleted.`);
       } catch (error) {
-        console.error('Error deleting product:', error)
+        console.error('Error deleting product:', error);
       }
-    }
-
-    onMounted(fetchProductList)
+    };
 
     return {
       headers,
-      products,
+      serverItems,
       isLoading,
-      fetchProductList,
+      totalItems, // Total asignado al prop items-length
+      itemsPerPage,
+      search,
+      loadItems,
       deleteProduct: deleteProductHandler,
-      router
-    }
+      router,
+    };
   },
-}
+};
 </script>
+
+
