@@ -38,7 +38,7 @@
     </aside>
 
     <!-- Sidebar (versión móvil) -->
-    <aside
+    <aside v-if="isAuthenticated"
       class="fixed inset-y-0 left-0 bg-gray-800 text-white w-64 p-4 z-50 transform transition-transform h-screen md:hidden"
       :class="{
         '-translate-x-full': !isSidebarOpen,
