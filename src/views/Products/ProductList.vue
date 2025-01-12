@@ -83,10 +83,10 @@ export default {
     const deletingProductId = ref<number | null>(null); // ID del producto en proceso de eliminación
 
     const headers = ref([
-      { text: 'Name', value: 'name' },
-      { text: 'Category', value: 'category' },
-      { text: 'Unit Price', value: 'unit_price' },
-      { text: 'Actions', value: 'actions', sortable: false },
+      { title: 'Name', value: 'name' },
+      { title: 'Category', value: 'category' },
+      { title: 'Unit Price', value: 'unit_price' },
+      { title: 'Actions', value: 'actions', sortable: false },
     ]);
 
     // Cargar productos del servidor
