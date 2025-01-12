@@ -16,3 +16,8 @@ export interface ProductPayload {
   reorder_point: number
   unit_price: number
 }
+
+export interface FetchProductsResponse {
+  items: ProductPayload[];
+  total: number;
+}
