@@ -27,8 +27,20 @@
         </v-btn>
 
         <!-- Botón Eliminar -->
-        <v-btn icon color="error" @click="deleteProduct(item.id)">
-          <v-icon>mdi-delete</v-icon>
+        <v-btn
+          icon
+          color="error"
+          :disabled="deletingProductId === item.id"
+          @click="deleteProduct(item.id)"
+        >
+          <v-icon>
+            <template v-if="deletingProductId === item.id">
+              mdi-loading
+            </template>
+            <template v-else>
+              mdi-delete
+            </template>
+          </v-icon>
         </v-btn>
 
         <!-- Botón Agregar Stock -->
@@ -68,6 +80,7 @@ export default {
     const serverItems = ref<ProductPayload[]>([]);
     const totalItems = ref(0); // Total de productos disponibles
     const search = ref('');
+    const deletingProductId = ref<number | null>(null); // ID del producto en proceso de eliminación
 
     const headers = ref([
       { text: 'Name', value: 'name' },
@@ -77,11 +90,7 @@ export default {
     ]);
 
     // Cargar productos del servidor
-    const loadItems = async ({
-      page,
-      itemsPerPage,
-      sortBy,
-    }: {
+    const loadItems = async (params: {
       page: number;
       itemsPerPage: number;
       sortBy: { key: string; order: string }[];
@@ -89,9 +98,9 @@ export default {
       isLoading.value = true;
       try {
         const { items, total }: FetchProductsResponse = await fetchProducts({
-          page,
-          itemsPerPage,
-          sortBy,
+          page: params.page,
+          itemsPerPage: params.itemsPerPage,
+          sortBy: params.sortBy,
           search: search.value,
         });
         serverItems.value = items;
@@ -105,12 +114,15 @@ export default {
 
     // Eliminar un producto
     const deleteProductHandler = async (id: number) => {
+      deletingProductId.value = id; // Establecer el producto en proceso de eliminación
       try {
         await deleteProduct(id);
         serverItems.value = serverItems.value.filter((product) => product.id !== id);
         console.log(`Product with ID ${id} deleted.`);
       } catch (error) {
         console.error('Error deleting product:', error);
+      } finally {
+        deletingProductId.value = null; // Restablecer el estado después de eliminar
       }
     };
 
@@ -123,10 +135,10 @@ export default {
       search,
       loadItems,
       deleteProduct: deleteProductHandler,
+      deletingProductId,
       router,
     };
   },
 };
 </script>
-
 
