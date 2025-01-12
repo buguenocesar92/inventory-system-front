@@ -60,7 +60,7 @@ export default {
 
     const productId = Number(route.params.id);
     const movementType = (route.params.movementType as 'entry' | 'exit' | 'adjustment') || 'entry';
- /*    console.log(movementType); */
+
     const form = ref<InventoryMovementPayload>({
       product_id: productId,
       movement_type: movementType,
@@ -76,7 +76,6 @@ export default {
       isLoading.value = true
       errorMessage.value = null
       errors.value = {}
-       console.log (form.value);
       try {
         await updateStockMovement(form.value)
         alert('Product updated successfully.')
