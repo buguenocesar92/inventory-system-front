@@ -11,7 +11,7 @@
     <!-- Contenido principal con scroll -->
     <div class="flex-1 overflow-y-auto bg-gray-100">
       <!-- Navbar -->
-      <AppNavbar :toggleSidebar="toggleSidebar" />
+      <AppNavbar :isAuthenticated="isAuthenticated" :toggleSidebar="toggleSidebar" />
 
       <!-- Contenido del router (vistas) -->
       <main class="p-4">

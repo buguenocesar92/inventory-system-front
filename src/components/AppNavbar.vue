@@ -14,7 +14,7 @@
       </a>
 
       <!-- Botón hamburguesa (para abrir sidebar en móvil) -->
-      <button
+      <button v-if="isAuthenticated"
         class="md:hidden text-gray-700 hover:text-blue-600"
         @click="toggleSidebar"
       >
@@ -44,6 +44,10 @@ import type { PropType } from 'vue';
  * Prop para controlar la función toggleSidebar
  */
 defineProps({
+  isAuthenticated: {
+    type: Boolean,
+    required: true
+  },
   toggleSidebar: {
     type: Function as PropType<() => void>,
     required: true
