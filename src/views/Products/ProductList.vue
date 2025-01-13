@@ -4,7 +4,7 @@
     <h1 class="text-2xl font-bold mb-4">Product List</h1>
 
     <RouterLink to="/add-product" class="bg-blue-500 text-white font-medium py-2 px-4 rounded hover:bg-blue-600 transition-colors mb-5">
-        <span>Crear Producto</span>
+      <span>Crear Producto</span>
     </RouterLink>
     <!-- Barra de búsqueda -->
     <v-text-field
@@ -13,7 +13,7 @@
       class="mb-4 mt-4"
       outlined
       dense
-      @input="loadItems({ page: 1, itemsPerPage, sortBy: [] })"
+      @input="onSearchInput"
     ></v-text-field>
 
     <v-data-table-server
@@ -82,13 +82,13 @@
   </div>
 </template>
 
-
-
 <script lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { fetchProducts, deleteProduct } from '@/services/ProductService';
 import type { ProductPayload, FetchProductsResponse } from '@/types/ProductTypes';
+import { debounce } from '@/utils/debounce';
+
 
 export default {
   name: 'ProductListServer',
@@ -147,6 +147,14 @@ export default {
       }
     };
 
+    // Debounced search input handler
+    const debouncedLoadItems = debounce((params) => loadItems(params), 300);
+
+    // Actualizar productos al escribir en el campo de búsqueda
+    const onSearchInput = () => {
+      debouncedLoadItems({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] });
+    };
+
     return {
       headers,
       serverItems,
@@ -158,9 +166,8 @@ export default {
       deleteProduct: deleteProductHandler,
       deletingProductId,
       router,
+      onSearchInput,
     };
   },
 };
 </script>
-
-
