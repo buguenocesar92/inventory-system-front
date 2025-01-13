@@ -22,7 +22,22 @@ const isSubdomain = () => {
 
 // Definición de rutas
 const routes = [
-  { path: '/', redirect: '/register' },
+/*   {
+    path: '/',
+    redirect: () => {
+      const authStore = useAuthStore()
+      return authStore.isAuthenticated ? '/dashboard' : '/login'
+    },
+  }, */
+  {
+    path: '/',
+    redirect: () => {
+      if (isSubdomain()) {
+        return '/dashboard' // Subdominios van al Dashboard
+      }
+      return '/register' // Dominio principal va a Register
+    }
+  },
   {
     path: '/login',
     name: 'Login',
