@@ -166,41 +166,37 @@
 </template>
 
 <script setup lang="ts">
-import LogoutButton from '@/components/LogoutButton.vue'
+import LogoutButton from '@/components/LogoutButton.vue';
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
+import { isSubdomain } from '@/utils/domainUtils'; // Utilidad para lógica de dominio
 
+// Sidebar
 const isSidebarOpen = ref(false);
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value;
 };
+
+// Dropdown
 const isDropdownOpen = ref(false);
-/** Accede al store de autenticación */
-const authStore = useAuthStore()
-
-/** Computed para acceder al estado de autenticación */
-const isAuthenticated = computed(() => authStore.isAuthenticated)
-
 const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value;
 };
 
-/** Detectar si estamos en un subdominio */
-const isSubdomain = () => {
-  const host = window.location.host // Ejemplo: "tenant.foo.localhost"
-  const parts = host.split('.')
-  return parts.length > 2 // Más de dos partes indica un subdominio
-}
+// Auth Store
+const authStore = useAuthStore();
+const isAuthenticated = computed(() => authStore.isAuthenticated);
 
-/** Estado reactivo para el dominio principal */
-const isMainDomain = ref(!isSubdomain())
+// Estado reactivo para el dominio principal
+const isMainDomain = ref(!isSubdomain());
 
-/** Verificar el estado de autenticación y dominio al montar el componente */
+// Check auth status and domain on component mount
 onMounted(() => {
-  isMainDomain.value = !isSubdomain()
-  authStore.checkAuth()
-})
+  isMainDomain.value = !isSubdomain();
+  authStore.checkAuth();
+});
 </script>
+
 
 <style scoped>
 @media (min-width: 1281px) {

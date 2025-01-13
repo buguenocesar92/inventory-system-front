@@ -1,42 +1,23 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@/stores/authStore'
+import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore';
+import { isSubdomain } from '@/utils/domainUtils'; // Importar lógica de subdominio
 
 // Importaciones de vistas
-import Login from '../views/Login.vue'
-import Register from '../views/Register.vue'
-import Dashboard from '../views/Dashboard.vue'
-import NotFound from '../views/NotFound.vue'
-import RegisterUser from '../views/RegisterUser.vue'
-import AddProduct from '../views/Products/AddProduct.vue'
-import ProductList from '../views/Products/ProductList.vue'
-import EditProduct from '../views/Products/EditProduct.vue'
-// Importa tu componente para movimientos
-import MovementForm from '../views/Inventory/MovementForm.vue'
-
-// Función para detectar si estamos en un subdominio
-const isSubdomain = () => {
-  const host = window.location.host // Ejemplo: "tenant.foo.localhost"
-  const parts = host.split('.')
-  return parts.length > 2 // Más de dos partes indica un subdominio
-}
+import Login from '../views/Login.vue';
+import Register from '../views/Register.vue';
+import Dashboard from '../views/Dashboard.vue';
+import NotFound from '../views/NotFound.vue';
+import RegisterUser from '../views/RegisterUser.vue';
+import AddProduct from '../views/Products/AddProduct.vue';
+import ProductList from '../views/Products/ProductList.vue';
+import EditProduct from '../views/Products/EditProduct.vue';
+import MovementForm from '../views/Inventory/MovementForm.vue';
 
 // Definición de rutas
 const routes = [
-/*   {
-    path: '/',
-    redirect: () => {
-      const authStore = useAuthStore()
-      return authStore.isAuthenticated ? '/dashboard' : '/login'
-    },
-  }, */
   {
     path: '/',
-    redirect: () => {
-      if (isSubdomain()) {
-        return '/dashboard' // Subdominios van al Dashboard
-      }
-      return '/register' // Dominio principal va a Register
-    }
+    redirect: () => (isSubdomain() ? '/dashboard' : '/register'),
   },
   {
     path: '/login',
@@ -96,39 +77,26 @@ const routes = [
     path: '/:pathMatch(.*)*',
     redirect: '/404',
   },
-]
+];
 
 // Crear la instancia del router
 const router = createRouter({
   history: createWebHistory(),
   routes,
-})
+});
 
 // Middleware de autenticación con Pinia
 router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore()
-  authStore.checkAuth()
+  const authStore = useAuthStore();
+  authStore.checkAuth();
 
-  // Bloquear el acceso a /login si no es un subdominio
-  if (to.name === 'Login' && !isSubdomain()) {
-    return next('/404')
-  }
+  if (to.name === 'Login' && !isSubdomain()) return next('/404');
+  if (to.name === 'Register' && isSubdomain()) return next('/404');
 
-  if (to.name === 'Register' && isSubdomain()) {
-    return next('/404')
-  }
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) return next('/login');
+  if (to.meta.requiresGuest && authStore.isAuthenticated) return next('/dashboard');
 
-  // Rutas protegidas
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return next('/login')
-  }
+  next();
+});
 
-  // Rutas de invitado
-  if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    return next('/dashboard')
-  }
-
-  next()
-})
-
-export default router
+export default router;
