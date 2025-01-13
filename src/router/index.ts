@@ -12,6 +12,7 @@ import AddProduct from '../views/Products/AddProduct.vue';
 import ProductList from '../views/Products/ProductList.vue';
 import EditProduct from '../views/Products/EditProduct.vue';
 import MovementForm from '../views/Inventory/MovementForm.vue';
+import POS from '../views/Sales/POS.vue';
 
 // Definición de rutas
 const routes = [
@@ -66,6 +67,12 @@ const routes = [
     path: '/movement/:id/:movementType?',
     name: 'MovementForm',
     component: MovementForm,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/pos',
+    name: 'POS',
+    component: POS,
     meta: { requiresAuth: true },
   },
   {
