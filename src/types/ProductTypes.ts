@@ -22,3 +22,15 @@ export interface FetchProductsResponse {
   items: ProductPayload[];
   total: number;
 }
+
+export interface SelectedProduct {
+  id: number;
+  name: string;
+  category: string;
+  brand: string;
+  barcode: string;
+  description: string;
+  image_url: string;
+  unit_price: number;
+  quantity: number; // Cantidad seleccionada
+}
