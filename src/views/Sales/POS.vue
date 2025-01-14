@@ -31,6 +31,7 @@
             @keydown.enter="searchProduct"
           />
         </div>
+        <p v-if="searchError" class="text-red-500 mb-4">{{ searchError }}</p>
 
         <!-- Product List Table -->
         <table class="w-full border text-sm">
@@ -58,6 +59,7 @@
                   class="w-16 text-right border rounded px-1"
                   v-model.number="item.quantity"
                   min="1"
+                  @input="updateTotal"
                 />
               </td>
               <td class="border px-2 py-1 text-right">${{ (item.unit_price * item.quantity).toFixed(2) }}</td>
@@ -74,10 +76,10 @@
         </div>
         <button
           class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 rounded mb-2"
-          :disabled="selectedItems.length === 0"
+          :disabled="selectedItems.length === 0 || isLoading"
           @click="confirmSale"
         >
-          Confirmar Venta
+          {{ isLoading ? 'Confirmando...' : 'Confirmar Venta' }}
         </button>
         <button
           class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 rounded"
@@ -85,6 +87,7 @@
         >
           Cancelar Venta
         </button>
+        <p v-if="saleError" class="text-red-500 mt-4">{{ saleError }}</p>
       </div>
     </div>
   </div>
@@ -100,7 +103,10 @@ export default {
   name: 'POS',
   setup() {
     const search = ref(''); // Campo de búsqueda
+    const searchError = ref<string | null>(null); // Error en búsqueda
     const selectedItems = ref<SelectedProduct[]>([]); // Productos seleccionados para la venta
+    const saleError = ref<string | null>(null); // Error en confirmación de venta
+    const isLoading = ref(false); // Estado de carga
 
     // Calcular el total
     const totalAmount = computed(() =>
@@ -109,53 +115,50 @@ export default {
 
     // Buscar producto por código de barras o nombre
     const searchProduct = async () => {
-    try {
-      // Buscar el producto desde el backend
-      const product = await fetchProduct(Number(search.value));
+      try {
+        isLoading.value = true;
+        searchError.value = null; // Limpia errores previos
 
-      console.log('Producto encontrado:', product);
+        const product = await fetchProduct(Number(search.value));
+        const existingProduct = selectedItems.value.find(
+          (item) => item.id === product.id
+        );
 
-      // Verificar si el producto ya está en la lista de productos seleccionados
-      const existingProduct = selectedItems.value.find(
-        (item) => item.id === product.id
-      );
-
-      if (existingProduct) {
-        // Si el producto ya está en la lista, incrementar la cantidad
-        existingProduct.quantity++;
-      } else {
-        // Si el producto no está en la lista, agregarlo con cantidad inicial de 1
-        if (product.id !== undefined) {
-          selectedItems.value.push({
-          id: product.id,
-          name: product.name,
-          category: product.category,
-          brand: product.brand,
-          barcode: product.barcode,
-          description: product.description,
-          image_url: product.image_url,
-          unit_price: Number(product.unit_price), // Asegúrate de que sea un número
-          quantity: 1, // Cantidad inicial
-        });
-
+        if (existingProduct) {
+          existingProduct.quantity++;
         } else {
-          console.error('El producto no tiene un ID válido:', product);
+          if (product.id !== undefined) {
+            selectedItems.value.push({
+              id: product.id,
+              name: product.name,
+              category: product.category,
+              brand: product.brand,
+              barcode: product.barcode,
+              description: product.description,
+              image_url: product.image_url,
+              unit_price: Number(product.unit_price),
+              quantity: 1,
+            });
+          } else {
+            searchError.value = 'El producto no tiene un ID válido';
+          }
         }
+
+        search.value = '';
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        searchError.value = 'Producto no encontrado';
+      } finally {
+        isLoading.value = false;
       }
-
-
-      // Limpiar el campo de búsqueda
-      search.value = '';
-      console.log('Productos seleccionados:', selectedItems.value);
-    } catch (error) {
-      console.error('Error fetching product:', error);
-    }
-  };
-
+    };
 
     // Confirmar la venta
     const confirmSale = async () => {
       try {
+        isLoading.value = true;
+        saleError.value = null;
+
         const salePayload = {
           items: selectedItems.value.map((item) => ({
             product_id: item.id,
@@ -164,11 +167,13 @@ export default {
         };
 
         await registerSale(salePayload);
-
         alert('Venta confirmada exitosamente');
         clearSale();
       } catch (error) {
         console.error('Error confirming sale:', error);
+        saleError.value = 'No se pudo confirmar la venta. Inténtalo de nuevo.';
+      } finally {
+        isLoading.value = false;
       }
     };
 
@@ -177,13 +182,22 @@ export default {
       selectedItems.value = [];
     };
 
+    // Actualizar el total
+    const updateTotal = () => {
+      // El cálculo está basado en la propiedad computada totalAmount
+    };
+
     return {
       search,
+      searchError,
       selectedItems,
       totalAmount,
+      saleError,
+      isLoading,
       searchProduct,
       confirmSale,
       clearSale,
+      updateTotal,
     };
   },
 };
