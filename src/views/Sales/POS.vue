@@ -155,7 +155,7 @@ export default {
 
 
     // Confirmar la venta
-/*     const confirmSale = async () => {
+    const confirmSale = async () => {
       try {
         const salePayload = {
           items: selectedItems.value.map((item) => ({
@@ -171,7 +171,7 @@ export default {
       } catch (error) {
         console.error('Error confirming sale:', error);
       }
-    }; */
+    };
 
     // Limpiar la venta actual
     const clearSale = () => {
@@ -183,7 +183,7 @@ export default {
       selectedItems,
       totalAmount,
       searchProduct,
-     /*  confirmSale, */
+      confirmSale,
       clearSale,
     };
   },
