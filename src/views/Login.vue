@@ -73,8 +73,9 @@ export default {
       errorMessage.value = null // Resetear mensaje general
 
       try {
-        const { access_token } = await loginUser(form.value)
+        const { access_token, refresh_token } = await loginUser(form.value)
         localStorage.setItem('access_token', access_token)
+        localStorage.setItem('refresh_token', refresh_token)
         router.push('/dashboard')
       } catch (error) {
         if (!axios.isAxiosError(error)) {

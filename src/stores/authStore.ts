@@ -14,14 +14,16 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = token || ''
     },
     /** Inicia sesión y guarda el token */
-    login(token: string) {
+    login(token: string, refresh_token: string) {
       localStorage.setItem('access_token', token)
+      localStorage.setItem('refresh_token', refresh_token);
       this.accessToken = token
       this.isAuthenticated = true
     },
     /** Cierra sesión */
     logout() {
       localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
       this.accessToken = ''
       this.isAuthenticated = false
     },
