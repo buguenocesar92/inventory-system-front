@@ -58,7 +58,6 @@
                   class="w-16 text-right border rounded px-1"
                   v-model.number="item.quantity"
                   min="1"
-                  @input="updateTotal"
                 />
               </td>
               <td class="border px-2 py-1 text-right">${{ (item.unit_price * item.quantity).toFixed(2) }}</td>
