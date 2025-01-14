@@ -44,57 +44,59 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue'
-import axios, { AxiosError } from 'axios'
-import { useRouter } from 'vue-router'
-import { loginUser } from '@/services/AuthService'
-import FormInput from '@/components/FormInput.vue'
-import type { LoginPayload } from '@/types/AuthTypes'
-import type { ValidationErrorResponse } from '@/types/ValidationErrorResponse'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore'; // Importar el store de Pinia
+import { loginUser } from '@/services/AuthService';
+import FormInput from '@/components/FormInput.vue';
+import type { LoginPayload } from '@/types/AuthTypes';
+import type { ValidationErrorResponse } from '@/types/ValidationErrorResponse';
+import type { AxiosError } from 'axios';
 
 export default {
   name: 'UserLogin',
   components: { FormInput },
   setup() {
-    const router = useRouter()
+    const router = useRouter();
+    const authStore = useAuthStore(); // Instanciar el store
 
     // Estado del formulario
-    const form = ref<LoginPayload>({ email: '', password: '' })
-    const isLoading = ref(false)
+    const form = ref<LoginPayload>({ email: '', password: '' });
+    const isLoading = ref(false);
 
     // Manejo de errores
-    const errors = ref<{ [key: string]: string[] }>({})
-    const errorMessage = ref<string | null>(null)
+    const errors = ref<{ [key: string]: string[] }>({});
+    const errorMessage = ref<string | null>(null);
 
     // Función para manejar el login
     const handleLogin = async () => {
-      isLoading.value = true
-      errors.value = {} // Resetear errores por campo
-      errorMessage.value = null // Resetear mensaje general
+      isLoading.value = true;
+      errors.value = {}; // Resetear errores por campo
+      errorMessage.value = null; // Resetear mensaje general
 
       try {
-        const { access_token, refresh_token } = await loginUser(form.value)
-        localStorage.setItem('access_token', access_token)
-        localStorage.setItem('refresh_token', refresh_token)
-        router.push('/dashboard')
+        const { access_token, refresh_token } = await loginUser(form.value);
+
+        // Usar el store para manejar el login
+        authStore.login(access_token, refresh_token);
+
+        // Redirigir al dashboard
+        router.push('/dashboard');
       } catch (error) {
-        if (!axios.isAxiosError(error)) {
-          errorMessage.value = 'An unexpected error occurred.'
-          return
+        const axiosError = error as AxiosError<ValidationErrorResponse>;
+
+        if (axiosError.response?.status === 422) {
+          errors.value = axiosError.response.data.errors;
+          errorMessage.value =
+            axiosError.response.data.message || 'Validation error occurred.';
+          return;
         }
 
-        const { response } = error as AxiosError<ValidationErrorResponse>
-        if (response?.status === 422) {
-          errors.value = response.data.errors as { [key: string]: string[] }
-          errorMessage.value = response.data.message || 'Validation error occurred.'
-          return
-        }
-
-        errorMessage.value = 'Unexpected error occurred. Please try again later.'
+        errorMessage.value = 'Unexpected error occurred. Please try again later.';
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
-    }
+    };
 
     return {
       form,
@@ -102,7 +104,7 @@ export default {
       errors,
       errorMessage,
       handleLogin,
-    }
+    };
   },
-}
+};
 </script>
