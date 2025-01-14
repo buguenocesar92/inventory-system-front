@@ -1,10 +1,9 @@
 <template>
-  <div class="flex flex-col h-screen bg-gray-100">
-
+<div class="flex flex-col bg-gray-100 container-fill">
     <!-- Main Content -->
     <div class="flex flex-1 overflow-hidden">
       <!-- Center Panel -->
-      <div class="flex-1 bg-white p-4">
+      <div class="flex-1 bg-white p-4 flex flex-col">
         <!-- Search Bar -->
         <div class="flex items-center mb-4">
           <label for="product-code" class="mr-2 font-medium">Código del Producto:</label>
@@ -23,7 +22,7 @@
         <v-data-table
           :headers="headers"
           :items="selectedItems"
-          class="elevation-1"
+          class="elevation-1 flex-1"
           dense
         >
           <template v-slot:body="{ items }">
@@ -87,6 +86,7 @@
 import { ref, computed } from 'vue';
 import { fetchProduct } from '@/services/ProductService';
 import { registerSale } from '@/services/SaleService';
+import Swal from 'sweetalert2';
 import type { SelectedProduct } from '@/types/ProductTypes';
 
 export default {
@@ -162,7 +162,13 @@ export default {
         };
 
         await registerSale(salePayload);
-        alert('Venta confirmada exitosamente');
+
+        await Swal.fire({
+          icon: 'success',
+          title: 'Venta confirmada',
+          text: 'La venta se realizó exitosamente.',
+        });
+
         clearSale();
       } catch (error) {
         console.error('Error confirming sale:', error);

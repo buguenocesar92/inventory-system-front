@@ -24,7 +24,7 @@
       :loading="isLoading"
       item-value="id"
       @update:options="loadItems"
-      class="elevation-1"
+      class="elevation-1 container-fill2"
       dense
       loading-text="Loading products..."
     >
