@@ -1,71 +1,60 @@
 <template>
   <div class="flex flex-col h-screen bg-gray-100">
-    <!-- Header -->
-    <header class="bg-blue-700 text-white py-2 px-4 flex items-center justify-between shadow">
-      <h1 class="text-lg font-semibold">POS - Punto de Venta</h1>
-    </header>
 
     <!-- Main Content -->
     <div class="flex flex-1 overflow-hidden">
-      <!-- Left Panel -->
-      <div class="w-1/4 bg-gray-200 p-2 shadow-inner">
-        <ul class="space-y-2 text-sm">
-          <li class="font-semibold">F1 Ventas</li>
-          <li>F2 Créditos</li>
-          <li>F3 Productos</li>
-          <li>F4 Inventario</li>
-        </ul>
-      </div>
-
       <!-- Center Panel -->
       <div class="flex-1 bg-white p-4">
         <!-- Search Bar -->
         <div class="flex items-center mb-4">
           <label for="product-code" class="mr-2 font-medium">Código del Producto:</label>
-          <input
+          <v-text-field
             id="product-code"
-            type="text"
-            class="border px-2 py-1 rounded w-1/3"
-            placeholder="Buscar producto"
             v-model="search"
+            placeholder="Buscar producto"
+            outlined
+            dense
             @keydown.enter="searchProduct"
-          />
+          ></v-text-field>
         </div>
         <p v-if="searchError" class="text-red-500 mb-4">{{ searchError }}</p>
 
         <!-- Product List Table -->
-        <table class="w-full border text-sm">
-          <thead class="bg-gray-200">
-            <tr>
-              <th class="border px-2 py-1 text-left">Código de Barras</th>
-              <th class="border px-2 py-1 text-left">Descripción</th>
-              <th class="border px-2 py-1 text-right">Precio</th>
-              <th class="border px-2 py-1 text-right">Cantidad</th>
-              <th class="border px-2 py-1 text-right">Importe</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="(item, index) in selectedItems"
-              :key="index"
-              class="hover:bg-gray-100"
-            >
+        <v-data-table
+          :headers="headers"
+          :items="selectedItems"
+          class="elevation-1"
+          dense
+        >
+          <template v-slot:body="{ items }">
+            <tr v-for="(item, index) in items" :key="index">
               <td class="border px-2 py-1">{{ item.barcode }}</td>
               <td class="border px-2 py-1">{{ item.name }}</td>
               <td class="border px-2 py-1 text-right">${{ item.unit_price.toFixed(2) }}</td>
               <td class="border px-2 py-1 text-right">
-                <input
-                  type="number"
-                  class="w-16 text-right border rounded px-1"
+                <v-text-field
                   v-model.number="item.quantity"
+                  type="number"
                   min="1"
+                  class="w-16 text-right"
+                  dense
+                  hide-details
                   @input="updateTotal"
-                />
+                ></v-text-field>
               </td>
               <td class="border px-2 py-1 text-right">${{ (item.unit_price * item.quantity).toFixed(2) }}</td>
+              <td class="border px-2 py-1 text-center">
+                <v-btn
+                  icon
+                  color="error"
+                  @click="removeItem(index)"
+                >
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+              </td>
             </tr>
-          </tbody>
-        </table>
+          </template>
+        </v-data-table>
       </div>
 
       <!-- Right Panel -->
@@ -74,19 +63,20 @@
           <h3 class="text-lg font-semibold">Totales</h3>
           <p class="text-sm">Total: ${{ totalAmount.toFixed(2) }}</p>
         </div>
-        <button
-          class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 rounded mb-2"
+        <v-btn
+          color="success"
           :disabled="selectedItems.length === 0 || isLoading"
           @click="confirmSale"
+          class="mb-2"
         >
           {{ isLoading ? 'Confirmando...' : 'Confirmar Venta' }}
-        </button>
-        <button
-          class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 rounded"
+        </v-btn>
+        <v-btn
+          color="error"
           @click="clearSale"
         >
           Cancelar Venta
-        </button>
+        </v-btn>
         <p v-if="saleError" class="text-red-500 mt-4">{{ saleError }}</p>
       </div>
     </div>
@@ -102,23 +92,29 @@ import type { SelectedProduct } from '@/types/ProductTypes';
 export default {
   name: 'POS',
   setup() {
-    const search = ref(''); // Campo de búsqueda
-    const searchError = ref<string | null>(null); // Error en búsqueda
-    const selectedItems = ref<SelectedProduct[]>([]); // Productos seleccionados para la venta
-    const saleError = ref<string | null>(null); // Error en confirmación de venta
-    const isLoading = ref(false); // Estado de carga
+    const search = ref('');
+    const searchError = ref<string | null>(null);
+    const selectedItems = ref<SelectedProduct[]>([]);
+    const saleError = ref<string | null>(null);
+    const isLoading = ref(false);
 
-    // Calcular el total
+    const headers = [
+      { text: 'Código de Barras', value: 'barcode' },
+      { text: 'Descripción', value: 'name' },
+      { text: 'Precio', value: 'unit_price', align: 'end' },
+      { text: 'Cantidad', value: 'quantity', align: 'end' },
+      { text: 'Importe', value: 'total', align: 'end' },
+      { text: 'Acciones', value: 'actions', align: 'center' },
+    ];
+
     const totalAmount = computed(() =>
       selectedItems.value.reduce((sum, item) => sum + item.unit_price * item.quantity, 0)
     );
 
-    // Buscar producto por código de barras o nombre
     const searchProduct = async () => {
       try {
         isLoading.value = true;
-        searchError.value = null; // Limpia errores previos
-
+        searchError.value = null;
         const product = await fetchProduct(Number(search.value));
         const existingProduct = selectedItems.value.find(
           (item) => item.id === product.id
@@ -153,7 +149,6 @@ export default {
       }
     };
 
-    // Confirmar la venta
     const confirmSale = async () => {
       try {
         isLoading.value = true;
@@ -177,14 +172,16 @@ export default {
       }
     };
 
-    // Limpiar la venta actual
     const clearSale = () => {
       selectedItems.value = [];
     };
 
-    // Actualizar el total
     const updateTotal = () => {
-      // El cálculo está basado en la propiedad computada totalAmount
+      // Propiedad computada se encarga del cálculo
+    };
+
+    const removeItem = (index: number) => {
+      selectedItems.value.splice(index, 1);
     };
 
     return {
@@ -198,13 +195,15 @@ export default {
       confirmSale,
       clearSale,
       updateTotal,
+      removeItem,
+      headers,
     };
   },
 };
 </script>
 
 <style scoped>
-table th, table td {
+.table th, .table td {
   padding: 0.5rem;
   text-align: left;
 }
