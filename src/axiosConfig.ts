@@ -1,15 +1,13 @@
 import axios from 'axios';
 import router from './router';
+import { isSubdomain } from './utils/domainUtils';
 
 // Obtiene el subdominio actual del host (si existe)
 const getSubdomain = (): string | null => {
-  const host = window.location.host; // Ejemplo: "tenant1.foo.localhost"
-  const parts = host.split('.');
-
-  if (parts.length > 2) {
-    return parts[0]; // Retorna "tenant1"
+  if (isSubdomain()) {
+    const host = window.location.host; // Ejemplo: "tenant1.foo.localhost"
+    return host.split('.')[0]; // Retorna "tenant1"
   }
-
   return null; // No hay subdominio
 };
 
