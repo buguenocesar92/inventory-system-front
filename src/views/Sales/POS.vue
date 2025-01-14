@@ -84,7 +84,7 @@
 
 <script lang="ts">
 import { ref, computed } from 'vue';
-import { fetchProduct } from '@/services/ProductService';
+import { fetchProductByBarcode } from '@/services/ProductService';
 import { registerSale } from '@/services/SaleService';
 import Swal from 'sweetalert2';
 import type { SelectedProduct } from '@/types/ProductTypes';
@@ -115,7 +115,7 @@ export default {
       try {
         isLoading.value = true;
         searchError.value = null;
-        const product = await fetchProduct(Number(search.value));
+        const product = await fetchProductByBarcode(search.value);
         const existingProduct = selectedItems.value.find(
           (item) => item.id === product.id
         );

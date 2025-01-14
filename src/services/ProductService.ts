@@ -45,3 +45,9 @@ export const fetchProduct = async (id: number): Promise<ProductPayload> => {
   const response = await axios.get(`/products/${id}`);
   return response.data;
 };
+
+// Obtener un producto por código de barras
+export const fetchProductByBarcode = async (barcode: string): Promise<ProductPayload> => {
+  const response = await axios.get(`/products/barcode/${barcode}`);
+  return response.data;
+};
