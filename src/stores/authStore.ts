@@ -1,38 +1,75 @@
-// authStore.ts
 import { defineStore } from 'pinia';
+import axios from '@/axiosConfig';
+import type { LoginPayload } from '@/types/AuthTypes';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     isAuthenticated: false,
     accessToken: '',
-    refreshToken: '', // Añadimos refreshToken al estado
+    refreshToken: '',
+    roles: [] as string[],
+    permissions: [] as string[],
+    isUserDataLoaded: false, // Nueva bandera
   }),
   actions: {
     /** Verifica si el usuario está autenticado */
     checkAuth() {
       const token = localStorage.getItem('access_token');
-      const refreshToken = localStorage.getItem('refresh_token'); // Verifica también el refresh token
-
-      // Autenticación válida solo si ambos tokens están presentes
+      const refreshToken = localStorage.getItem('refresh_token');
       this.isAuthenticated = !!token && !!refreshToken;
       this.accessToken = token || '';
       this.refreshToken = refreshToken || '';
+
+      if (this.isAuthenticated && !this.isUserDataLoaded) {
+        this.fetchUserData(); // Solo carga datos si no están cargados
+      }
     },
-    /** Inicia sesión y guarda los tokens */
-    login(token: string, refresh_token: string) {
-      localStorage.setItem('access_token', token);
+    /** Inicia sesión */
+    async login(payload: LoginPayload) {
+      const response = await axios.post('/auth/login', payload);
+      const { access_token, refresh_token } = response.data;
+
+      localStorage.setItem('access_token', access_token);
       localStorage.setItem('refresh_token', refresh_token);
-      this.accessToken = token;
+
+      this.accessToken = access_token;
       this.refreshToken = refresh_token;
       this.isAuthenticated = true;
+
+      // Carga roles y permisos
+      await this.fetchUserData();
     },
     /** Cierra sesión */
-    logout() {
+    async logout() {
+      try {
+        await axios.post('/auth/logout');
+      } catch (error) {
+        console.error('Logout failed:', error);
+      }
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       this.accessToken = '';
       this.refreshToken = '';
+      this.roles = [];
+      this.permissions = [];
       this.isAuthenticated = false;
+      this.isUserDataLoaded = false; // Restablece la bandera
+    },
+    /** Obtiene roles y permisos del usuario */
+    async fetchUserData() {
+      if (this.isUserDataLoaded) return; // Evita llamadas redundantes
+      const response = await axios.post('/auth/me');
+      this.roles = response.data.roles || [];
+      this.permissions = response.data.permissions || [];
+      this.isUserDataLoaded = true; // Marca los datos como cargados
+    },
+    /** Verifica si el usuario tiene un permiso */
+    hasPermission(permission: string): boolean {
+      return this.permissions.includes(permission);
+    },
+    /** Verifica si el usuario tiene un rol */
+    hasRole(role: string): boolean {
+      return this.roles.includes(role);
     },
   },
 });
