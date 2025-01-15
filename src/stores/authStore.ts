@@ -9,7 +9,6 @@ export const useAuthStore = defineStore('auth', {
     refreshToken: '',
     roles: [] as string[],
     permissions: [] as string[],
-    isUserDataLoaded: false, // Nueva bandera
   }),
   actions: {
     /** Verifica si el usuario está autenticado */
@@ -20,8 +19,8 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = token || '';
       this.refreshToken = refreshToken || '';
 
-      if (this.isAuthenticated && !this.isUserDataLoaded) {
-        this.fetchUserData(); // Solo carga datos si no están cargados
+      if (this.isAuthenticated) {
+        this.fetchUserData(); // Carga roles y permisos
       }
     },
     /** Inicia sesión */
@@ -53,15 +52,12 @@ export const useAuthStore = defineStore('auth', {
       this.roles = [];
       this.permissions = [];
       this.isAuthenticated = false;
-      this.isUserDataLoaded = false; // Restablece la bandera
     },
     /** Obtiene roles y permisos del usuario */
     async fetchUserData() {
-      if (this.isUserDataLoaded) return; // Evita llamadas redundantes
       const response = await axios.post('/auth/me');
       this.roles = response.data.roles || [];
       this.permissions = response.data.permissions || [];
-      this.isUserDataLoaded = true; // Marca los datos como cargados
     },
     /** Verifica si el usuario tiene un permiso */
     hasPermission(permission: string): boolean {

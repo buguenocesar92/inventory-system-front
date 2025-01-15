@@ -1,6 +1,7 @@
 import axios from 'axios';
-import router from './router';
+/* import router from './router'; */
 import { isSubdomain } from './utils/domainUtils';
+
 
 // Obtiene el subdominio actual del host (si existe)
 const getSubdomain = (): string | null => {
@@ -109,7 +110,7 @@ axiosInstance.interceptors.response.use(
         processQueue(refreshError, null);
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        router.push('/login');
+        /* router.push('/login'); */
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
