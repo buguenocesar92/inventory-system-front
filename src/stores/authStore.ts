@@ -18,10 +18,6 @@ export const useAuthStore = defineStore('auth', {
       this.isAuthenticated = !!token && !!refreshToken;
       this.accessToken = token || '';
       this.refreshToken = refreshToken || '';
-
-      if (this.isAuthenticated) {
-        this.fetchUserData(); // Carga roles y permisos
-      }
     },
     /** Inicia sesión */
     async login(payload: LoginPayload) {
