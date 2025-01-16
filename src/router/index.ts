@@ -14,6 +14,7 @@ import EditProduct from '../views/Products/EditProduct.vue';
 import MovementForm from '../views/Inventory/MovementForm.vue';
 import POS from '../views/Sales/POS.vue';
 import AccessDenied from '../views/AccessDenied.vue';
+import RealTimeMessages from '../views/RealTimeMessages.vue';
 
 const routes = [
   {
@@ -88,6 +89,11 @@ const routes = [
   {
     path: '/:pathMatch(.*)*',
     redirect: '/404',
+  },
+  {
+    path: '/test-real-time-messages',
+    name: 'RealTimeMessages',
+    component: RealTimeMessages,
   },
 ];
 
