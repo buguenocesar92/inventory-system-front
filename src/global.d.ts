@@ -1,4 +1,4 @@
-import Pusher from 'pusher-js';
+/* import Pusher from 'pusher-js';
 import Echo from 'laravel-echo';
 
 
@@ -8,3 +8,4 @@ declare global {
     Echo: Echo;
   }
 }
+ */
