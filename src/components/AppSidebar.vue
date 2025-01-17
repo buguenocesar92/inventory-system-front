@@ -77,7 +77,7 @@ const hasPermission = (perm: string) => authStore.hasPermission(perm);
 
 const isSidebarOpen = ref(false);
 onMounted(() => {
-  authStore.checkAuth();
+  /* authStore.checkAuth(); */
   isMainDomain.value = !isSubdomain();
   window.addEventListener('toggle-sidebar', () => {
     isSidebarOpen.value = !isSidebarOpen.value;

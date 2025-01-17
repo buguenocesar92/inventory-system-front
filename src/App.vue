@@ -24,7 +24,7 @@ const authStore = useAuthStore();
 const isAuthenticated = computed(() => authStore.isAuthenticated);
 
 // Verificar autenticación al montar el componente principal
-authStore.checkAuth();
+/* authStore.checkAuth(); */
 </script>
 
 

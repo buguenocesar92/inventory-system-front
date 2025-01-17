@@ -20,11 +20,11 @@ export const useAuthStore = defineStore('auth', {
       this.refreshToken = refreshToken || '';
 
       // Cargar datos del usuario si está autenticado
-      if (this.isAuthenticated) {
-        this.fetchUserData().catch((error) => {
+  /*     if (this.isAuthenticated) { */
+/*         this.fetchUserData().catch((error) => {
           console.error('Error fetching user data on auth check:', error);
-        });
-      }
+        }); */
+   /*    } */
     },
 
     /** Inicia sesión */
