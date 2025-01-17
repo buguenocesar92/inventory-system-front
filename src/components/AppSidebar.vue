@@ -47,6 +47,14 @@
             <span class="ms-3">POS venta</span>
           </RouterLink>
         </li>
+        <li v-if="isAuthenticated && hasPermission('roles.with-permissions')">
+          <RouterLink to="/roles-permissions" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+            <span class="ms-3">Roles and Permissions</span>
+          </RouterLink>
+        </li>
         <li v-if="isAuthenticated">
             <LogoutButton />
         </li>
@@ -69,6 +77,7 @@ const hasPermission = (perm: string) => authStore.hasPermission(perm);
 
 const isSidebarOpen = ref(false);
 onMounted(() => {
+  authStore.checkAuth();
   isMainDomain.value = !isSubdomain();
   window.addEventListener('toggle-sidebar', () => {
     isSidebarOpen.value = !isSidebarOpen.value;
