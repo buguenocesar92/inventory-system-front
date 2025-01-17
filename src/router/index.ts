@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
-import { isSubdomain } from '@/utils/domainUtils'; // Importar lógica de subdominio
+import { isSubdomain } from '@/utils/domainUtils';
 
-// Importaciones de vistas
+// Importar vistas
 import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
 import Dashboard from '../views/Dashboard.vue';
@@ -14,8 +14,8 @@ import EditProduct from '../views/Products/EditProduct.vue';
 import MovementForm from '../views/Inventory/MovementForm.vue';
 import POS from '../views/Sales/POS.vue';
 import AccessDenied from '../views/AccessDenied.vue';
-/* import RealTimeMessages from '../views/RealTimeMessages.vue';
- */
+import RolePermissionManager from '../views/RolesPermissions/RolePermissionManager.vue';
+
 const routes = [
   {
     path: '/',
@@ -37,7 +37,7 @@ const routes = [
     path: '/dashboard',
     name: 'Dashboard',
     component: Dashboard,
-    meta: { requiresAuth: true, permissions: [] }, // Permite a todos los autenticados
+    meta: { requiresAuth: true, permissions: [] },
   },
   {
     path: '/register-user',
@@ -77,9 +77,15 @@ const routes = [
     meta: { requiresAuth: true, permissions: ['sales.store'] },
   },
   {
+    path: '/roles-permissions',
+    name: 'RolePermissionManager',
+    component: RolePermissionManager,
+    meta: { requiresAuth: true, permissions: ['roles.with-permissions'] },
+  },
+  {
     path: '/403',
     name: 'AccessDenied',
-    component: AccessDenied, // Página de acceso denegado
+    component: AccessDenied,
   },
   {
     path: '/404',
@@ -90,33 +96,38 @@ const routes = [
     path: '/:pathMatch(.*)*',
     redirect: '/404',
   },
-/*   {
-    path: '/test-real-time-messages',
-    name: 'RealTimeMessages',
-    component: RealTimeMessages,
-  }, */
 ];
 
-
-// Crear la instancia del router
 const router = createRouter({
   history: createWebHistory(),
   routes,
 });
 
-// Middleware de autenticación y autorización
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
 
-  // Cargar datos del usuario si no están cargados
-  authStore.checkAuth();
+  // Verificar si la autenticación ya fue inicializada
+  if (!authStore.isAuthenticated) {
+    authStore.checkAuth(); // Verifica si hay tokens en localStorage
+  }
 
-  if (to.name === 'Login' && !isSubdomain()) return next('/404');
-  if (to.name === 'Register' && isSubdomain()) return next('/404');
+  // Asegurarse de que los roles y permisos estén cargados antes de proceder
+  if (!authStore.roles.length || !authStore.permissions.length) {
+    try {
+      await authStore.fetchUserData(); // Cargar datos del usuario
+    } catch (error) {
+      console.error('Error loading user data:', error);
+      return next('/login'); // Redirigir al login si hay un problema
+    }
+  }
 
   // Verificar autenticación
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) return next('/login');
-  if (to.meta.requiresGuest && authStore.isAuthenticated) return next('/dashboard');
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    return next('/login');
+  }
+  if (to.meta.requiresGuest && authStore.isAuthenticated) {
+    return next('/dashboard');
+  }
 
   // Verificar roles
   if (to.meta.roles && !to.meta.roles.some((role) => authStore.hasRole(role))) {
@@ -128,7 +139,8 @@ router.beforeEach((to, from, next) => {
     return next('/403');
   }
 
-  next();
+  next(); // Permitir la navegación
 });
+
 
 export default router;
