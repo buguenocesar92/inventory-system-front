@@ -32,3 +32,11 @@ export const updateRolePermissions = async (
   });
   return data.role;
 };
+
+/**
+ * Obtener todos los permisos disponibles.
+ */
+export const fetchAllPermissions = async (): Promise<Permission[]> => {
+  const { data } = await axios.get('/permissions');
+  return data.permissions;
+};

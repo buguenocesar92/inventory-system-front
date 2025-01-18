@@ -2,12 +2,12 @@
   <div>
     <h2 class="text-xl font-bold mb-4">Editar Rol: {{ role?.name }}</h2>
 
-    <!-- Mostrar permisos del rol con checkboxes -->
-    <div v-if="role">
+    <!-- Mostrar todos los permisos con checkboxes -->
+    <div v-if="allPermissions.length">
       <h3 class="text-lg font-semibold mb-2">Permisos:</h3>
       <ul>
         <li
-          v-for="permission in role.permissions"
+          v-for="permission in allPermissions"
           :key="permission.id"
           class="mb-1 flex items-center"
         >
@@ -22,7 +22,7 @@
       </ul>
     </div>
     <div v-else>
-      <p>Cargando datos del rol...</p>
+      <p>Cargando permisos...</p>
     </div>
 
     <div class="mt-4">
@@ -39,8 +39,8 @@
 <script lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { fetchRoleById, updateRolePermissions } from '@/services/RolePermissionService';
-import type { Role } from '@/types/RolePermissionTypes';
+import { fetchRoleById, fetchAllPermissions, updateRolePermissions } from '@/services/RolePermissionService';
+import type { Role, Permission } from '@/types/RolePermissionTypes';
 
 export default {
   name: 'RolePermissionEdit',
@@ -49,26 +49,28 @@ export default {
     const router = useRouter();
 
     const role = ref<Role | null>(null); // Datos del rol
-    const selectedPermissions = ref<number[]>([]); // Permisos seleccionados
+    const allPermissions = ref<Permission[]>([]); // Lista de todos los permisos disponibles
+    const selectedPermissions = ref<number[]>([]); // IDs de los permisos seleccionados
 
     const roleId = route.params.roleId as string;
 
-    const loadRole = async () => {
+    const loadRoleAndPermissions = async () => {
       try {
-        // Obtener el rol y sus permisos actuales
+        // Cargar los datos del rol y los permisos disponibles
         role.value = await fetchRoleById(roleId);
+        allPermissions.value = await fetchAllPermissions();
 
-        // Inicializar los permisos seleccionados con los permisos actuales del rol
+        // Inicializar los permisos seleccionados según el rol actual
         selectedPermissions.value =
           role.value?.permissions.map((permission) => permission.id) || [];
       } catch (error) {
-        console.error('Error al cargar los datos del rol:', error);
+        console.error('Error al cargar los datos del rol y permisos:', error);
       }
     };
 
     const savePermissions = async () => {
       try {
-        // Enviar permisos seleccionados al backend
+        // Enviar los permisos seleccionados al backend
         await updateRolePermissions(roleId, selectedPermissions.value);
 
         alert('Permisos actualizados correctamente.');
@@ -82,10 +84,11 @@ export default {
       router.back();
     };
 
-    onMounted(loadRole);
+    onMounted(loadRoleAndPermissions);
 
     return {
       role,
+      allPermissions,
       selectedPermissions,
       savePermissions,
       goBack,
