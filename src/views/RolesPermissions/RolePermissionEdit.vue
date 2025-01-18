@@ -26,6 +26,9 @@
     </div>
 
     <div class="mt-4">
+      <v-btn color="primary" @click="savePermissions">
+        Guardar Cambios
+      </v-btn>
       <v-btn color="secondary" @click="goBack">
         Volver
       </v-btn>
@@ -36,7 +39,7 @@
 <script lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { fetchRoleById } from '@/services/RolePermissionService';
+import { fetchRoleById, updateRolePermissions } from '@/services/RolePermissionService';
 import type { Role } from '@/types/RolePermissionTypes';
 
 export default {
@@ -63,6 +66,18 @@ export default {
       }
     };
 
+    const savePermissions = async () => {
+      try {
+        // Enviar permisos seleccionados al backend
+        await updateRolePermissions(roleId, selectedPermissions.value);
+
+        alert('Permisos actualizados correctamente.');
+      } catch (error) {
+        console.error('Error al guardar los permisos:', error);
+        alert('Hubo un error al guardar los permisos.');
+      }
+    };
+
     const goBack = () => {
       router.back();
     };
@@ -72,6 +87,7 @@ export default {
     return {
       role,
       selectedPermissions,
+      savePermissions,
       goBack,
     };
   },
