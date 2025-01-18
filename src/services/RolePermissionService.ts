@@ -38,5 +38,6 @@ export const updateRolePermissions = async (
  */
 export const fetchAllPermissions = async (): Promise<Permission[]> => {
   const { data } = await axios.get('/permissions');
-  return data.permissions;
+  // Suponiendo que el backend devuelve directamente un array de permisos
+  return data; // No intentes acceder a `data.permissions` porque es un array directamente
 };

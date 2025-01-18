@@ -3,7 +3,7 @@
     <h2 class="text-xl font-bold mb-4">Editar Rol: {{ role?.name }}</h2>
 
     <!-- Mostrar todos los permisos con checkboxes -->
-    <div v-if="allPermissions.length">
+    <div v-if="allPermissions.length > 0">
       <h3 class="text-lg font-semibold mb-2">Permisos:</h3>
       <ul>
         <li
@@ -56,13 +56,20 @@ export default {
 
     const loadRoleAndPermissions = async () => {
       try {
+        // Inicializar `role` y `allPermissions` como listas vacías
+        role.value = null;
+        allPermissions.value = [];
+
         // Cargar los datos del rol y los permisos disponibles
-        role.value = await fetchRoleById(roleId);
-        allPermissions.value = await fetchAllPermissions();
+        const fetchedRole = await fetchRoleById(roleId);
+        role.value = fetchedRole;
+
+        const fetchedPermissions = await fetchAllPermissions();
+        allPermissions.value = fetchedPermissions;
 
         // Inicializar los permisos seleccionados según el rol actual
         selectedPermissions.value =
-          role.value?.permissions.map((permission) => permission.id) || [];
+          fetchedRole.permissions.map((permission) => permission.id) || [];
       } catch (error) {
         console.error('Error al cargar los datos del rol y permisos:', error);
       }
@@ -70,7 +77,7 @@ export default {
 
     const savePermissions = async () => {
       try {
-        // Enviar los permisos seleccionados al backend
+        // Enviar permisos seleccionados al backend
         await updateRolePermissions(roleId, selectedPermissions.value);
 
         alert('Permisos actualizados correctamente.');
