@@ -2,7 +2,7 @@ import axios from '@/axiosConfig';
 import type { Role, Permission } from '@/types/RolePermissionTypes';
 
 /**
- * Fetch all roles with their associated permissions.
+ * Obtener todos los roles con sus permisos asociados.
  */
 export const fetchRolesWithPermissions = async (): Promise<{
   roles: Role[];
@@ -13,32 +13,30 @@ export const fetchRolesWithPermissions = async (): Promise<{
 };
 
 /**
- * Save or update a role.
+ * Obtener un rol específico con sus permisos.
  */
-export const saveRole = async (role: { name: string; permissions: number[] }): Promise<Role> => {
-  if (role.id) {
-    const { data } = await axios.put(`/roles/${role.id}`, role);
-    return data;
-  } else {
-    const { data } = await axios.post('/roles', role);
-    return data;
-  }
+export const fetchRoleById = async (roleId: number | string): Promise<Role> => {
+  const { data } = await axios.get(`/roles/with-permissions/${roleId}`);
+  return data;
 };
 
 /**
- * Delete a role by ID.
- */
-export const deleteRoleById = async (roleId: number): Promise<void> => {
-  await axios.delete(`/roles/${roleId}`);
-};
-
-/**
- * Update permissions of a role.
+ * Actualizar los permisos de un rol específico.
  */
 export const updateRolePermissions = async (
-  roleId: number,
-  permissions: number[]
+  roleId: number | string,
+  permissions: (number | string)[]
 ): Promise<Role> => {
-  const { data } = await axios.put(`/roles/with-permissions/${roleId}`, { permissions });
+  const { data } = await axios.put(`/roles/with-permissions/${roleId}`, {
+    permissions,
+  });
   return data.role;
+};
+
+/**
+ * Obtener todos los permisos disponibles.
+ */
+export const fetchAllPermissions = async (): Promise<Permission[]> => {
+  const { data } = await axios.get('/permissions');
+  return data.permissions;
 };
