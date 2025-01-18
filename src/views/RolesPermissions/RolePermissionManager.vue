@@ -21,6 +21,12 @@
                   </li>
                 </ul>
               </td>
+              <!-- New Edit Button Column -->
+              <td class="border px-2 py-1">
+                <v-btn color="primary" @click="goToRoleEdit(role.id)">
+                  Editar
+                </v-btn>
+              </td>
             </tr>
           </template>
         </v-data-table>
@@ -31,6 +37,7 @@
 
 <script lang="ts">
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router'; // <-- import useRouter
 import { fetchRolesWithPermissions } from '@/services/RolePermissionService';
 import type { Role } from '@/types/RolePermissionTypes';
 
@@ -38,10 +45,12 @@ export default {
   name: 'RolePermissionList',
   setup() {
     const roles = ref<Role[]>([]);
+    const router = useRouter();
 
     const headers = [
       { text: 'Nombre del Rol', value: 'name' },
       { text: 'Permisos Asociados', value: 'permissions' },
+      { text: 'Acciones', value: 'actions', sortable: false },
     ];
 
     const fetchRoles = async () => {
@@ -53,18 +62,25 @@ export default {
       }
     };
 
+    const goToRoleEdit = (roleId: number) => {
+      // Navigate to the route, e.g. /role-permission-edit/:id
+      router.push({ name: 'RolePermissionEdit', params: { roleId: roleId.toString() } });
+    };
+
     onMounted(fetchRoles);
 
     return {
       roles,
       headers,
+      goToRoleEdit,
     };
   },
 };
 </script>
 
 <style scoped>
-.table th, .table td {
+.table th,
+.table td {
   padding: 0.5rem;
   text-align: left;
 }
