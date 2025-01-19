@@ -32,7 +32,7 @@ interface SidebarItem {
   icon: string;
 }
 
-const props = defineProps<{
+defineProps<{
   item: SidebarItem
 }>();
 </script>
