@@ -6,7 +6,6 @@
         <div class="flex items-center justify-start rtl:justify-end">
           <button
             @click="toggleSidebar"
-            aria-controls="logo-sidebar"
             type="button"
             class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
           >
@@ -32,63 +31,19 @@
         </div>
 
         <!-- Menú de usuario -->
-        <div v-if="isAuthenticated" class="relative flex items-center">
-          <div class="flex items-center ms-3">
-            <div>
-              <!-- Botón que controla el menú -->
-              <button
-                type="button"
-                @click="toggleDropdown"
-                class="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-                :aria-expanded="isDropdownOpen"
-              >
-                <span class="sr-only">Open user menu</span>
-                <img
-                  class="w-8 h-8 rounded-full"
-                  src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
-                  alt="user photo"
-                />
-              </button>
-            </div>
-
-            <!-- Menú desplegable -->
-            <div
-              :class="[isDropdownOpen ? 'block' : 'hidden', 'absolute right-0 mt-2 z-50 w-48 bg-white divide-y divide-gray-100 rounded shadow-lg dark:bg-gray-700 dark:divide-gray-600']"
-              id="dropdown-user"
-            >
-              <div class="px-4 py-3" role="none">
-                <p class="text-sm text-gray-900 dark:text-white" role="none">Neil Sims</p>
-                <p
-                  class="text-sm font-medium text-gray-900 truncate dark:text-gray-300"
-                  role="none"
-                >
-                  neil.sims@flowbite.com
-                </p>
-              </div>
-              <ul class="py-1" role="none">
-                <li><a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white">Dashboard</a></li>
-                <li><a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white">Settings</a></li>
-                <li><a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white">Sign out</a></li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        <UserDropdown v-if="isAuthenticated" />
       </div>
     </div>
   </nav>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
+import UserDropdown from '@/components/UserDropdown.vue';
 
 const authStore = useAuthStore();
 const isAuthenticated = computed(() => authStore.isAuthenticated);
-
-const isDropdownOpen = ref(false);
-const toggleDropdown = () => {
-  isDropdownOpen.value = !isDropdownOpen.value;
-};
 
 const toggleSidebar = () => {
   // Emitir un evento al padre para controlar el sidebar
