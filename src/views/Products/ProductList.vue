@@ -3,9 +3,13 @@
   <div class="container mx-auto">
     <h1 class="text-2xl font-bold mb-4">Product List</h1>
 
-    <RouterLink to="/add-product" class="bg-blue-500 text-white font-medium py-2 px-4 rounded hover:bg-blue-600 transition-colors mb-5">
+    <RouterLink
+      to="/add-product"
+      class="bg-blue-500 text-white font-medium py-2 px-4 rounded hover:bg-blue-600 transition-colors mb-5"
+    >
       <span>Crear Producto</span>
     </RouterLink>
+
     <!-- Barra de búsqueda -->
     <v-text-field
       v-model="search"
@@ -86,26 +90,29 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { fetchProducts, deleteProduct } from '@/services/ProductService';
-import type { ProductPayload, FetchProductsResponse } from '@/types/ProductTypes';
 import { debounce } from '@/utils/debounce';
+import { useFormValidation } from '@/composables/useFormValidation';
+import type { ProductPayload, FetchProductsResponse } from '@/types/ProductTypes';
 
 export default {
   name: 'ProductListServer',
   setup() {
     const router = useRouter();
+    const { errors, errorMessage, handleValidationError } = useFormValidation();
+
     const itemsPerPage = ref(5);
     const isLoading = ref(false);
-    const serverItems = ref<ProductPayload[]>([]); // Los productos del servidor
-    const totalItems = ref(0); // Total de productos disponibles
+    const serverItems = ref<ProductPayload[]>([]);
+    const totalItems = ref(0);
     const search = ref('');
-    const deletingProductId = ref<number | null>(null); // ID del producto en proceso de eliminación
+    const deletingProductId = ref<number | null>(null);
 
     // Definición de los encabezados de la tabla
     const headers = ref([
       { title: 'Name', value: 'name', sortable: true },
       { title: 'Category', value: 'category', sortable: true },
       { title: 'Unit Price', value: 'unit_price', sortable: true },
-      { title: 'Current Stock', value: 'current_stock', sortable: true }, // Nueva columna
+      { title: 'Current Stock', value: 'current_stock', sortable: true },
       { title: 'Actions', value: 'actions', sortable: false },
     ]);
 
@@ -124,38 +131,32 @@ export default {
           search: search.value,
         });
         serverItems.value = items;
-        totalItems.value = total; // Asignar total de elementos
+        totalItems.value = total;
       } catch (error) {
-        console.error('Error fetching products:', error);
-
-        // Verificar si la API devuelve un error de permisos
-        if ((error as { response?: { status: number } }).response?.status === 403) {
-          router.push('/403');
-        }
+        handleValidationError(error); // Usar el composable para manejar errores
       } finally {
         isLoading.value = false;
       }
     };
 
-
     // Eliminar un producto
     const deleteProductHandler = async (id: number) => {
-      deletingProductId.value = id; // Establecer el producto en proceso de eliminación
+      deletingProductId.value = id;
       try {
         await deleteProduct(id);
         serverItems.value = serverItems.value.filter((product) => product.id !== id);
-        console.log(`Product with ID ${id} deleted.`);
       } catch (error) {
-        console.error('Error deleting product:', error);
+        handleValidationError(error); // Usar el composable para manejar errores
+        if (errorMessage.value === 'You do not have permission to perform this action.') {
+          router.push('/403'); // Redirigir a 403 si no se tienen permisos
+        }
       } finally {
-        deletingProductId.value = null; // Restablecer el estado después de eliminar
+        deletingProductId.value = null;
       }
     };
 
-    // Debounced search input handler
     const debouncedLoadItems = debounce((params) => loadItems(params), 300);
 
-    // Actualizar productos al escribir en el campo de búsqueda
     const onSearchInput = () => {
       debouncedLoadItems({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] });
     };
@@ -164,7 +165,7 @@ export default {
       headers,
       serverItems,
       isLoading,
-      totalItems, // Total asignado al prop items-length
+      totalItems,
       itemsPerPage,
       search,
       loadItems,
@@ -172,6 +173,8 @@ export default {
       deletingProductId,
       router,
       onSearchInput,
+      errors,
+      errorMessage,
     };
   },
 };

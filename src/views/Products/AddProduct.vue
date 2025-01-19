@@ -82,17 +82,20 @@
 
 <script lang="ts">
 import { ref } from 'vue';
-import axios, { AxiosError } from 'axios';
+import { useRouter } from 'vue-router';
 import { addProduct } from '@/services/ProductService';
 import FormInput from '@/components/FormInput.vue';
 import Swal from 'sweetalert2';
+import { useFormValidation } from '@/composables/useFormValidation';
 import type { ProductPayload } from '@/types/ProductTypes';
-import type { ValidationErrorResponse } from '@/types/ValidationErrorResponse';
 
 export default {
   name: 'AddProduct',
   components: { FormInput },
   setup() {
+    const router = useRouter();
+    const { errors, errorMessage, handleValidationError } = useFormValidation();
+
     const form = ref<ProductPayload>({
       name: '',
       category: '',
@@ -104,13 +107,9 @@ export default {
     });
 
     const isLoading = ref(false);
-    const errorMessage = ref<string | null>(null);
-    const errors = ref<{ [key: string]: string[] }>({});
 
     const handleAddProduct = async () => {
       isLoading.value = true;
-      errorMessage.value = null;
-      errors.value = {};
 
       try {
         await addProduct(form.value);
@@ -123,44 +122,19 @@ export default {
           confirmButtonText: 'OK',
         });
 
-        resetForm();
+        router.push('/list-product');
       } catch (error) {
-        if (!axios.isAxiosError(error)) {
-          errorMessage.value = 'An unexpected error occurred.';
-          return;
-        }
-
-        const { response } = error as AxiosError<ValidationErrorResponse>;
-
-        if (response?.status === 422) {
-          errors.value = response.data.errors as { [key: string]: string[] };
-          errorMessage.value = response.data.message || 'Validation error occurred.';
-          return;
-        }
-
-        errorMessage.value = 'Unexpected error occurred. Please try again later.';
+        handleValidationError(error); // Usar el composable para manejar errores
       } finally {
         isLoading.value = false;
       }
     };
 
-    const resetForm = () => {
-      form.value = {
-        name: '',
-        category: '',
-        brand: '',
-        barcode: '',
-        description: '',
-        image_url: '',
-        unit_price: 0,
-      };
-    };
-
     return {
       form,
       isLoading,
-      errorMessage,
       errors,
+      errorMessage,
       handleAddProduct,
     };
   },

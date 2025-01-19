@@ -79,14 +79,13 @@
 </template>
 
 <script lang="ts">
-import axios, { AxiosError } from 'axios';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { fetchProduct, updateProduct } from '@/services/ProductService';
 import FormInput from '@/components/FormInput.vue';
 import Swal from 'sweetalert2';
+import { useFormValidation } from '@/composables/useFormValidation';
 import type { ProductPayload } from '@/types/ProductTypes';
-import type { ValidationErrorResponse } from '@/types/ValidationErrorResponse';
 
 export default {
   name: 'EditProduct',
@@ -107,8 +106,9 @@ export default {
     });
 
     const isLoading = ref(false);
-    const errorMessage = ref<string | null>(null);
-    const errors = ref<{ [key: string]: string[] }>({});
+
+    // Usar el composable para manejar errores
+    const { errors, errorMessage, handleValidationError } = useFormValidation();
 
     // Fetch the product data when the component is mounted
     const fetchProductData = async () => {
@@ -121,8 +121,7 @@ export default {
           router.push('/404');
         }
       } catch (error) {
-        errorMessage.value = 'Error loading product details.';
-        console.error('Error fetching product:', error);
+        handleValidationError(error); // Usar el composable para manejar errores
       } finally {
         isLoading.value = false;
       }
@@ -130,9 +129,6 @@ export default {
 
     const handleEditProduct = async () => {
       isLoading.value = true;
-      errorMessage.value = null;
-      errors.value = {};
-
       try {
         await updateProduct(productId, form.value);
 
@@ -146,20 +142,7 @@ export default {
 
         router.push('/list-product');
       } catch (error) {
-        if (!axios.isAxiosError(error)) {
-          errorMessage.value = 'An unexpected error occurred.';
-          return;
-        }
-
-        const { response } = error as AxiosError<ValidationErrorResponse>;
-
-        if (response?.status === 422) {
-          errors.value = response.data.errors as { [key: string]: string[] };
-          errorMessage.value = response.data.message || 'Validation error occurred.';
-          return;
-        }
-
-        errorMessage.value = 'Unexpected error occurred. Please try again later.';
+        handleValidationError(error); // Usar el composable para manejar errores
       } finally {
         isLoading.value = false;
       }
