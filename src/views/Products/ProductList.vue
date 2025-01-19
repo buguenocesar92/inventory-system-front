@@ -89,7 +89,6 @@ import { fetchProducts, deleteProduct } from '@/services/ProductService';
 import type { ProductPayload, FetchProductsResponse } from '@/types/ProductTypes';
 import { debounce } from '@/utils/debounce';
 
-
 export default {
   name: 'ProductListServer',
   setup() {
@@ -128,10 +127,16 @@ export default {
         totalItems.value = total; // Asignar total de elementos
       } catch (error) {
         console.error('Error fetching products:', error);
+
+        // Verificar si la API devuelve un error de permisos
+        if ((error as { response?: { status: number } }).response?.status === 403) {
+          router.push('/403');
+        }
       } finally {
         isLoading.value = false;
       }
     };
+
 
     // Eliminar un producto
     const deleteProductHandler = async (id: number) => {
