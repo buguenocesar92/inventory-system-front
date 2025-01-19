@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { useAuthStore } from '@/stores/authStore';
+import { useAuthGuard } from '@/composables/useAuthGuard';
 import { isSubdomain } from '@/utils/domainUtils';
 
 // Importar vistas
@@ -122,69 +122,55 @@ const routes = [
   },
 ];
 
-// Crear el router con historial web
 const router = createRouter({
   history: createWebHistory(),
   routes,
 });
 
-// Guardas de navegación
-// Guardas de navegación
 router.beforeEach(async (to, from, next) => {
-  const authStore = useAuthStore();
+  const {
+    isAuthenticated,
+    checkAuth,
+    fetchUserDataIfNeeded,
+    hasAnyRole,
+    hasAllPermissions,
+    doLogout,
+  } = useAuthGuard();
 
-  // Verificar si la autenticación está inicializada
-  if (!authStore.isAuthenticated) {
-    try {
-      // Verifica los tokens en el almacenamiento local
-      await authStore.checkAuth();
-    } catch {
-      if (to.meta.requiresAuth) {
-        return next('/login'); // Redirigir al inicio de sesión si no está autenticado
-      }
+  try {
+    // Verificar autenticación
+    if (!isAuthenticated()) {
+      await checkAuth();
     }
-  }
 
-  // Cargar roles y permisos si el usuario está autenticado y los datos no están cargados
-  if (
-    authStore.isAuthenticated &&
-    (!authStore.roles.length || !authStore.permissions.length)
-  ) {
-    try {
-      await authStore.fetchUserData(); // Cargar datos del usuario
-    } catch (error) {
-      console.error('Error al cargar los datos del usuario:', error);
-      authStore.logout(); // Limpiar estado en caso de error
-      return next('/login'); // Redirigir al inicio de sesión
+    // Cargar roles y permisos si faltan
+    if (isAuthenticated()) {
+      await fetchUserDataIfNeeded();
     }
-  }
 
-  // Requiere autenticación
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return next('/login');
-  }
+    // Validaciones de meta
+    if (to.meta.requiresAuth && !isAuthenticated()) {
+      return next('/login');
+    }
 
-  // Evitar que usuarios autenticados accedan a rutas para invitados
-  if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    return next('/dashboard');
-  }
+    if (to.meta.requiresGuest && isAuthenticated()) {
+      return next('/dashboard');
+    }
 
-  // Verificar roles
-  if (to.meta.roles && !to.meta.roles.some((role) => authStore.hasRole(role))) {
-    return next('/403'); // Redirigir a acceso denegado
-  }
+    if (to.meta.roles && !hasAnyRole(to.meta.roles)) {
+      return next('/403');
+    }
 
-  // Verificar permisos
-  if (
-    to.meta.permissions &&
-    !to.meta.permissions.every((perm) => authStore.hasPermission(perm))
-  ) {
-    return next('/403'); // Redirigir a acceso denegado
-  }
+    if (to.meta.permissions && !hasAllPermissions(to.meta.permissions)) {
+      return next('/403');
+    }
 
-  // Permitir la navegación
-  next();
+    next(); // Permitir navegación
+  } catch (error) {
+    console.error(error);
+    doLogout(); // Limpiar sesión en caso de error
+    next('/login');
+  }
 });
-
 
 export default router;
