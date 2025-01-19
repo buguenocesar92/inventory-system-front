@@ -1,62 +1,47 @@
 <template>
   <aside
-    id="logo-sidebar"
-    :class="[isSidebarOpen ? 'translate-x-0' : '-translate-x-full', !isAuthenticated ? 'xl:hidden' : '', 'fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700']"
+    :class="[
+      isSidebarOpen ? 'translate-x-0' : '-translate-x-full',
+      !isAuthenticated ? 'xl:hidden' : '',
+      'fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700'
+    ]"
     aria-label="Sidebar"
   >
     <div class="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
       <ul class="space-y-2 font-medium">
-        <!-- Sidebar content -->
+        <!-- Iteramos sobre sidebarItems -->
+        <li
+           v-for="(item, index) in displayedSidebarItems"
+          :key="index"
+        >
+          <RouterLink
+            :to="item.route"
+            class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white
+                   hover:bg-gray-100 dark:hover:bg-gray-700 group"
+          >
+            <!-- Ícono en SVG -->
+            <svg
+              class="w-5 h-5"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                :d="item.icon"
+              />
+            </svg>
+
+            <span class="ml-3">{{ item.label }}</span>
+          </RouterLink>
+        </li>
+
+        <!-- Botón de Logout aparte -->
         <li v-if="isAuthenticated">
-          <RouterLink to="/dashboard" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-            </svg>
-            <span class="ms-3">Dashboard</span>
-          </RouterLink>
-        </li>
-        <li v-if="!isAuthenticated && isMainDomain">
-          <RouterLink to="/register" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-            </svg>
-            <span class="ms-3">Register</span>
-          </RouterLink>
-        </li>
-        <li v-if="!isAuthenticated && isSubdomain()">
-          <RouterLink to="/login" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-            </svg>
-            <span class="ms-3">Login</span>
-          </RouterLink>
-        </li>
-        <li v-if="isAuthenticated && hasPermission('products.index')">
-          <RouterLink to="/list-product" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-            </svg>
-            <span class="ms-3">Inventory</span>
-          </RouterLink>
-        </li>
-        <li v-if="isAuthenticated && hasPermission('sales.store')">
-          <RouterLink to="/pos" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-            </svg>
-            <span class="ms-3">POS venta</span>
-          </RouterLink>
-        </li>
-        <li v-if="isAuthenticated && hasPermission('roles.with-permissions')">
-          <RouterLink to="/roles-permissions" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-            </svg>
-            <span class="ms-3">Roles and Permissions</span>
-          </RouterLink>
-        </li>
-        <li v-if="isAuthenticated">
-            <LogoutButton />
+          <LogoutButton />
         </li>
       </ul>
     </div>
@@ -67,18 +52,66 @@
 import { ref, computed, onMounted } from 'vue';
 import LogoutButton from '@/components/LogoutButton.vue';
 import { useAuthStore } from '@/stores/authStore';
-import { isSubdomain } from '@/utils/domainUtils'; // Utilidad para lógica de dominio
+import { isSubdomain } from '@/utils/domainUtils';
 
-const isMainDomain = ref(!isSubdomain());
+
+const displayedSidebarItems = computed(() => {
+  return sidebarItems.filter(item => {
+    // si item.showCondition existe, la llamamos
+    // y retornamos los que sean `true`
+    return item.showCondition ? item.showCondition() : true;
+  });
+});
+
 
 const authStore = useAuthStore();
 const isAuthenticated = computed(() => authStore.isAuthenticated);
 const hasPermission = (perm: string) => authStore.hasPermission(perm);
 
+// Para el ejemplo:
+const sidebarItems = [
+  {
+    label: 'Dashboard',
+    route: '/dashboard',
+    icon: 'M4 6h16M4 12h16m-7 6h7',
+    showCondition: () => isAuthenticated.value
+  },
+  {
+    label: 'Register',
+    route: '/register',
+    icon: 'M4 6h16M4 12h16m-7 6h7',
+    showCondition: () => !isAuthenticated.value && !isSubdomain()
+  },
+  {
+    label: 'Login',
+    route: '/login',
+    icon: 'M4 6h16M4 12h16m-7 6h7',
+    showCondition: () => !isAuthenticated.value && isSubdomain()
+  },
+  {
+    label: 'Inventory',
+    route: '/list-product',
+    icon: 'M4 6h16M4 12h16m-7 6h7',
+    showCondition: () => isAuthenticated.value && hasPermission('products.index')
+  },
+  {
+    label: 'POS venta',
+    route: '/pos',
+    icon: 'M4 6h16M4 12h16m-7 6h7',
+    showCondition: () => isAuthenticated.value && hasPermission('sales.store')
+  },
+  {
+    label: 'Roles and Permissions',
+    route: '/roles-permissions',
+    icon: 'M4 6h16M4 12h16m-7 6h7',
+    showCondition: () => isAuthenticated.value && hasPermission('roles.with-permissions')
+  },
+];
+
+// Control del sidebar (abre/cierra con un evento)
 const isSidebarOpen = ref(false);
+
 onMounted(() => {
-  /* authStore.checkAuth(); */
-  isMainDomain.value = !isSubdomain();
   window.addEventListener('toggle-sidebar', () => {
     isSidebarOpen.value = !isSidebarOpen.value;
   });
