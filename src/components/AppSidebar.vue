@@ -9,37 +9,13 @@
   >
     <div class="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
       <ul class="space-y-2 font-medium">
-        <!-- Iteramos sobre sidebarItems -->
         <li
-           v-for="(item, index) in displayedSidebarItems"
+          v-for="(item, index) in displayedSidebarItems"
           :key="index"
         >
-          <RouterLink
-            :to="item.route"
-            class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white
-                   hover:bg-gray-100 dark:hover:bg-gray-700 group"
-          >
-            <!-- Ícono en SVG -->
-            <svg
-              class="w-5 h-5"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                :d="item.icon"
-              />
-            </svg>
-
-            <span class="ml-3">{{ item.label }}</span>
-          </RouterLink>
+          <SidebarItem :item="item" />
         </li>
 
-        <!-- Botón de Logout aparte -->
         <li v-if="isAuthenticated">
           <LogoutButton />
         </li>
@@ -51,6 +27,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import LogoutButton from '@/components/LogoutButton.vue';
+import SidebarItem from '@/components/SidebarItem.vue';
 import { useAuthStore } from '@/stores/authStore';
 import { isSubdomain } from '@/utils/domainUtils';
 
