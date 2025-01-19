@@ -1,72 +1,43 @@
-// composables/useSidebarItems.ts
 import { computed } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
-import { isSubdomain } from '@/utils/domainUtils';
+import router from '@/router';
+import type { Router, RouteRecordRaw } from 'vue-router';
 
-/**
- * Composable que encapsula la lógica de los items del sidebar:
- * - Permisos y autenticación
- * - Filtro para mostrar/ocultar
- */
 export function useSidebarItems() {
   const authStore = useAuthStore();
-  // Computed para saber si el usuario está autenticado
+
+  // Verificar si el usuario está autenticado
   const isAuthenticated = computed(() => authStore.isAuthenticated);
-  // Helper para verificar permisos
-  const hasPermission = (perm: string) => authStore.hasPermission(perm);
 
-  // Definición de todos los items
-  const items = [
-    {
-      label: 'Dashboard',
-      route: '/dashboard',
-      icon: 'M4 6h16M4 12h16m-7 6h7',
-      showCondition: () => isAuthenticated.value
-    },
-    {
-      label: 'Register',
-      route: '/register',
-      icon: 'M4 6h16M4 12h16m-7 6h7',
-      showCondition: () => !isAuthenticated.value && !isSubdomain()
-    },
-    {
-      label: 'Login',
-      route: '/login',
-      icon: 'M4 6h16M4 12h16m-7 6h7',
-      showCondition: () => !isAuthenticated.value && isSubdomain()
-    },
-    {
-      label: 'Inventory',
-      route: '/list-product',
-      icon: 'M4 6h16M4 12h16m-7 6h7',
-      showCondition: () =>
-        isAuthenticated.value && hasPermission('products.index')
-    },
-    {
-      label: 'POS venta',
-      route: '/pos',
-      icon: 'M4 6h16M4 12h16m-7 6h7',
-      showCondition: () =>
-        isAuthenticated.value && hasPermission('sales.store')
-    },
-    {
-      label: 'Roles and Permissions',
-      route: '/roles-permissions',
-      icon: 'M4 6h16M4 12h16m-7 6h7',
-      showCondition: () =>
-        isAuthenticated.value && hasPermission('roles.with-permissions')
-    },
-  ];
+  // Obtener las rutas del router
+  const typedRouter = router as Router;
 
-  // Filtrar ítems según showCondition
-  const displayedSidebarItems = computed(() => {
-    return items.filter(item =>
-      item.showCondition ? item.showCondition() : true
-    );
+  // Generar dinámicamente los ítems del sidebar
+  const items = computed(() => {
+    return typedRouter
+      .getRoutes()
+      .filter((route: RouteRecordRaw) => {
+        // Excluir rutas sin metadatos de sidebar
+        if (!route.meta?.sidebar) {
+          return false;
+        }
+
+        // Validar autenticación y permisos
+        if (route.meta.requiresAuth && !isAuthenticated.value) {
+          return false;
+        }
+
+        return true; // Mostrar la ruta si pasa las condiciones
+      })
+      .map((route: RouteRecordRaw) => ({
+        label: route.meta?.label as string || '',
+        route: route.path,
+        icon: route.meta?.icon as string || '',
+      }));
   });
 
   return {
     isAuthenticated,
-    displayedSidebarItems,
+    displayedSidebarItems: items,
   };
 }
