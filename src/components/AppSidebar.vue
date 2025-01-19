@@ -28,90 +28,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import LogoutButton from '@/components/LogoutButton.vue';
 import SidebarItem from '@/components/SidebarItem.vue';
-import { useAuthStore } from '@/stores/authStore';
-import { isSubdomain } from '@/utils/domainUtils';
 
-// ==============================
-// 1) Estado de Autenticación
-// ==============================
-const authStore = useAuthStore();
-const isAuthenticated = computed(() => authStore.isAuthenticated);
+// Importamos el composable con la definición de ítems
+import { useSidebarItems } from '@/composables/useSidebarItems';
 
-// Para permisos
-const hasPermission = (perm: string) => authStore.hasPermission(perm);
+// 1) Obtenemos los ítems y el estado "isAuthenticated" desde el composable
+const { displayedSidebarItems, isAuthenticated } = useSidebarItems();
 
-// ==============================
-// 2) Estado de Sidebar (abierto/cerrado)
-// ==============================
+// 2) Estado para abrir/cerrar el sidebar (aún manejado por un evento global)
 const isSidebarOpen = ref(false);
 
-// Definimos el handler para el toggle
+// Handler para alternar el sidebar
 function toggleHandler() {
   isSidebarOpen.value = !isSidebarOpen.value;
 }
 
 onMounted(() => {
-  // Escuchamos un evento global para alternar el sidebar
   window.addEventListener('toggle-sidebar', toggleHandler);
 });
 
 onUnmounted(() => {
-  // Importante: remover el listener al desmontar el componente
   window.removeEventListener('toggle-sidebar', toggleHandler);
-});
-
-// ==============================
-// 3) Definir Items del Sidebar
-// ==============================
-const sidebarItems = [
-  {
-    label: 'Dashboard',
-    route: '/dashboard',
-    icon: 'M4 6h16M4 12h16m-7 6h7',
-    showCondition: () => isAuthenticated.value
-  },
-  {
-    label: 'Register',
-    route: '/register',
-    icon: 'M4 6h16M4 12h16m-7 6h7',
-    showCondition: () => !isAuthenticated.value && !isSubdomain()
-  },
-  {
-    label: 'Login',
-    route: '/login',
-    icon: 'M4 6h16M4 12h16m-7 6h7',
-    showCondition: () => !isAuthenticated.value && isSubdomain()
-  },
-  {
-    label: 'Inventory',
-    route: '/list-product',
-    icon: 'M4 6h16M4 12h16m-7 6h7',
-    showCondition: () => isAuthenticated.value && hasPermission('products.index')
-  },
-  {
-    label: 'POS venta',
-    route: '/pos',
-    icon: 'M4 6h16M4 12h16m-7 6h7',
-    showCondition: () => isAuthenticated.value && hasPermission('sales.store')
-  },
-  {
-    label: 'Roles and Permissions',
-    route: '/roles-permissions',
-    icon: 'M4 6h16M4 12h16m-7 6h7',
-    showCondition: () =>
-      isAuthenticated.value && hasPermission('roles.with-permissions')
-  },
-];
-
-// ==============================
-// 4) Filtrar Items (displayed)
-// ==============================
-const displayedSidebarItems = computed(() => {
-  return sidebarItems.filter(item => {
-    return item.showCondition ? item.showCondition() : true;
-  });
 });
 </script>
