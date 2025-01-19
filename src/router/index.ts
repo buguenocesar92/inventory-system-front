@@ -129,21 +129,33 @@ const router = createRouter({
 });
 
 // Guardas de navegación
+// Guardas de navegación
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
 
   // Verificar si la autenticación está inicializada
   if (!authStore.isAuthenticated) {
-    authStore.checkAuth(); // Verifica los tokens en el almacenamiento local
+    try {
+      // Verifica los tokens en el almacenamiento local
+      await authStore.checkAuth();
+    } catch {
+      if (to.meta.requiresAuth) {
+        return next('/login'); // Redirigir al inicio de sesión si no está autenticado
+      }
+    }
   }
 
-  // Cargar roles y permisos si aún no están disponibles
-  if (!authStore.roles.length || !authStore.permissions.length) {
+  // Cargar roles y permisos si el usuario está autenticado y los datos no están cargados
+  if (
+    authStore.isAuthenticated &&
+    (!authStore.roles.length || !authStore.permissions.length)
+  ) {
     try {
       await authStore.fetchUserData(); // Cargar datos del usuario
     } catch (error) {
       console.error('Error al cargar los datos del usuario:', error);
-      return next('/login'); // Redirigir al inicio de sesión si hay problemas
+      authStore.logout(); // Limpiar estado en caso de error
+      return next('/login'); // Redirigir al inicio de sesión
     }
   }
 
@@ -151,6 +163,7 @@ router.beforeEach(async (to, from, next) => {
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return next('/login');
   }
+
   // Evitar que usuarios autenticados accedan a rutas para invitados
   if (to.meta.requiresGuest && authStore.isAuthenticated) {
     return next('/dashboard');
@@ -162,12 +175,16 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // Verificar permisos
-  if (to.meta.permissions && !to.meta.permissions.every((perm) => authStore.hasPermission(perm))) {
-    return next('/403');
+  if (
+    to.meta.permissions &&
+    !to.meta.permissions.every((perm) => authStore.hasPermission(perm))
+  ) {
+    return next('/403'); // Redirigir a acceso denegado
   }
 
   // Permitir la navegación
   next();
 });
+
 
 export default router;
