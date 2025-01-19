@@ -31,20 +31,20 @@
         </div>
 
         <!-- Menú de usuario -->
-        <UserDropdown v-if="isAuthenticated" />
+        <UserDropdown v-if="isAuthenticated()" />
       </div>
     </div>
   </nav>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useAuthStore } from '@/stores/authStore';
+import { useAuthGuard } from '@/composables/useAuthGuard';
 import UserDropdown from '@/components/UserDropdown.vue';
 
-const authStore = useAuthStore();
-const isAuthenticated = computed(() => authStore.isAuthenticated);
+// Usar el composable para manejar la autenticación
+const { isAuthenticated } = useAuthGuard();
 
+// Control del sidebar
 const toggleSidebar = () => {
   // Emitir un evento al padre para controlar el sidebar
   const event = new CustomEvent('toggle-sidebar');
