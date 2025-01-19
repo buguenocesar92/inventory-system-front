@@ -23,34 +23,33 @@
           <LogoutButton />
         </li>
       </ul>
+
+      <!-- Botón para cerrar el sidebar -->
+      <button
+        @click="closeSidebar"
+        class="absolute top-4 right-4 p-2 rounded bg-gray-200 dark:bg-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none"
+        aria-label="Cerrar Sidebar"
+      >
+        Cerrar
+      </button>
     </div>
   </aside>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
 import LogoutButton from '@/components/LogoutButton.vue';
 import SidebarItem from '@/components/SidebarItem.vue';
-
-// Importamos el composable con la definición de ítems
 import { useSidebarItems } from '@/composables/useSidebarItems';
 
-// 1) Obtenemos los ítems y el estado "isAuthenticated" desde el composable
+// Props y eventos
+defineProps(['isSidebarOpen']);
+const emit = defineEmits(['closeSidebar']);
+
+// Obtenemos los ítems y el estado "isAuthenticated" desde el composable
 const { displayedSidebarItems, isAuthenticated } = useSidebarItems();
 
-// 2) Estado para abrir/cerrar el sidebar (aún manejado por un evento global)
-const isSidebarOpen = ref(false);
-
-// Handler para alternar el sidebar
-function toggleHandler() {
-  isSidebarOpen.value = !isSidebarOpen.value;
-}
-
-onMounted(() => {
-  window.addEventListener('toggle-sidebar', toggleHandler);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('toggle-sidebar', toggleHandler);
-});
+// Función para cerrar el sidebar
+const closeSidebar = () => {
+  emit('closeSidebar');
+};
 </script>

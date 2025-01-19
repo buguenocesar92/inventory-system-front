@@ -1,44 +1,26 @@
 <template>
-  <!-- Navbar Component -->
-  <Navbar />
-
-  <!-- Sidebar Component -->
-  <Sidebar />
-
-  <!-- Main Content Area -->
+  <Navbar @toggleSidebar="toggleSidebar" />
+  <Sidebar
+    :isSidebarOpen="sidebarOpen"
+    @closeSidebar="toggleSidebar"
+  />
   <div :class="['p-4 sm:ml-64', !isAuthenticated ? 'xl:ml-0' : '']">
-    <div class="p-4 rounded-lg mt-14">
-      <RouterView />
-    </div>
+    <RouterView class="mt-14"/>
   </div>
 </template>
 
 <script setup lang="ts">
-import Navbar from '@/components/AppNavbar.vue'; // Componente Navbar
-import Sidebar from '@/components/AppSidebar.vue'; // Componente Sidebar
-import { computed } from 'vue';
-import { useAuthStore } from '@/stores/authStore'; // Store de autenticación
+import { ref, computed } from 'vue';
+import Navbar from '@/components/AppNavbar.vue';
+import Sidebar from '@/components/AppSidebar.vue';
+import { useAuthStore } from '@/stores/authStore';
 
-// Auth Store
+const sidebarOpen = ref(false);
+
+const toggleSidebar = () => {
+  sidebarOpen.value = !sidebarOpen.value;
+};
+
 const authStore = useAuthStore();
 const isAuthenticated = computed(() => authStore.isAuthenticated);
-
-// Verificar autenticación al montar el componente principal
-/* authStore.checkAuth(); */
 </script>
-
-
-
-<style scoped>
-@media (min-width: 1281px) {
-  #dropdown-user {
-  top: 37px; right: -20px
-}
-}
-@media (min-width: 320px) and (max-width: 480px) {
-
-  #dropdown-user {
-  top: 41px; right: -20px
-}
-}
-</style>

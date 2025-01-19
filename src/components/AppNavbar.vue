@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { defineEmits, computed } from 'vue';
 import { useAuthGuard } from '@/composables/useAuthGuard';
 import UserDropdown from '@/components/UserDropdown.vue';
 import IconMenu from '@/components/icons/IconMenu.vue'; // Ícono del menú hamburguesa
@@ -56,18 +56,15 @@ defineProps({
   },
 });
 
-// Emitir evento para el padre
+// Define el evento que emite el componente
+const emit = defineEmits(['toggleSidebar']);
+
+// Emitir evento para abrir/cerrar el sidebar
 const toggleSidebar = () => {
-  // Emitir un evento al padre para controlar el sidebar
-  const event = new CustomEvent('toggle-sidebar');
-  window.dispatchEvent(event);
+  emit('toggleSidebar');
 };
 
 // Lógica de autenticación
 const { isAuthenticated } = useAuthGuard();
 const isLoggedIn = computed(() => isAuthenticated());
 </script>
-
-<style>
-/* Opcional: Mejora de estilos */
-</style>
