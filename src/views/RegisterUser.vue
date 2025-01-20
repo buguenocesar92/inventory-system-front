@@ -42,20 +42,17 @@
           {{ isLoading ? 'Registering...' : 'Register' }}
         </button>
       </form>
-
-      <!-- Mensaje de error general -->
-      <p v-if="errorMessage" class="text-red-500 mt-2 text-center">{{ errorMessage }}</p>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { ref } from 'vue'
-import axios, { AxiosError } from 'axios'
-import FormInput from '@/components/FormInput.vue'
-import { registerUser } from '@/services/UserService'
-import type { RegisterUser } from '@/types/UserTypes'
-import type { ValidationErrorResponse } from '@/types/ValidationErrorResponse'
+import { ref } from 'vue';
+import FormInput from '@/components/FormInput.vue';
+import { registerUser } from '@/services/UserService';
+import { useFormValidation } from '@/composables/useFormValidation';
+import { useNotification } from '@/composables/useNotification';
+import type { RegisterUser } from '@/types/UserTypes';
 
 export default {
   name: 'RegisterUser',
@@ -65,49 +62,43 @@ export default {
       name: '',
       email: '',
       password: '',
-    })
+    });
 
-    const isLoading = ref(false)
-    const errors = ref<{ [key: string]: string[] }>({})
-    const errorMessage = ref<string | null>(null)
+    const isLoading = ref(false);
+
+    const { errors, handleValidationError } = useFormValidation();
+    const { showSuccessNotification } = useNotification();
 
     const handleRegister = async () => {
-      isLoading.value = true
-      errorMessage.value = null
-      errors.value = {} // Resetear errores por campo
+      isLoading.value = true;
 
       try {
-        await registerUser(form.value)
-        alert('User registered successfully.')
-        resetForm()
+        await registerUser(form.value);
+
+        // Mostrar notificación de éxito
+        await showSuccessNotification(
+          'User Registered',
+          'The user has been registered successfully.'
+        );
+
+        resetForm();
       } catch (error) {
-        if (!axios.isAxiosError(error)) {
-          errorMessage.value = 'An unexpected error occurred.'
-          return
-        }
-        const { response } = error as AxiosError<ValidationErrorResponse>
-        if (response?.status === 422) {
-          errors.value = response.data.errors as { [key: string]: string[] }
-          errorMessage.value = response.data.message || 'Validation error occurred.'
-          return
-        }
-        errorMessage.value = 'Unexpected error occurred. Please try again later.'
+        handleValidationError(error);
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
-    }
+    };
 
     const resetForm = () => {
-      form.value = { name: '', email: '', password: '' }
-    }
+      form.value = { name: '', email: '', password: '' };
+    };
 
     return {
       form,
       isLoading,
       errors,
-      errorMessage,
       handleRegister,
-    }
+    };
   },
-}
+};
 </script>
