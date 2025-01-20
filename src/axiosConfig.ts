@@ -1,7 +1,5 @@
 import axios from 'axios';
-/* import router from './router'; */
 import { isSubdomain } from './utils/domainUtils';
-
 
 // Obtiene el subdominio actual del host (si existe)
 const getSubdomain = (): string | null => {
@@ -65,6 +63,11 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Excluir rutas específicas como `/auth/login` de los intentos de refresh token
+    if (originalRequest.url.includes('/auth/login')) {
+      return Promise.reject(error); // No procesar refresh para el login
+    }
+
     // Si el servidor responde con 401 (token expirado) y no es un intento de refresh
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
@@ -83,9 +86,9 @@ axiosInstance.interceptors.response.use(
 
       try {
         const refreshToken = localStorage.getItem('refresh_token');
-/*         if (!refreshToken) {
+        if (!refreshToken) {
           throw new Error('Refresh token no disponible');
-        } */
+        }
 
         const response = await axios.post(`${baseURL}auth/refresh`, null, {
           headers: { Authorization: `Bearer ${refreshToken}` },
@@ -110,7 +113,6 @@ axiosInstance.interceptors.response.use(
         processQueue(refreshError, null);
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        /* router.push('/login'); */
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

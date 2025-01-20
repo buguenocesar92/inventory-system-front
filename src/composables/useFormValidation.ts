@@ -10,8 +10,6 @@ export function useFormValidation() {
   const router = useRouter();
 
   const handleValidationError = (error: unknown) => {
-    console.log('Raw error:', error); // Para depuración
-
     if (!axios.isAxiosError(error)) {
       errorMessage.value = 'An unexpected error occurred.';
       Swal.fire({
@@ -24,8 +22,6 @@ export function useFormValidation() {
     }
 
     const { response } = error as AxiosError<ValidationErrorResponse>;
-    console.log('Axios error response:', response); // Depuración de la respuesta
-
     if (response?.status === 422) {
       // Manejar errores de validación
       errors.value = response.data.errors as { [key: string]: string[] };
