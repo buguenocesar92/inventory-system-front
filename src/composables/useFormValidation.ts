@@ -1,17 +1,15 @@
 import { ref } from 'vue';
 import axios, { AxiosError } from 'axios';
-import { useRouter } from 'vue-router'; // Para redirecciones
 import Swal from 'sweetalert2';
 import type { ValidationErrorResponse } from '@/types/ValidationErrorResponse';
+import { useRouter } from 'vue-router';
 
 export function useFormValidation() {
   const errors = ref<{ [key: string]: string[] }>({});
   const errorMessage = ref<string | null>(null);
-  const router = useRouter(); // Inicializar router para redirecciones
+  const router = useRouter();
 
   const handleValidationError = (error: unknown) => {
-    console.log('Raw error:', error); // <-- Depuración: imprime el error crudo
-
     if (!axios.isAxiosError(error)) {
       errorMessage.value = 'An unexpected error occurred.';
       Swal.fire({
@@ -24,23 +22,29 @@ export function useFormValidation() {
     }
 
     const { response } = error as AxiosError<ValidationErrorResponse>;
-    console.log('Axios error response:', response); // <-- Depuración: imprime la respuesta de Axios
 
-    if (response?.status === 401) {
-      console.log('401 Unauthorized error detected'); // <-- Depuración
+    if (response?.status === 422) {
+      // Manejar errores de validación
+      errors.value = response.data.errors as { [key: string]: string[] };
+      errorMessage.value = response.data.message || 'Validation error occurred.';
+
+      // Crear un mensaje HTML dinámico para mostrar los errores detallados
+      const errorDetails = Object.entries(errors.value)
+        .map(([field, messages]) => `<p><strong>${field}:</strong> ${messages.join(', ')}</p>`)
+        .join('');
+
+      // Mostrar SweetAlert2 con los errores detallados
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        html: errorDetails,
+        confirmButtonText: 'OK',
+      });
+    } else if (response?.status === 401) {
       errorMessage.value = 'Credenciales incorrectas.';
       Swal.fire({
         icon: 'error',
         title: 'Authentication Error',
-        text: errorMessage.value,
-        confirmButtonText: 'OK',
-      });
-    } else if (response?.status === 422) {
-      errors.value = response.data.errors as { [key: string]: string[] };
-      errorMessage.value = response.data.message || 'Validation error occurred.';
-      Swal.fire({
-        icon: 'error',
-        title: 'Validation Error',
         text: errorMessage.value,
         confirmButtonText: 'OK',
       });
@@ -52,7 +56,7 @@ export function useFormValidation() {
         text: errorMessage.value,
         confirmButtonText: 'OK',
       }).then(() => {
-        router.push('/403'); // Redirigir al 403 después de cerrar el Swal
+        router.push('/403'); // Redirigir al 403
       });
     } else if (response?.status === 409) {
       errorMessage.value = response.data.message || 'A conflict occurred.';

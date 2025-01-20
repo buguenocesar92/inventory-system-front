@@ -50,8 +50,6 @@
           {{ isLoading ? 'Registering...' : 'Register' }}
         </button>
       </form>
-
-      <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>
     </div>
 
     <!-- Modal -->
@@ -77,12 +75,12 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue'
-import axios, { AxiosError } from 'axios'
-import { registerTenant } from '@/services/TenantService'
-import FormInput from '@/components/FormInput.vue'
-import type { RegisterTenantPayload } from '@/types/TenantTypes'
-import type { ValidationErrorResponse } from '@/types/ValidationErrorResponse'
+import { ref } from 'vue';
+import { registerTenant } from '@/services/TenantService';
+import FormInput from '@/components/FormInput.vue';
+import { useFormValidation } from '@/composables/useFormValidation';
+import { useNotification } from '@/composables/useNotification';
+import type { RegisterTenantPayload } from '@/types/TenantTypes';
 
 export default {
   name: 'RegisterTenant',
@@ -93,48 +91,39 @@ export default {
       user_name: '',
       user_email: '',
       user_password: '',
-    })
+    });
 
-    const isLoading = ref(false)
-    const errorMessage = ref<string | null>(null)
-    const errors = ref<{ [key: string]: string[] }>({})
-    const showModal = ref(false)
-    const loginUrl = ref<string | null>(null)
+    const isLoading = ref(false);
+    const showModal = ref(false);
+    const loginUrl = ref<string | null>(null);
+
+    const { errors, handleValidationError } = useFormValidation();
+    const { showSuccessNotification } = useNotification();
 
     const handleRegister = async () => {
-      isLoading.value = true
-      errorMessage.value = null
-      errors.value = {}
+      isLoading.value = true;
 
       try {
-        const { frontend_url } = await registerTenant(form.value)
-        loginUrl.value = `${frontend_url.toLowerCase()}/login`
-        showModal.value = true
+        const { frontend_url } = await registerTenant(form.value);
+        loginUrl.value = `${frontend_url.toLowerCase()}/login`;
+
+        await showSuccessNotification(
+          'Registration Successful',
+          'Your tenant has been registered successfully.',
+        );
+
+        showModal.value = true;
       } catch (error) {
-        if (!axios.isAxiosError(error)) {
-          errorMessage.value = 'An unexpected error occurred.'
-          return
-        }
-
-        const { response } = error as AxiosError<ValidationErrorResponse>
-
-        if (response?.status === 422) {
-          // Manejar nuevos errores del backend
-          errors.value = response.data.errors as { [key: string]: string[] }
-          errorMessage.value = response.data.message || 'Validation error occurred.'
-          return
-        }
-
-        errorMessage.value = 'Unexpected error occurred. Please try again later.'
+        handleValidationError(error);
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
-    }
+    };
 
     const handleCloseModal = () => {
-      showModal.value = false
-      resetForm()
-    }
+      showModal.value = false;
+      resetForm();
+    };
 
     const resetForm = () => {
       form.value = {
@@ -142,19 +131,18 @@ export default {
         user_name: '',
         user_email: '',
         user_password: '',
-      }
-    }
+      };
+    };
 
     return {
       form,
       isLoading,
-      errorMessage,
       errors,
       showModal,
       loginUrl,
       handleRegister,
       handleCloseModal,
-    }
+    };
   },
-}
+};
 </script>
