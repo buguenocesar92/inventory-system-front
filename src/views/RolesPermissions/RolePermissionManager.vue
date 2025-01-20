@@ -1,10 +1,12 @@
 <template>
   <div class="flex flex-col bg-gray-100">
     <!-- Main Content -->
+    <GoToRegisterButton />
     <div class="flex flex-1 overflow-hidden">
       <!-- Center Panel -->
       <div class="flex-1 bg-white p-4 flex flex-col">
         <!-- Role List Table -->
+
         <v-data-table
           :headers="headers"
           :items="roles"
@@ -49,9 +51,14 @@ import { fetchRolesWithPermissions } from '@/services/RolePermissionService';
 import { useNotification } from '@/composables/useNotification';
 import { useFormValidation } from '@/composables/useFormValidation';
 import type { Role } from '@/types/RoleTypes';
+import GoToRegisterButton from '@/components/GoToRegisterButton.vue'
+
 
 export default {
   name: 'RolePermissionList',
+  components: {
+    GoToRegisterButton,
+  },
   setup() {
     const roles = ref<Role[]>([]);
     const router = useRouter();
