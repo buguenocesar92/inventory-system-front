@@ -48,7 +48,7 @@ import { useRouter } from 'vue-router';
 import { fetchRolesWithPermissions } from '@/services/RolePermissionService';
 import { useNotification } from '@/composables/useNotification';
 import { useFormValidation } from '@/composables/useFormValidation';
-import type { Role } from '@/types/RolePermissionTypes';
+import type { Role } from '@/types/RoleTypes';
 
 export default {
   name: 'RolePermissionList',

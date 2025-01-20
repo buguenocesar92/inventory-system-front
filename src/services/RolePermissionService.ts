@@ -1,5 +1,5 @@
 import axios from '@/axiosConfig';
-import type { Role, Permission } from '@/types/RolePermissionTypes';
+import type { Role, Permission } from '@/types/RoleTypes';
 
 /**
  * Obtener todos los roles con sus permisos asociados.

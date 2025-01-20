@@ -1,41 +1,35 @@
-export interface PermissionData {
-  roleId: number
-  permission: string
+export interface Permission {
+  id: number;
+  name: string;
+  guard_name: string;
+  created_at: string;
+  updated_at: string;
 }
-
-export interface UserData {
-  roleId: number
-  userId: number
-}
-
-export interface RoleData {
-  roleId: number
-}
-
-export type DeleteType = 'permission' | 'user' | 'role'
-
-export type ConfirmData = PermissionData | UserData | RoleData
 
 export interface Role {
-  id: number
-  name: string
-  permissions: string[]
-  users: { id: number; name: string; email: string }[]
+
+  id: number;
+
+  name: string;
+
+  guard_name: string;
+
+  created_at: string;
+
+  updated_at: string;
+
+  permissions: Permission[];
+
+  users: User[];
+
 }
 
-export interface CreateRoleForm {
-  role_name: string
-  permissions: string[]
-  users: number[]
-}
 
 export interface User {
-  id: number
-  name: string
+  id: number;
+  name: string;
+  email: string;
+  created_at: string;
+  updated_at: string;
 }
 
-export interface UpdateRoleForm {
-  role_name: string
-  permissions: string[]
-  users: number[]
-}
