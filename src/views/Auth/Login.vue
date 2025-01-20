@@ -38,10 +38,10 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore'; // Usar el store
+import { useFormValidation } from '@/composables/useFormValidation'; // Validaciones
+import { useNotification } from '@/composables/useNotification'; // Notificaciones
 import FormInput from '@/components/FormInput.vue';
 import type { LoginPayload } from '@/types/AuthTypes';
-import type { ValidationErrorResponse } from '@/types/ValidationErrorResponse';
-import type { AxiosError } from 'axios';
 
 export default {
   name: 'UserLogin',
@@ -52,8 +52,9 @@ export default {
 
     const form = ref<LoginPayload>({ email: '', password: '' });
     const isLoading = ref(false);
-    const errors = ref<{ [key: string]: string[] }>({});
-    const errorMessage = ref<string | null>(null);
+
+    const { errors, errorMessage, handleValidationError } = useFormValidation();
+    const { showErrorNotification } = useNotification();
 
     const handleLogin = async () => {
       isLoading.value = true;
@@ -64,12 +65,11 @@ export default {
         await authStore.login(form.value); // Usar el método del store
         router.push('/dashboard'); // Redirigir al dashboard
       } catch (error) {
-        const axiosError = error as AxiosError<ValidationErrorResponse>;
-        if (axiosError.response?.status === 422) {
-          errors.value = axiosError.response.data.errors;
-          errorMessage.value = axiosError.response.data.message || 'Validation error occurred.';
-        } else {
-          errorMessage.value = 'Unexpected error occurred. Please try again later.';
+        handleValidationError(error);
+
+        // Mostrar error mediante notificación
+        if (errorMessage.value) {
+          await showErrorNotification('Error de Login', errorMessage.value);
         }
       } finally {
         isLoading.value = false;

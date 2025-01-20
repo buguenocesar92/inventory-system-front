@@ -10,6 +10,8 @@ export function useFormValidation() {
   const router = useRouter(); // Inicializar router para redirecciones
 
   const handleValidationError = (error: unknown) => {
+    console.log('Raw error:', error); // <-- Depuración: imprime el error crudo
+
     if (!axios.isAxiosError(error)) {
       errorMessage.value = 'An unexpected error occurred.';
       Swal.fire({
@@ -22,8 +24,18 @@ export function useFormValidation() {
     }
 
     const { response } = error as AxiosError<ValidationErrorResponse>;
+    console.log('Axios error response:', response); // <-- Depuración: imprime la respuesta de Axios
 
-    if (response?.status === 422) {
+    if (response?.status === 401) {
+      console.log('401 Unauthorized error detected'); // <-- Depuración
+      errorMessage.value = 'Credenciales incorrectas.';
+      Swal.fire({
+        icon: 'error',
+        title: 'Authentication Error',
+        text: errorMessage.value,
+        confirmButtonText: 'OK',
+      });
+    } else if (response?.status === 422) {
       errors.value = response.data.errors as { [key: string]: string[] };
       errorMessage.value = response.data.message || 'Validation error occurred.';
       Swal.fire({

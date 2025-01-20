@@ -3,8 +3,8 @@ import { useAuthGuard } from '@/composables/useAuthGuard';
 import { isSubdomain } from '@/utils/domainUtils';
 
 // Importar vistas
-import Login from '../views/Login.vue';
-import Register from '../views/Register.vue';
+import Login from '../views/Auth/Login.vue';
+import Register from '../views/Auth/Register.vue';
 import Dashboard from '../views/Dashboard.vue';
 import NotFound from '../views/NotFound.vue';
 import RegisterUser from '../views/RegisterUser.vue';
