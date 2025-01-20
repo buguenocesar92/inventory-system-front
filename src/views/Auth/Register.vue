@@ -51,35 +51,15 @@
         </button>
       </form>
     </div>
-
-    <!-- Modal -->
-    <div
-      v-if="showModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
-    >
-      <div class="bg-white rounded shadow-md p-6">
-        <h2 class="text-xl font-bold mb-4">Registration Successful</h2>
-        <p class="mb-4">
-          Your tenant has been registered. You can log in at:
-          <a :href="loginUrl || '#'" class="text-blue-500 underline">{{ loginUrl }}</a>
-        </p>
-        <button
-          @click="handleCloseModal"
-          class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Close
-        </button>
-      </div>
-    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { ref } from 'vue';
+import Swal from 'sweetalert2';
 import { registerTenant } from '@/services/TenantService';
 import FormInput from '@/components/FormInput.vue';
 import { useFormValidation } from '@/composables/useFormValidation';
-import { useNotification } from '@/composables/useNotification';
 import type { RegisterTenantPayload } from '@/types/TenantTypes';
 
 export default {
@@ -94,11 +74,9 @@ export default {
     });
 
     const isLoading = ref(false);
-    const showModal = ref(false);
     const loginUrl = ref<string | null>(null);
 
     const { errors, handleValidationError } = useFormValidation();
-    const { showSuccessNotification } = useNotification();
 
     const handleRegister = async () => {
       isLoading.value = true;
@@ -107,12 +85,18 @@ export default {
         const { frontend_url } = await registerTenant(form.value);
         loginUrl.value = `${frontend_url.toLowerCase()}/login`;
 
-        await showSuccessNotification(
-          'Registration Successful',
-          'Your tenant has been registered successfully.',
-        );
-
-        showModal.value = true;
+        // Mostrar notificación con enlace dinámico usando SweetAlert2
+        await Swal.fire({
+          icon: 'success',
+          title: 'Registration Successful',
+          html: `
+            <p>Your tenant has been registered successfully. You can log in at:</p>
+            <a href="${loginUrl.value}" class="text-blue-500 underline" target="_blank">
+              ${loginUrl.value}
+            </a>
+          `,
+          confirmButtonText: 'OK',
+        });
       } catch (error) {
         handleValidationError(error);
       } finally {
@@ -120,28 +104,12 @@ export default {
       }
     };
 
-    const handleCloseModal = () => {
-      showModal.value = false;
-      resetForm();
-    };
-
-    const resetForm = () => {
-      form.value = {
-        tenant_id: '',
-        user_name: '',
-        user_email: '',
-        user_password: '',
-      };
-    };
-
     return {
       form,
       isLoading,
       errors,
-      showModal,
       loginUrl,
       handleRegister,
-      handleCloseModal,
     };
   },
 };
