@@ -21,6 +21,13 @@
                   </li>
                 </ul>
               </td>
+              <td class="border px-2 py-1">
+                <ul>
+                  <li v-for="user in role.users" :key="user.id">
+                    {{ user.name }} ({{ user.email }})
+                  </li>
+                </ul>
+              </td>
               <!-- New Edit Button Column -->
               <td class="border px-2 py-1">
                 <v-btn color="primary" @click="goToRoleEdit(role.id)">
@@ -48,13 +55,14 @@ export default {
   setup() {
     const roles = ref<Role[]>([]);
     const router = useRouter();
-    const {showErrorNotification } = useNotification();
+    const { showErrorNotification } = useNotification();
     const { errors, errorMessage, handleValidationError } = useFormValidation();
 
     const headers = [
-      { text: 'Nombre del Rol', value: 'name' },
-      { text: 'Permisos Asociados', value: 'permissions' },
-      { text: 'Acciones', value: 'actions', sortable: false },
+      { title: 'Nombre del Rol', value: 'name' },
+      { title: 'Permisos Asociados', value: 'permissions' },
+      { title: 'Usuarios Asociados', value: 'users' }, // Nueva columna para usuarios
+      { title: 'Acciones', value: 'actions', sortable: false },
     ];
 
     const fetchRoles = async () => {
