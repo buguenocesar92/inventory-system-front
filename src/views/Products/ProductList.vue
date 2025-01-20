@@ -92,12 +92,14 @@ import { useRouter } from 'vue-router';
 import { fetchProducts, deleteProduct } from '@/services/ProductService';
 import { debounce } from '@/utils/debounce';
 import { useFormValidation } from '@/composables/useFormValidation';
+import { useNotification } from '@/composables/useNotification';
 import type { ProductPayload, FetchProductsResponse } from '@/types/ProductTypes';
 
 export default {
   name: 'ProductListServer',
   setup() {
     const router = useRouter();
+    const { showSuccessNotification } = useNotification();
     const { errors, errorMessage, handleValidationError } = useFormValidation();
 
     const itemsPerPage = ref(5);
@@ -144,6 +146,7 @@ export default {
       deletingProductId.value = id;
       try {
         await deleteProduct(id);
+        await showSuccessNotification('Success!', 'Product updated successfully.', '/list-product');
         serverItems.value = serverItems.value.filter((product) => product.id !== id);
       } catch (error) {
         handleValidationError(error); // Usar el composable para manejar errores

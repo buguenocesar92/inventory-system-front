@@ -83,8 +83,8 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { fetchProduct, updateProduct } from '@/services/ProductService';
 import FormInput from '@/components/FormInput.vue';
-import Swal from 'sweetalert2';
 import { useFormValidation } from '@/composables/useFormValidation';
+import { useNotification } from '@/composables/useNotification';
 import type { ProductPayload } from '@/types/ProductTypes';
 
 export default {
@@ -107,7 +107,7 @@ export default {
 
     const isLoading = ref(false);
 
-    // Usar el composable para manejar errores
+    const { showSuccessNotification } = useNotification();
     const { errors, errorMessage, handleValidationError } = useFormValidation();
 
     // Fetch the product data when the component is mounted
@@ -121,7 +121,7 @@ export default {
           router.push('/404');
         }
       } catch (error) {
-        handleValidationError(error); // Usar el composable para manejar errores
+        handleValidationError(error);
       } finally {
         isLoading.value = false;
       }
@@ -132,17 +132,9 @@ export default {
       try {
         await updateProduct(productId, form.value);
 
-        // Mostrar alerta de éxito con SweetAlert2
-        await Swal.fire({
-          title: 'Success!',
-          text: 'Product updated successfully.',
-          icon: 'success',
-          confirmButtonText: 'OK',
-        });
-
-        router.push('/list-product');
+        await showSuccessNotification('Success!', 'Product updated successfully.', '/list-product');
       } catch (error) {
-        handleValidationError(error); // Usar el composable para manejar errores
+        handleValidationError(error);
       } finally {
         isLoading.value = false;
       }

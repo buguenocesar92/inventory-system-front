@@ -82,18 +82,17 @@
 
 <script lang="ts">
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { addProduct } from '@/services/ProductService';
 import FormInput from '@/components/FormInput.vue';
-import Swal from 'sweetalert2';
 import { useFormValidation } from '@/composables/useFormValidation';
+import { useNotification } from '@/composables/useNotification';
 import type { ProductPayload } from '@/types/ProductTypes';
 
 export default {
   name: 'AddProduct',
   components: { FormInput },
   setup() {
-    const router = useRouter();
+    const { showSuccessNotification } = useNotification();
     const { errors, errorMessage, handleValidationError } = useFormValidation();
 
     const form = ref<ProductPayload>({
@@ -115,14 +114,7 @@ export default {
         await addProduct(form.value);
 
         // Mostrar alerta de éxito con SweetAlert2
-        await Swal.fire({
-          title: 'Success!',
-          text: 'The product has been added successfully.',
-          icon: 'success',
-          confirmButtonText: 'OK',
-        });
-
-        router.push('/list-product');
+        await showSuccessNotification('Success!', 'Product updated successfully.', '/list-product');
       } catch (error) {
         handleValidationError(error); // Usar el composable para manejar errores
       } finally {
