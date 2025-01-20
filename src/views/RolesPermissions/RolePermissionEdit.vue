@@ -40,6 +40,8 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { fetchRoleById, fetchAllPermissions, updateRolePermissions } from '@/services/RolePermissionService';
+import { useNotification } from '@/composables/useNotification';
+import { useFormValidation } from '@/composables/useFormValidation';
 import type { Role, Permission } from '@/types/RolePermissionTypes';
 
 export default {
@@ -47,43 +49,47 @@ export default {
   setup() {
     const route = useRoute();
     const router = useRouter();
-
     const role = ref<Role | null>(null); // Datos del rol
     const allPermissions = ref<Permission[]>([]); // Lista de todos los permisos disponibles
     const selectedPermissions = ref<number[]>([]); // IDs de los permisos seleccionados
+
+    const { showSuccessNotification, showErrorNotification } = useNotification();
+    const { errors, errorMessage, handleValidationError } = useFormValidation();
 
     const roleId = route.params.roleId as string;
 
     const loadRoleAndPermissions = async () => {
       try {
-        // Inicializar `role` y `allPermissions` como listas vacías
         role.value = null;
         allPermissions.value = [];
-
-        // Cargar los datos del rol y los permisos disponibles
         const fetchedRole = await fetchRoleById(roleId);
         role.value = fetchedRole;
 
         const fetchedPermissions = await fetchAllPermissions();
         allPermissions.value = fetchedPermissions;
 
-        // Inicializar los permisos seleccionados según el rol actual
         selectedPermissions.value =
           fetchedRole.permissions.map((permission) => permission.id) || [];
       } catch (error) {
-        console.error('Error al cargar los datos del rol y permisos:', error);
+        handleValidationError(error);
+        if (errorMessage.value) {
+          showErrorNotification('Error al cargar datos', errorMessage.value);
+        }
       }
     };
 
     const savePermissions = async () => {
       try {
-        // Enviar permisos seleccionados al backend
         await updateRolePermissions(roleId, selectedPermissions.value);
-
-        alert('Permisos actualizados correctamente.');
+        await showSuccessNotification(
+          'Permisos Actualizados',
+          'Los permisos del rol se actualizaron correctamente.', // Ruta de redirección después de guardar
+        );
       } catch (error) {
-        console.error('Error al guardar los permisos:', error);
-        alert('Hubo un error al guardar los permisos.');
+        handleValidationError(error);
+        if (errorMessage.value) {
+          showErrorNotification('Error al guardar', errorMessage.value);
+        }
       }
     };
 
@@ -99,6 +105,8 @@ export default {
       selectedPermissions,
       savePermissions,
       goBack,
+      errors,
+      errorMessage,
     };
   },
 };

@@ -37,8 +37,10 @@
 
 <script lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router'; // <-- import useRouter
+import { useRouter } from 'vue-router';
 import { fetchRolesWithPermissions } from '@/services/RolePermissionService';
+import { useNotification } from '@/composables/useNotification';
+import { useFormValidation } from '@/composables/useFormValidation';
 import type { Role } from '@/types/RolePermissionTypes';
 
 export default {
@@ -46,6 +48,8 @@ export default {
   setup() {
     const roles = ref<Role[]>([]);
     const router = useRouter();
+    const {showErrorNotification } = useNotification();
+    const { errors, errorMessage, handleValidationError } = useFormValidation();
 
     const headers = [
       { text: 'Nombre del Rol', value: 'name' },
@@ -58,13 +62,22 @@ export default {
         const { roles: fetchedRoles } = await fetchRolesWithPermissions();
         roles.value = fetchedRoles;
       } catch (error) {
-        console.error('Error fetching roles and permissions:', error);
+        handleValidationError(error);
+        if (errorMessage.value) {
+          showErrorNotification('Error!', errorMessage.value);
+        }
       }
     };
 
     const goToRoleEdit = (roleId: number) => {
-      // Navigate to the route, e.g. /role-permission-edit/:id
-      router.push({ name: 'RolePermissionEdit', params: { roleId: roleId.toString() } });
+      try {
+        router.push({ name: 'RolePermissionEdit', params: { roleId: roleId.toString() } });
+      } catch (error) {
+        handleValidationError(error);
+        if (errorMessage.value) {
+          showErrorNotification('Navigation Error', errorMessage.value);
+        }
+      }
     };
 
     onMounted(fetchRoles);
@@ -73,6 +86,8 @@ export default {
       roles,
       headers,
       goToRoleEdit,
+      errors,
+      errorMessage,
     };
   },
 };
