@@ -1,3 +1,111 @@
+<!-- src/views/RolesPermissions/RolePermissionEdit.vue -->
+<script setup lang="ts">
+import { ref, onMounted, defineOptions } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import {
+  fetchRoleById,
+  fetchAllPermissions,
+  updateRolePermissions,
+} from '@/services/RolePermissionService';
+import {
+  updateRoleUsers,
+  fetchAllUsers,
+} from '@/services/UserService';
+import { useNotification } from '@/composables/useNotification';
+import { useFormValidation } from '@/composables/useFormValidation';
+import type { Role, Permission } from '@/types/RoleTypes';
+import type { User } from '@/types/UserTypes';
+
+// Asigna un nombre al componente (opcional, útil para devtools o debugging)
+defineOptions({ name: 'RolePermissionEdit' });
+
+// State principal
+const role = ref<Role | null>(null);
+const allPermissions = ref<Permission[]>([]);
+const allUsers = ref<User[]>([]);
+const selectedPermissions = ref<number[]>([]);
+const selectedUsers = ref<number[]>([]);
+
+// Router y composables
+const route = useRoute();
+const router = useRouter();
+const { showSuccessNotification, showErrorNotification } = useNotification();
+const { errorMessage, handleValidationError } = useFormValidation();
+
+// Obtenemos el parámetro 'roleId' de la URL
+const roleId = route.params.roleId as string;
+
+/**
+ * Carga todos los datos necesarios al montar el componente.
+ */
+async function loadRoleData() {
+  try {
+    // Limpiar datos anteriores
+    role.value = null;
+    allPermissions.value = [];
+    allUsers.value = [];
+
+    // Cargar el rol y sus permisos asociados
+    const fetchedRole = await fetchRoleById(roleId);
+    role.value = fetchedRole;
+
+    // Cargar la lista de todos los permisos
+    const fetchedPermissions = await fetchAllPermissions();
+    allPermissions.value = fetchedPermissions;
+
+    // Inicializar permisos seleccionados (IDs)
+    selectedPermissions.value = fetchedRole.permissions.map(p => p.id);
+
+    // Cargar todos los usuarios
+    const fetchedUsers = await fetchAllUsers();
+    allUsers.value = fetchedUsers;
+
+    // Inicializar usuarios seleccionados (IDs)
+    selectedUsers.value = fetchedRole.users.map(u => u.id);
+  } catch (error) {
+    handleValidationError(error);
+    if (errorMessage.value) {
+      showErrorNotification('Error al cargar datos', errorMessage.value);
+    }
+  }
+}
+
+/**
+ * Guarda los cambios en el rol:
+ * 1. Actualiza permisos
+ * 2. Actualiza usuarios
+ */
+async function saveChanges() {
+  try {
+    // Actualizar los permisos del rol
+    await updateRolePermissions(roleId, selectedPermissions.value);
+
+    // Actualizar usuarios asociados al rol
+    await updateRoleUsers(roleId, selectedUsers.value);
+
+    await showSuccessNotification(
+      'Cambios Guardados',
+      'Los permisos y usuarios del rol se actualizaron correctamente.'
+    );
+  } catch (error) {
+    handleValidationError(error);
+    if (errorMessage.value) {
+      showErrorNotification('Error al guardar cambios', errorMessage.value);
+    }
+  }
+}
+
+/**
+ * Regresa a la página anterior
+ */
+function goBack() {
+  router.back();
+}
+
+// Cargar datos al montar el componente
+onMounted(loadRoleData);
+</script>
+
 <template>
   <div>
     <h2 class="text-xl font-bold mb-4">Editar Rol: {{ role?.name }}</h2>
@@ -59,110 +167,3 @@
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import {
-  fetchRoleById,
-  fetchAllPermissions,
-  updateRolePermissions,
-} from '@/services/RolePermissionService';
-import {
-  updateRoleUsers,
-  fetchAllUsers,
-} from '@/services/UserService';
-import { useNotification } from '@/composables/useNotification';
-import { useFormValidation } from '@/composables/useFormValidation';
-import type { User } from '@/types/UserTypes'
-import type { Role, Permission } from '@/types/RoleTypes';
-
-export default {
-  name: 'RolePermissionEdit',
-  setup() {
-    const route = useRoute();
-    const router = useRouter();
-
-    const role = ref<Role | null>(null); // Datos del rol
-    const allPermissions = ref<Permission[]>([]); // Lista de todos los permisos disponibles
-    const allUsers = ref<User[]>([]); // Lista de todos los usuarios disponibles
-    const selectedPermissions = ref<number[]>([]); // IDs de los permisos seleccionados
-    const selectedUsers = ref<number[]>([]); // IDs de los usuarios seleccionados
-
-    const { showSuccessNotification, showErrorNotification } = useNotification();
-    const { errors, errorMessage, handleValidationError } = useFormValidation();
-
-    const roleId = route.params.roleId as string;
-
-    const loadRoleData = async () => {
-      try {
-        // Limpiar datos iniciales
-        role.value = null;
-        allPermissions.value = [];
-        allUsers.value = [];
-
-        // Cargar el rol y los permisos
-        const fetchedRole = await fetchRoleById(roleId);
-        role.value = fetchedRole;
-
-        const fetchedPermissions = await fetchAllPermissions();
-        allPermissions.value = fetchedPermissions;
-
-        // Inicializar permisos seleccionados
-        selectedPermissions.value =
-          fetchedRole.permissions.map((permission) => permission.id) || [];
-
-        // Cargar todos los usuarios
-        const fetchedUsers = await fetchAllUsers();
-        allUsers.value = fetchedUsers;
-
-        // Inicializar usuarios seleccionados
-        selectedUsers.value = fetchedRole.users.map((user) => user.id);
-      } catch (error) {
-        handleValidationError(error);
-        if (errorMessage.value) {
-          showErrorNotification('Error al cargar datos', errorMessage.value);
-        }
-      }
-    };
-
-    const saveChanges = async () => {
-      try {
-        // Actualizar permisos del rol
-        await updateRolePermissions(roleId, selectedPermissions.value);
-
-        // Actualizar usuarios asociados al rol
-        await updateRoleUsers(roleId, selectedUsers.value);
-
-        await showSuccessNotification(
-          'Cambios Guardados',
-          'Los permisos y usuarios del rol se actualizaron correctamente.',
-        );
-      } catch (error) {
-        handleValidationError(error);
-        if (errorMessage.value) {
-          showErrorNotification('Error al guardar cambios', errorMessage.value);
-        }
-      }
-    };
-
-    const goBack = () => {
-      router.back();
-    };
-
-    onMounted(loadRoleData);
-
-    return {
-      role,
-      allPermissions,
-      allUsers,
-      selectedPermissions,
-      selectedUsers,
-      saveChanges,
-      goBack,
-      errors,
-      errorMessage,
-    };
-  },
-};
-</script>
