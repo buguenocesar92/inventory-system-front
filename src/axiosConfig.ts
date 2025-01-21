@@ -1,121 +1,176 @@
-import axios from 'axios';
-import { isSubdomain } from './utils/domainUtils';
+// src/axiosConfig.ts
 
-// Obtiene el subdominio actual del host (si existe)
-const getSubdomain = (): string | null => {
-  if (isSubdomain()) {
-    const host = window.location.host; // Ejemplo: "tenant1.foo.localhost"
-    return host.split('.')[0]; // Retorna "tenant1"
+import axios, { AxiosError } from 'axios';
+import type { AxiosInstance } from 'axios';
+import type { InternalAxiosRequestConfig } from 'axios';
+import { isSubdomain } from '@/utils/domainUtils';
+
+/* -------------------------------------
+ * 1. Lógica de Subdominio y baseURL
+ * ------------------------------------- */
+
+/**
+ * Retorna un posible subdominio (ej. 'tenant1') si existe;
+ * de lo contrario, null.
+ */
+function getSubdomain(): string | null {
+  return isSubdomain()
+    ? window.location.host.split('.')[0] // Ej: 'tenant1'
+    : null;
+}
+
+/**
+ * Construye la URL base según:
+ * - Variables de entorno VITE_API_PROTOCOL y VITE_API_DOMAIN
+ * - Fallback sin subdominio (VITE_API_BASE_URL)
+ * - O un valor por defecto si las variables no existen.
+ */
+function getBaseURL(): string {
+  const protocol = import.meta.env.VITE_API_PROTOCOL || 'http';
+  const baseDomain = import.meta.env.VITE_API_DOMAIN || 'api.localhost';
+  const fallbackUrl = import.meta.env.VITE_API_BASE_URL || 'http://api.localhost/api/';
+
+  const subdomain = getSubdomain();
+  if (subdomain) {
+    // http://tenant1.api.localhost/api/ (ejemplo)
+    return `${protocol}://${subdomain}.${baseDomain}/api/`;
+  } else {
+    // Sin subdominio, usar fallback
+    return fallbackUrl;
   }
-  return null; // No hay subdominio
-};
+}
 
-// Configura la baseURL dinámicamente
-const subdomain = getSubdomain();
-const baseURL = subdomain
-  ? `http://${subdomain}.api.localhost/api/` // Usa el subdominio dinámico
-  : `http://api.localhost/api/`; // Usa la API por defecto
+// Determina la baseURL final
+const baseURL = getBaseURL();
 
-console.log(window.location.host);
-
-// Crea una instancia de Axios
-const axiosInstance = axios.create({
+/* -------------------------------------
+ * 2. Creación de la instancia de Axios
+ * ------------------------------------- */
+const axiosInstance: AxiosInstance = axios.create({
   baseURL,
   timeout: 5000,
 });
 
-// Variable para evitar múltiples solicitudes de refresh al mismo tiempo
-type FailedRequest = {
+/* -------------------------------------
+ * 3. Manejo de cola para solicitudes fallidas (Refresh Token)
+ * ------------------------------------- */
+
+// Almacena la resolución/rechazo de cada petición en espera
+interface FailedRequest {
   resolve: (token: string) => void;
   reject: (error: unknown) => void;
-};
+}
 
 let isRefreshing = false;
 let failedQueue: FailedRequest[] = [];
 
-// Manejo de cola para solicitudes fallidas
-const processQueue = (error: unknown, token: string | null = null): void => {
-  failedQueue.forEach((prom) => {
+/**
+ * Procesa las peticiones en cola:
+ * - Si hay un nuevo token, se resuelven con ese token.
+ * - Si hay error, se rechazan.
+ */
+function processQueue(error: unknown, token: string | null = null): void {
+  failedQueue.forEach(({ resolve, reject }) => {
     if (token) {
-      prom.resolve(token);
+      resolve(token);
     } else {
-      prom.reject(error);
+      reject(error);
     }
   });
   failedQueue = [];
-};
+}
 
-// Interceptor de requests (para incluir el access_token)
+/* -------------------------------------
+ * 4. Interceptor de requests (incluir access_token)
+ * ------------------------------------- */
 axiosInstance.interceptors.request.use(
-  (config) => {
-    const access_token = localStorage.getItem('access_token');
-    if (access_token) {
-      config.headers.Authorization = `Bearer ${access_token}`;
+  (config: InternalAxiosRequestConfig) => {
+    const accessToken = localStorage.getItem('access_token');
+    if (accessToken) {
+      // Para Axios >= 1.2, usa config.headers.set():
+      config.headers.set('Authorization', `Bearer ${accessToken}`);
     }
     return config;
   },
-  (error) => Promise.reject(error),
+  (error: AxiosError) => Promise.reject(error),
 );
 
-// Interceptor de respuestas (para manejar errores globales y refresh token)
+/* -------------------------------------
+ * 5. Interceptor de respuestas (manejo global de errores, refresh token)
+ * ------------------------------------- */
 axiosInstance.interceptors.response.use(
+  // Respuesta exitosa: simplemente retornarla
   (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
 
-    // Excluir rutas específicas como `/auth/login` de los intentos de refresh token
-    if (originalRequest.url.includes('/auth/login')) {
-      return Promise.reject(error); // No procesar refresh para el login
-    }
+  // Manejo de errores
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    // Si el servidor responde con 401 (token expirado) y no es un intento de refresh
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Si es 401 (Unauthorized) y no hemos intentado refresh todavía
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      // Evita reintentar refresh en la ruta de login
+      if (originalRequest.url?.includes('/auth/login')) {
+        return Promise.reject(error);
+      }
+
+      // Si ya estamos refrescando, añadir esta petición a la cola
       if (isRefreshing) {
-        return new Promise((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
           .then((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
+            // Después de refrescar, reintentar con el nuevo token
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
             return axiosInstance(originalRequest);
           })
           .catch((err) => Promise.reject(err));
       }
 
+      // Marcar esta request para no reintentar infinito
       originalRequest._retry = true;
       isRefreshing = true;
 
       try {
+        // Leer el refresh token de localStorage
         const refreshToken = localStorage.getItem('refresh_token');
         if (!refreshToken) {
-          throw new Error('Refresh token no disponible');
+          throw new Error('No refresh token available');
         }
 
+        // Llamada al endpoint para refrescar token
         const response = await axios.post(`${baseURL}auth/refresh`, null, {
           headers: { Authorization: `Bearer ${refreshToken}` },
         });
 
         const { access_token, refresh_token } = response.data;
 
-        // Almacena los nuevos tokens
+        // Guardar nuevos tokens
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('refresh_token', refresh_token);
 
-        // Actualiza las solicitudes en cola con el nuevo token
+        // Procesar la cola de peticiones fallidas con el nuevo token
         processQueue(null, access_token);
 
-        // Actualiza el header de la solicitud original
-        originalRequest.headers.Authorization = `Bearer ${access_token}`;
+        // Reintentar la petición original
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${access_token}`;
+        }
         return axiosInstance(originalRequest);
       } catch (refreshError) {
+        // Si falla el refresh, rechazar la cola y limpiar tokens
         processQueue(refreshError, null);
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         return Promise.reject(refreshError);
       } finally {
+        // Ya no estamos refrescando
         isRefreshing = false;
       }
     }
 
+    // Si no es un 401 (o ya se reintento), rechazar el error directamente
     return Promise.reject(error);
   },
 );
