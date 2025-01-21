@@ -1,8 +1,10 @@
+// src/services/RolePermissionService.ts
 import axios from '@/axiosConfig';
 import type { Role, Permission } from '@/types/RoleTypes';
 
 /**
  * Obtener todos los roles con sus permisos asociados.
+ * Retorna { roles, permissions }.
  */
 export const fetchRolesWithPermissions = async (): Promise<{
   roles: Role[];
@@ -34,10 +36,9 @@ export const updateRolePermissions = async (
 };
 
 /**
- * Obtener todos los permisos disponibles.
+ * Obtener todos los permisos disponibles (opcional).
  */
 export const fetchAllPermissions = async (): Promise<Permission[]> => {
   const { data } = await axios.get('/permissions');
-  // Suponiendo que el backend devuelve directamente un array de permisos
-  return data; // No intentes acceder a `data.permissions` porque es un array directamente
+  return data; // Asumiendo que el backend retorna directamente un array de permisos
 };

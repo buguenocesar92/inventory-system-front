@@ -96,9 +96,6 @@ axiosInstance.interceptors.response.use(
 
         const { access_token, refresh_token } = response.data;
 
-        console.log('Nuevo access token:', access_token);
-        console.log('Nuevo refresh token:', refresh_token);
-
         // Almacena los nuevos tokens
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('refresh_token', refresh_token);
