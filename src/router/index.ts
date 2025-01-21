@@ -8,7 +8,7 @@ import Login from '@/views/Auth/Login.vue';
 import Register from '@/views/Auth/Register.vue';
 import Dashboard from '@/views/Dashboard.vue';
 import NotFound from '@/views/NotFound.vue';
-import RegisterUser from '@/views/RegisterUser.vue';
+import RegisterUser from '@/views/Users/RegisterUser.vue';
 import AddProduct from '@/views/Products/AddProduct.vue';
 import ProductList from '@/views/Products/ProductList.vue';
 import EditProduct from '@/views/Products/EditProduct.vue';

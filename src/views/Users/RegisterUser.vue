@@ -1,3 +1,4 @@
+<!-- src/views/RegisterUser.vue -->
 <script setup lang="ts">
 import { ref, defineOptions } from 'vue';
 import FormInput from '@/components/FormInput.vue';
