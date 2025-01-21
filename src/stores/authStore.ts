@@ -1,6 +1,7 @@
+// src/stores/authStore.ts
 import { defineStore } from 'pinia';
-import axios from '@/axiosConfig';
-import type { LoginPayload } from '@/types/AuthTypes';
+import { loginUser, logoutUser, fetchUserData } from '@/services/AuthService';
+import type { AuthPayload } from '@/types/AuthTypes';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -10,66 +11,96 @@ export const useAuthStore = defineStore('auth', {
     roles: [] as string[],
     permissions: [] as string[],
   }),
+
+  getters: {
+    /**
+     * Verifica si el usuario tiene un permiso
+     * Uso: authStore.hasPermission('products.store')
+     */
+    hasPermission: (state) => (permission: string) => {
+      return state.permissions.includes(permission);
+    },
+
+    /**
+     * Verifica si el usuario tiene un rol
+     * Uso: authStore.hasRole('admin')
+     */
+    hasRole: (state) => (role: string) => {
+      return state.roles.includes(role);
+    },
+  },
+
   actions: {
-    /** Verifica si el usuario está autenticado */
+    /**
+     * Verifica tokens en localStorage y actualiza el estado
+     */
     checkAuth() {
       const token = localStorage.getItem('access_token');
       const refreshToken = localStorage.getItem('refresh_token');
+
       this.isAuthenticated = !!token && !!refreshToken;
       this.accessToken = token || '';
       this.refreshToken = refreshToken || '';
-
-      // Cargar datos del usuario si está autenticado
-  /*     if (this.isAuthenticated) { */
-/*         this.fetchUserData().catch((error) => {
-          console.error('Error fetching user data on auth check:', error);
-        }); */
-   /*    } */
     },
 
-    /** Inicia sesión */
-    async login(payload: LoginPayload) {
-      const response = await axios.post('/auth/login', payload);
-      const { access_token, refresh_token } = response.data;
+    /**
+     * Inicia sesión y almacena tokens, roles y permisos
+     */
+    async login(payload: AuthPayload) {
+      try {
+        // Llamada al servicio
+        const { access_token, refresh_token } = await loginUser(payload);
 
-      localStorage.setItem('access_token', access_token);
-      localStorage.setItem('refresh_token', refresh_token);
+        // Guardar en localStorage
+        localStorage.setItem('access_token', access_token);
+        localStorage.setItem('refresh_token', refresh_token);
 
-      this.accessToken = access_token;
-      this.refreshToken = refresh_token;
-      this.isAuthenticated = true;
+        // Actualizar state
+        this.accessToken = access_token;
+        this.refreshToken = refresh_token;
+        this.isAuthenticated = true;
 
-      // Carga roles y permisos
-      await this.fetchUserData();
+        // Obtener roles y permisos del backend
+        const { roles, permissions } = await fetchUserData();
+        this.roles = roles;
+        this.permissions = permissions;
+      } catch (error) {
+        console.error('Login failed:', error);
+        throw error;
+      }
     },
-    /** Cierra sesión */
+
+    /**
+     * Cierra sesión
+     */
     async logout() {
       try {
-        await axios.post('/auth/logout');
+        await logoutUser();
       } catch (error) {
         console.error('Logout failed:', error);
+      } finally {
+        // Limpiar localStorage y state
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        this.accessToken = '';
+        this.refreshToken = '';
+        this.roles = [];
+        this.permissions = [];
+        this.isAuthenticated = false;
       }
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      this.accessToken = '';
-      this.refreshToken = '';
-      this.roles = [];
-      this.permissions = [];
-      this.isAuthenticated = false;
     },
-    /** Obtiene roles y permisos del usuario */
+
+    /**
+     * Obtiene roles y permisos desde el backend
+     */
     async fetchUserData() {
-      const response = await axios.post('/auth/me');
-      this.roles = response.data.roles || [];
-      this.permissions = response.data.permissions || [];
-    },
-    /** Verifica si el usuario tiene un permiso */
-    hasPermission(permission: string): boolean {
-      return this.permissions.includes(permission);
-    },
-    /** Verifica si el usuario tiene un rol */
-    hasRole(role: string): boolean {
-      return this.roles.includes(role);
+      try {
+        const { roles, permissions } = await fetchUserData();
+        this.roles = roles;
+        this.permissions = permissions;
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
     },
   },
 });

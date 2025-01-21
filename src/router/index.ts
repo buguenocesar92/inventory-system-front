@@ -1,23 +1,23 @@
+// src/router/index.ts
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthGuard } from '@/composables/useAuthGuard';
 import { isSubdomain } from '@/utils/domainUtils';
 
-// Importar vistas
-import Login from '../views/Auth/Login.vue';
-import Register from '../views/Auth/Register.vue';
-import Dashboard from '../views/Dashboard.vue';
-import NotFound from '../views/NotFound.vue';
-import RegisterUser from '../views/RegisterUser.vue';
-import AddProduct from '../views/Products/AddProduct.vue';
-import ProductList from '../views/Products/ProductList.vue';
-import EditProduct from '../views/Products/EditProduct.vue';
-import MovementForm from '../views/Inventory/MovementForm.vue';
-import POS from '../views/Sales/POS.vue';
-import AccessDenied from '../views/AccessDenied.vue';
-import RolePermissionManager from '../views/RolesPermissions/RolePermissionManager.vue';
-import RolePermissionEdit from '../views/RolesPermissions/RolePermissionEdit.vue';
+// Vistas
+import Login from '@/views/Auth/Login.vue';
+import Register from '@/views/Auth/Register.vue';
+import Dashboard from '@/views/Dashboard.vue';
+import NotFound from '@/views/NotFound.vue';
+import RegisterUser from '@/views/RegisterUser.vue';
+import AddProduct from '@/views/Products/AddProduct.vue';
+import ProductList from '@/views/Products/ProductList.vue';
+import EditProduct from '@/views/Products/EditProduct.vue';
+import MovementForm from '@/views/Inventory/MovementForm.vue';
+import POS from '@/views/Sales/POS.vue';
+import AccessDenied from '@/views/AccessDenied.vue';
+import RolePermissionManager from '@/views/RolesPermissions/RolePermissionManager.vue';
+import RolePermissionEdit from '@/views/RolesPermissions/RolePermissionEdit.vue';
 
-// Definir las rutas de la aplicación
 const routes = [
   {
     path: '/',
@@ -109,13 +109,11 @@ const routes = [
   },
 ];
 
-// Crear el router
 const router = createRouter({
   history: createWebHistory(),
   routes,
 });
 
-// Middleware de navegación
 router.beforeEach(async (to, from, next) => {
   const {
     isAuthenticated,
@@ -127,51 +125,52 @@ router.beforeEach(async (to, from, next) => {
   } = useAuthGuard();
 
   try {
-    if (!isAuthenticated()) {
+    // 1. Verificar si ya estamos autenticados (o cargar tokens del localStorage)
+    if (!isAuthenticated.value) {
       await checkAuth();
     }
 
-    if (isAuthenticated()) {
+    // 2. Si el usuario está autenticado, obtener roles/permisos si aún no se han cargado
+    if (isAuthenticated.value) {
       await fetchUserDataIfNeeded();
     }
 
-    // Validar acceso a rutas específicas según subdominio
+    // 3. Redirecciones según subdominio y rutas públicas
     if (to.name === 'Register' && isSubdomain()) {
-      return next('/dashboard'); // Redirigir a Dashboard si estás en un subdominio
+      return next('/dashboard');
     }
-
     if (to.name === 'Login' && !isSubdomain()) {
-      return next('/register'); // Redirigir a Register si no estás en un subdominio
+      return next('/register');
     }
 
-    // Validar rutas que requieren autenticación
-    if (to.meta.requiresAuth && !isAuthenticated()) {
+    // 4. Si la ruta requiere autenticación pero no estamos logueados
+    if (to.meta.requiresAuth && !isAuthenticated.value) {
       return next('/login');
     }
 
-    // Validar rutas solo para invitados
-    if (to.meta.requiresGuest && isAuthenticated()) {
+    // 5. Si la ruta es solo para invitados y ya estamos logueados
+    if (to.meta.requiresGuest && isAuthenticated.value) {
       return next('/dashboard');
     }
 
-    // Validar roles si están definidos en meta
-    if (to.meta.roles && !hasAnyRole(to.meta.roles)) {
+    // 6. Validar roles (si `to.meta.roles` está definido)
+    if (to.meta.roles && !hasAnyRole(to.meta.roles as string[])) {
       return next('/403');
     }
 
-    // Validar permisos si están definidos en meta
-    if (to.meta.permissions && !hasAllPermissions(to.meta.permissions)) {
+    // 7. Validar permisos (si `to.meta.permissions` está definido)
+    if (to.meta.permissions && !hasAllPermissions(to.meta.permissions as string[])) {
       return next('/403');
     }
 
+    // 8. Si nada falla, acceder a la ruta
     next();
   } catch (error) {
-    console.error(error);
-    doLogout();
+    console.error('Error en la navegación:', error);
+    // Forzar logout y redirigir a login si algo falla
+    await doLogout();
     next('/login');
   }
 });
-
-
 
 export default router;

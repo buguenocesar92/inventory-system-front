@@ -28,15 +28,16 @@
         </div>
 
         <!-- Menú de usuario -->
-        <UserDropdown v-if="isLoggedIn" />
+        <!-- <UserDropdown v-if="isLoggedIn" /> -->
+        <UserDropdown />
       </div>
     </div>
   </nav>
 </template>
 
 <script setup lang="ts">
-import { defineEmits, computed } from 'vue';
-import { useAuthGuard } from '@/composables/useAuthGuard';
+/* import { defineEmits, computed } from 'vue';
+import { useAuthGuard } from '@/composables/useAuthGuard'; */
 import UserDropdown from '@/components/UserDropdown.vue';
 import IconMenu from '@/components/icons/IconMenu.vue'; // Ícono del menú hamburguesa
 
@@ -44,7 +45,7 @@ import IconMenu from '@/components/icons/IconMenu.vue'; // Ícono del menú hamb
 defineProps({
   logoSrc: {
     type: String,
-    default: 'https://flowbite.com/docs/images/logo.svg',
+    default: 'https://img.freepik.com/vector-gratis/vector-degradado-logotipo-colorido-pajaro_343694-1365.jpg',
   },
   logoAlt: {
     type: String,
@@ -65,6 +66,6 @@ const toggleSidebar = () => {
 };
 
 // Lógica de autenticación
-const { isAuthenticated } = useAuthGuard();
-const isLoggedIn = computed(() => isAuthenticated());
+/* const { isAuthenticated } = useAuthGuard(); */
+/* const isLoggedIn = computed(() => isAuthenticated()); */
 </script>

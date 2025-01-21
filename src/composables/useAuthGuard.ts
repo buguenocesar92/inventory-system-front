@@ -1,50 +1,59 @@
 // src/composables/useAuthGuard.ts
 import { useAuthStore } from '@/stores/authStore';
+import { storeToRefs } from 'pinia';
 
-/**
- * Composable que centraliza la lógica de autenticación y permisos
- */
 export function useAuthGuard() {
   const authStore = useAuthStore();
+  const { isAuthenticated, accessToken, refreshToken, roles, permissions } = storeToRefs(authStore);
 
-  // Saber si el usuario está autenticado
-  function isAuthenticated() {
-    return authStore.isAuthenticated;
-  }
-
-  // Verificar tokens/localStorage con checkAuth
+  /**
+   * Verifica si hay tokens en localStorage y actualiza el estado
+   */
   async function checkAuth() {
-    try {
-      await authStore.checkAuth();
-    } catch {
-      throw new Error('Error al verificar autenticación');
-    }
+    authStore.checkAuth();
+    // Si deseas validar tokens en el servidor antes de setear isAuthenticated,
+    // podrías añadir lógica extra aquí.
   }
 
-  // Cargar roles y permisos solo si faltan
+  /**
+   * Carga roles y permisos solo si aún no han sido cargados
+   */
   async function fetchUserDataIfNeeded() {
-    if (!authStore.roles.length || !authStore.permissions.length) {
+    if (!roles.value.length || !permissions.value.length) {
       await authStore.fetchUserData();
     }
   }
 
-  // Verificar si tiene algún rol requerido
-  function hasAnyRole(roles: string[]) {
-    return roles.some(role => authStore.hasRole(role));
+  /**
+   * Verifica si el usuario tiene al menos uno de los roles solicitados
+   */
+  function hasAnyRole(requiredRoles: string[]): boolean {
+    return requiredRoles.some((role) => authStore.hasRole(role));
   }
 
-  // Verificar si tiene todos los permisos requeridos
-  function hasAllPermissions(permissions: string[]) {
-    return permissions.every(perm => authStore.hasPermission(perm));
+  /**
+   * Verifica si el usuario tiene todos los permisos solicitados
+   */
+  function hasAllPermissions(requiredPermissions: string[]): boolean {
+    return requiredPermissions.every((perm) => authStore.hasPermission(perm));
   }
 
-  // Método opcional para logout
-  function doLogout() {
-    authStore.logout();
+  /**
+   * Método opcional para forzar el logout
+   */
+  async function doLogout() {
+    await authStore.logout();
   }
 
   return {
+    // Estado reactivo
     isAuthenticated,
+    accessToken,
+    refreshToken,
+    roles,
+    permissions,
+
+    // Métodos
     checkAuth,
     fetchUserDataIfNeeded,
     hasAnyRole,
