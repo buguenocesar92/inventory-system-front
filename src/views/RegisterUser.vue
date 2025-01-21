@@ -1,3 +1,56 @@
+<script setup lang="ts">
+import { ref, defineOptions } from 'vue';
+import FormInput from '@/components/FormInput.vue';
+import { registerUser } from '@/services/UserService';
+import { useFormValidation } from '@/composables/useFormValidation';
+import { useNotification } from '@/composables/useNotification';
+import type { RegisterUser } from '@/types/UserTypes';
+
+// (Opcional) Asigna un nombre interno al componente para devtools/debugging
+defineOptions({ name: 'RegisterUser' });
+
+// Estado del formulario
+const form = ref<RegisterUser>({
+  name: '',
+  email: '',
+  password: '',
+});
+
+const isLoading = ref(false);
+
+// Composables
+const { errors, handleValidationError } = useFormValidation();
+const { showSuccessNotification } = useNotification();
+
+/**
+ * Maneja el evento de registro de usuario
+ */
+async function handleRegister() {
+  isLoading.value = true;
+  try {
+    await registerUser(form.value);
+
+    // Notificación de éxito
+    await showSuccessNotification(
+      'User Registered',
+      'The user has been registered successfully.'
+    );
+
+    resetForm();
+  } catch (error) {
+    handleValidationError(error);
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+/**
+ * Reinicia el formulario
+ */
+function resetForm() {
+  form.value = { name: '', email: '', password: '' };
+}
+</script>
 <template>
   <div class="flex flex-col items-center justify-center py-20">
     <div class="w-full max-w-md bg-white shadow-md rounded px-8 py-6">
@@ -9,7 +62,7 @@
           id="name"
           label="Name"
           v-model="form.name"
-          :error="errors.name ? errors.name[0] : undefined"
+          :error="errors.name?.[0]"
           required
         />
 
@@ -18,7 +71,7 @@
           id="email"
           label="Email"
           v-model="form.email"
-          :error="errors.email ? errors.email[0] : undefined"
+          :error="errors.email?.[0]"
           type="email"
           required
         />
@@ -28,7 +81,7 @@
           id="password"
           label="Password"
           v-model="form.password"
-          :error="errors.password ? errors.password[0] : undefined"
+          :error="errors.password?.[0]"
           type="password"
           required
         />
@@ -45,60 +98,3 @@
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import { ref } from 'vue';
-import FormInput from '@/components/FormInput.vue';
-import { registerUser } from '@/services/UserService';
-import { useFormValidation } from '@/composables/useFormValidation';
-import { useNotification } from '@/composables/useNotification';
-import type { RegisterUser } from '@/types/UserTypes';
-
-export default {
-  name: 'RegisterUser',
-  components: { FormInput },
-  setup() {
-    const form = ref<RegisterUser>({
-      name: '',
-      email: '',
-      password: '',
-    });
-
-    const isLoading = ref(false);
-
-    const { errors, handleValidationError } = useFormValidation();
-    const { showSuccessNotification } = useNotification();
-
-    const handleRegister = async () => {
-      isLoading.value = true;
-
-      try {
-        await registerUser(form.value);
-
-        // Mostrar notificación de éxito
-        await showSuccessNotification(
-          'User Registered',
-          'The user has been registered successfully.'
-        );
-
-        resetForm();
-      } catch (error) {
-        handleValidationError(error);
-      } finally {
-        isLoading.value = false;
-      }
-    };
-
-    const resetForm = () => {
-      form.value = { name: '', email: '', password: '' };
-    };
-
-    return {
-      form,
-      isLoading,
-      errors,
-      handleRegister,
-    };
-  },
-};
-</script>
