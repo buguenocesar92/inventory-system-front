@@ -1,3 +1,48 @@
+<!-- src/views/Products/AddProduct.vue -->
+<script setup lang="ts">
+import { ref } from 'vue';
+import FormInput from '@/components/FormInput.vue';
+import { useFormValidation } from '@/composables/useFormValidation';
+import { useNotification } from '@/composables/useNotification';
+import { addProduct } from '@/services/ProductService';
+import type { ProductPayload } from '@/types/ProductTypes';
+
+const form = ref<ProductPayload>({
+  name: '',
+  category: '',
+  brand: '',
+  barcode: '',
+  description: '',
+  image_url: '',
+  unit_price: 0,
+});
+
+const isLoading = ref(false);
+
+// Composables para validación y notificaciones
+const { errors, errorMessage, handleValidationError } = useFormValidation();
+const { showSuccessNotification } = useNotification();
+
+// Lógica para crear un producto
+async function handleAddProduct() {
+  isLoading.value = true;
+  try {
+    await addProduct(form.value);
+
+    // Notificación de éxito y redirección
+    await showSuccessNotification(
+      'Success!',
+      'Product added successfully.',
+      '/list-product'
+    );
+  } catch (error) {
+    handleValidationError(error);
+  } finally {
+    isLoading.value = false;
+  }
+}
+</script>
+
 <template>
   <div class="flex flex-col items-center justify-center py-20">
     <div class="w-full max-w-md bg-white shadow-md rounded px-8 py-6">
@@ -6,62 +51,62 @@
       <form @submit.prevent="handleAddProduct" class="space-y-6">
         <!-- Campo Nombre del Producto -->
         <FormInput
+          v-model="form.name"
           id="name"
           label="Product Name"
-          v-model="form.name"
-          :error="errors.name ? errors.name[0] : undefined"
+          :error="errors.name?.[0]"
           required
         />
 
         <!-- Campo Categoría -->
         <FormInput
+          v-model="form.category"
           id="category"
           label="Category"
-          v-model="form.category"
-          :error="errors.category ? errors.category[0] : undefined"
+          :error="errors.category?.[0]"
           required
         />
 
         <!-- Campo Marca -->
         <FormInput
+          v-model="form.brand"
           id="brand"
           label="Brand"
-          v-model="form.brand"
-          :error="errors.brand ? errors.brand[0] : undefined"
+          :error="errors.brand?.[0]"
         />
 
         <!-- Campo Código de Barras -->
         <FormInput
+          v-model="form.barcode"
           id="barcode"
           label="Barcode"
-          v-model="form.barcode"
-          :error="errors.barcode ? errors.barcode[0] : undefined"
+          :error="errors.barcode?.[0]"
         />
 
         <!-- Campo Descripción -->
         <FormInput
+          v-model="form.description"
           id="description"
           label="Description"
-          v-model="form.description"
-          :error="errors.description ? errors.description[0] : undefined"
+          :error="errors.description?.[0]"
           textarea
         />
 
         <!-- Campo URL de Imagen -->
         <FormInput
+          v-model="form.image_url"
           id="image_url"
           label="Image URL"
-          v-model="form.image_url"
-          :error="errors.image_url ? errors.image_url[0] : undefined"
+          :error="errors.image_url?.[0]"
           type="url"
         />
 
         <!-- Campo Precio Unitario -->
         <FormInput
+          v-model="form.unit_price"
           id="unit_price"
           label="Unit Price"
-          v-model="form.unit_price"
-          :error="errors.unit_price ? errors.unit_price[0] : undefined"
+          :error="errors.unit_price?.[0]"
           type="number"
           required
         />
@@ -79,56 +124,3 @@
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import { ref } from 'vue';
-import { addProduct } from '@/services/ProductService';
-import FormInput from '@/components/FormInput.vue';
-import { useFormValidation } from '@/composables/useFormValidation';
-import { useNotification } from '@/composables/useNotification';
-import type { ProductPayload } from '@/types/ProductTypes';
-
-export default {
-  name: 'AddProduct',
-  components: { FormInput },
-  setup() {
-    const { showSuccessNotification } = useNotification();
-    const { errors, errorMessage, handleValidationError } = useFormValidation();
-
-    const form = ref<ProductPayload>({
-      name: '',
-      category: '',
-      brand: '',
-      barcode: '',
-      description: '',
-      image_url: '',
-      unit_price: 0,
-    });
-
-    const isLoading = ref(false);
-
-    const handleAddProduct = async () => {
-      isLoading.value = true;
-
-      try {
-        await addProduct(form.value);
-
-        // Mostrar alerta de éxito con SweetAlert2
-        await showSuccessNotification('Success!', 'Product updated successfully.', '/list-product');
-      } catch (error) {
-        handleValidationError(error); // Usar el composable para manejar errores
-      } finally {
-        isLoading.value = false;
-      }
-    };
-
-    return {
-      form,
-      isLoading,
-      errors,
-      errorMessage,
-      handleAddProduct,
-    };
-  },
-};
-</script>

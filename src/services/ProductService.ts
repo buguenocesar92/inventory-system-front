@@ -1,53 +1,75 @@
+// src/services/ProductService.ts
 import axios from '@/axiosConfig';
-import type { ProductPayload, FetchProductsResponse } from '@/types/ProductTypes';
+import type {
+  Product,
+  ProductPayload,
+  FetchProductsResponse
+} from '@/types/ProductTypes';
 
-// Obtener productos con paginación, búsqueda y ordenamiento
-export const fetchProducts = async ({
-  page,
-  itemsPerPage,
-  sortBy,
-  search,
-}: {
+/**
+ * Parámetros para filtrar, paginar y buscar productos.
+ */
+interface FetchProductsParams {
   page: number;
   itemsPerPage: number;
   sortBy: { key: string; order: string }[];
   search: string;
-}): Promise<FetchProductsResponse> => {
+}
+
+/**
+ * Obtener productos con paginación, búsqueda y ordenamiento.
+ */
+export async function fetchProducts({
+  page,
+  itemsPerPage,
+  sortBy,
+  search,
+}: FetchProductsParams): Promise<FetchProductsResponse> {
   const response = await axios.get('/products', {
     params: { page, itemsPerPage, sortBy, search },
   });
-
   return {
-    items: response.data.items, // Productos desde el backend
-    total: response.data.total, // Total de productos desde el backend
+    items: response.data.items,
+    total: response.data.total,
   };
-};
+}
 
-// Agregar un producto
-export const addProduct = async (payload: ProductPayload): Promise<ProductPayload> => {
+/**
+ * Agregar un producto.
+ * Retorna el producto creado con 'id' asignado por la API.
+ */
+export async function addProduct(payload: ProductPayload): Promise<Product> {
   const response = await axios.post('/products', payload);
   return response.data;
-};
+}
 
-// Actualizar un producto
-export const updateProduct = async (id: number, payload: ProductPayload): Promise<ProductPayload> => {
+/**
+ * Actualizar un producto existente.
+ */
+export async function updateProduct(id: number, payload: ProductPayload): Promise<Product> {
   const response = await axios.put(`/products/${id}`, payload);
   return response.data;
-};
+}
 
-// Eliminar un producto
-export const deleteProduct = async (id: number): Promise<void> => {
+/**
+ * Eliminar un producto por 'id'.
+ */
+export async function deleteProduct(id: number): Promise<void> {
   await axios.delete(`/products/${id}`);
-};
+}
 
-// Obtener un producto por ID
-export const fetchProduct = async (id: number): Promise<ProductPayload> => {
+/**
+ * Obtener un producto por 'id'.
+ */
+export async function fetchProduct(id: number): Promise<Product> {
   const response = await axios.get(`/products/${id}`);
   return response.data;
-};
+}
 
-// Obtener un producto por código de barras
-export const fetchProductByBarcode = async (barcode: string): Promise<ProductPayload> => {
+/**
+ * Obtener un producto por código de barras.
+ */
+export async function fetchProductByBarcode(barcode: string): Promise<Product> {
   const response = await axios.get(`/products/barcode/${barcode}`);
   return response.data;
-};
+}
