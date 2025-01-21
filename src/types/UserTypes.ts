@@ -11,12 +11,15 @@ export interface RegisterUser {
 
 /**
  * Representa un usuario existente en el sistema.
+ * - `password` es opcional porque en muchos casos no se devuelve/usa.
+ * - `created_at` y `updated_at` también pueden ser opcionales
+ *   dependiendo de cómo devuelva datos tu backend.
  */
 export interface User {
   id: number;
   name: string;
   email: string;
-  // En algunos casos puede no ser recomendable exponer el password,
-  // pero aquí se incluye tal como lo definiste:
-  password: string;
+  password?: string;
+  created_at?: string;
+  updated_at?: string;
 }

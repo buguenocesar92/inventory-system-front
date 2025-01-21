@@ -1,3 +1,6 @@
+// src/types/RoleTypes.ts
+import type { User } from './UserTypes';
+
 /**
  * Representa un permiso.
  */
@@ -5,17 +8,6 @@ export interface Permission {
   id: number;
   name: string;
   guard_name: string;
-  created_at: string;
-  updated_at: string;
-}
-
-/**
- * Representa un usuario.
- */
-export interface User {
-  id: number;
-  name: string;
-  email: string;
   created_at: string;
   updated_at: string;
 }
@@ -31,11 +23,11 @@ export interface Role {
   created_at: string;
   updated_at: string;
   permissions: Permission[];
-  users: User[];
+  users: User[];  // <-- usamos la interfaz unificada de User
 }
 
 /**
- * Formularios de creación/edición (si los usas).
+ * Formularios de creación/edición de Roles (si los necesitas).
  */
 export interface CreateRoleForm {
   name: string;
