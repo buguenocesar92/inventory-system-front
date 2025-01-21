@@ -1,6 +1,6 @@
 <!-- src/views/RolesPermissions/RolePermissionEdit.vue -->
 <script setup lang="ts">
-import { ref, onMounted, defineOptions } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
   fetchRoleById,
@@ -15,9 +15,6 @@ import { useNotification } from '@/composables/useNotification';
 import { useFormValidation } from '@/composables/useFormValidation';
 import type { Role, Permission } from '@/types/RoleTypes';
 import type { User } from '@/types/UserTypes';
-
-// Asigna un nombre al componente (opcional, útil para devtools o debugging)
-defineOptions({ name: 'RolePermissionEdit' });
 
 // State principal
 const role = ref<Role | null>(null);
