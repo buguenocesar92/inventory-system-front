@@ -1,53 +1,4 @@
-<template>
-  <div class="flex flex-col bg-gray-100">
-    <!-- Botón para registro (opcional) -->
-    <GoToRegisterButton />
-
-    <div class="flex flex-1 overflow-hidden">
-      <!-- Tabla de Roles -->
-      <div class="flex-1 bg-white p-4 flex flex-col">
-        <v-data-table
-          :headers="headers"
-          :items="roles"
-          class="elevation-1 flex-1"
-          dense
-        >
-          <template #body="{ items }">
-            <tr v-for="(role, index) in items" :key="index">
-              <td class="border px-2 py-1">{{ role.name }}</td>
-
-              <!-- Permisos (asociados a cada rol) -->
-              <td class="border px-2 py-1">
-                <ul>
-                  <li v-for="permission in role.permissions" :key="permission.id">
-                    {{ permission.name }}
-                  </li>
-                </ul>
-              </td>
-
-              <!-- Usuarios asociados al rol -->
-              <td class="border px-2 py-1">
-                <ul>
-                  <li v-for="user in role.users" :key="user.id">
-                    {{ user.name }} ({{ user.email }})
-                  </li>
-                </ul>
-              </td>
-
-              <!-- Columna Acciones (Editar) -->
-              <td class="border px-2 py-1">
-                <v-btn color="primary" @click="goToRoleEdit(role.id)">
-                  Editar
-                </v-btn>
-              </td>
-            </tr>
-          </template>
-        </v-data-table>
-      </div>
-    </div>
-  </div>
-</template>
-
+<!-- src/views/RolesPermissions/RolePermissionManager.vue -->
 <script setup lang="ts">
 import { ref, onMounted, defineOptions } from 'vue';
 import { useRouter } from 'vue-router';
@@ -111,11 +62,52 @@ function goToRoleEdit(roleId: number) {
 // Cargar roles al montar el componente
 onMounted(fetchRoles);
 </script>
+<template>
+  <div class="flex flex-col bg-gray-100">
+    <!-- Botón para registro (opcional) -->
+    <GoToRegisterButton />
 
-<style scoped>
-.table th,
-.table td {
-  padding: 0.5rem;
-  text-align: left;
-}
-</style>
+    <div class="flex flex-1 overflow-hidden">
+      <!-- Tabla de Roles -->
+      <div class="flex-1 bg-white p-4 flex flex-col">
+        <v-data-table
+          :headers="headers"
+          :items="roles"
+          class="elevation-1 flex-1"
+          dense
+        >
+          <template #body="{ items }">
+            <tr v-for="(role, index) in items" :key="index">
+              <td class="border px-2 py-1">{{ role.name }}</td>
+
+              <!-- Permisos (asociados a cada rol) -->
+              <td class="border px-2 py-1">
+                <ul>
+                  <li v-for="permission in role.permissions" :key="permission.id">
+                    {{ permission.name }}
+                  </li>
+                </ul>
+              </td>
+
+              <!-- Usuarios asociados al rol -->
+              <td class="border px-2 py-1">
+                <ul>
+                  <li v-for="user in role.users" :key="user.id">
+                    {{ user.name }} ({{ user.email }})
+                  </li>
+                </ul>
+              </td>
+
+              <!-- Columna Acciones (Editar) -->
+              <td class="border px-2 py-1">
+                <v-btn color="primary" @click="goToRoleEdit(role.id)">
+                  Editar
+                </v-btn>
+              </td>
+            </tr>
+          </template>
+        </v-data-table>
+      </div>
+    </div>
+  </div>
+</template>
