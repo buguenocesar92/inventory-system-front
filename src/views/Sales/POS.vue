@@ -3,13 +3,11 @@
 import { onMounted } from 'vue';
 import { useCashRegister } from '@/composables/useCashRegister';
 import { usePOS } from '@/composables/usePOS';
-import { useRouter } from 'vue-router';
-import CashRegisterOpen from '@/components/Sales/CashRegisterOpen.vue';
+import { useRouter } from 'vue-router'; // Importa el router para la redirección
 import POSSearch from '@/components/Sales/POSSearch.vue';
 import POSProductTable from '@/components/Sales/POSProductTable.vue';
 import POSTotals from '@/components/Sales/POSTotals.vue';
 
-const router = useRouter();
 const { isOpen, fetchCashRegisterStatus } = useCashRegister();
 const {
   selectedItems,
@@ -24,20 +22,24 @@ const {
   updateQuantity,
 } = usePOS();
 
+const router = useRouter(); // Instancia del router
+
 // Consultar el estado de la caja al montar el componente
 onMounted(fetchCashRegisterStatus);
 
-// Redirigir al cierre de caja
+// Función para redirigir al cierre de caja
 function navigateToCloseRegister() {
   router.push({ name: 'CashRegisterClose' });
 }
 </script>
 
 <template>
-  <!-- Apertura de Caja -->
-  <CashRegisterOpen v-if="!isOpen" />
+  <div v-if="!isOpen" class="p-4 bg-gray-100 flex flex-col items-center">
+    <h2 class="text-xl font-bold">Caja Cerrada</h2>
+    <p class="text-gray-600">Por favor, abre la caja para continuar.</p>
+    <v-btn color="primary" to="/cash-register-open">Ir a Apertura de Caja</v-btn>
+  </div>
 
-  <!-- POS Principal -->
   <div v-else class="flex flex-col bg-gray-100 container-fill">
     <div class="flex flex-1 overflow-hidden">
       <!-- Panel Central -->
@@ -66,7 +68,9 @@ function navigateToCloseRegister() {
 
     <!-- Botón para Cerrar Caja -->
     <div class="p-4 bg-gray-100 flex justify-end">
-      <v-btn color="error" @click="navigateToCloseRegister">Cerrar Caja</v-btn>
+      <v-btn color="error" @click="navigateToCloseRegister">
+        Cerrar Caja
+      </v-btn>
     </div>
   </div>
 </template>

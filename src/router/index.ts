@@ -18,6 +18,7 @@ import AccessDenied from '@/views/AccessDenied.vue';
 import RolePermissionManager from '@/views/RolesPermissions/RolePermissionManager.vue';
 import RolePermissionEdit from '@/views/RolesPermissions/RolePermissionEdit.vue';
 import CashRegisterClose from '@/views/Sales/CashRegisterClose.vue';
+import CashRegisterOpen from '@/views/Sales/CashRegisterOpen.vue';
 
 const routes = [
   {
@@ -103,6 +104,12 @@ const routes = [
       label: 'Cerrar Caja',
       icon: 'M4 6h16M4 12h16m-7 6h7', // Opcional si se usa un menú lateral
     },
+  },
+  {
+    path: '/cash-register-open',
+    name: 'CashRegisterOpen',
+    component: CashRegisterOpen,
+    meta: { requiresAuth: true, permissions: ['cash-register.open'], sidebar: false },
   },
   {
     path: '/403',

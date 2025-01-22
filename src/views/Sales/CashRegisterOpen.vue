@@ -1,23 +1,20 @@
+<!-- src/views/Sales/CashRegisterOpen.vue -->
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { useCashRegister } from '@/composables/useCashRegister';
 
 const openingAmount = ref(0);
 const { isLoading, handleOpenCashRegister } = useCashRegister();
-const router = useRouter();
 
 async function openCashRegister() {
-  if (openingAmount.value > 0) {
-    try {
-      await handleOpenCashRegister(openingAmount.value);
-      console.log('Caja abierta. Redirigiendo al POS...');
-      router.push({ name: 'POS' }); // Verifica si el nombre es correcto
-    } catch (error) {
-      console.error('Error al abrir la caja:', error);
+  try {
+    if (openingAmount.value <= 0) {
+      alert('El monto de apertura debe ser mayor a 0.');
+      return;
     }
-  } else {
-    alert('El monto de apertura debe ser mayor a 0.');
+    await handleOpenCashRegister(openingAmount.value);
+  } catch (error) {
+    console.error('Error al abrir la caja:', error);
   }
 }
 </script>
