@@ -17,6 +17,7 @@ import POS from '@/views/Sales/POS.vue';
 import AccessDenied from '@/views/AccessDenied.vue';
 import RolePermissionManager from '@/views/RolesPermissions/RolePermissionManager.vue';
 import RolePermissionEdit from '@/views/RolesPermissions/RolePermissionEdit.vue';
+import CashRegisterClose from '@/views/Sales/CashRegisterClose.vue';
 
 const routes = [
   {
@@ -90,6 +91,18 @@ const routes = [
     component: RolePermissionEdit,
     meta: { requiresAuth: true, permissions: ['roles.with-permissions.show'], sidebar: false },
     props: true,
+  },
+  {
+    path: '/close-cash-register',
+    name: 'CashRegisterClose',
+    component: CashRegisterClose,
+    meta: {
+      requiresAuth: true,
+      permissions: ['cash-register.close'], // Permiso necesario para cerrar caja
+      sidebar: false, // No se muestra en el sidebar
+      label: 'Cerrar Caja',
+      icon: 'M4 6h16M4 12h16m-7 6h7', // Opcional si se usa un menú lateral
+    },
   },
   {
     path: '/403',
