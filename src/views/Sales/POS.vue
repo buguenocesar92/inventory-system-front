@@ -27,13 +27,12 @@ onMounted(fetchCashRegisterStatus);
 </script>
 
 <template>
-  <div class="flex flex-col bg-gray-100 container-fill">
+  <CashRegisterOpen v-if="!isOpen" />
+  <div v-else class="flex flex-col bg-gray-100 container-fill">
     <div class="flex flex-1 overflow-hidden">
-      <!-- Si la caja está cerrada, mostrar apertura -->
-      <CashRegisterOpen v-if="!isOpen" />
 
-      <!-- Si la caja está abierta, mostrar POS -->
-      <div v-else class="flex-1 bg-white p-4 flex flex-col">
+      <!-- Panel Central -->
+      <div  class="flex-1 bg-white p-4 flex flex-col">
         <!-- Componente de Búsqueda -->
         <POSSearch @search="handleSearch" :error="searchError" />
 
@@ -43,17 +42,19 @@ onMounted(fetchCashRegisterStatus);
           @remove="removeItem"
           @update-quantity="updateQuantity"
         />
-
-        <!-- Panel Derecho -->
-        <POSTotals
-          :total="totalAmount"
-          :is-loading="isLoading"
-          :has-items="selectedItems.length > 0"
-          @confirm="confirmSale"
-          @clear="clearSale"
-          :sale-error="saleError"
-        />
       </div>
+
+      <!-- Panel Derecho -->
+      <POSTotals
+        :total="totalAmount"
+        :is-loading="isLoading"
+        :has-items="selectedItems.length > 0"
+        @confirm="confirmSale"
+        @clear="clearSale"
+        :sale-error="saleError"
+      />
     </div>
   </div>
+
+
 </template>
