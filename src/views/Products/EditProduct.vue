@@ -1,92 +1,20 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
+import { useEditProduct } from '@/composables/useEditProduct';
 import FormInput from '@/components/FormInput.vue';
-import { fetchProduct, updateProduct } from '@/services/ProductService';
-import { fetchCategories } from '@/services/CategoryService'; // Servicio para obtener categorías
-import { useFormValidation } from '@/composables/useFormValidation';
-import { useNotification } from '@/composables/useNotification';
-import type { ProductPayload } from '@/types/ProductTypes';
-import type { CategoryPayload } from '@/types/CategoryTypes'; // Define el tipo para categorías
 
-// Rutas
 const route = useRoute();
-const router = useRouter();
 const productId = Number(route.params.id);
 
-// Estado del formulario con valores por defecto
-const form = ref<ProductPayload>({
-  name: '',
-  category_id: 0,
-  brand: '',
-  barcode: '',
-  description: '',
-  image_url: '',
-  unit_price: 0,
-});
-
-// Estado para categorías disponibles
-const categories = ref<CategoryPayload[]>([]);
-
-// Loading y control de errores
-const isLoading = ref(false);
-const { errors, errorMessage, handleValidationError } = useFormValidation();
-const { showSuccessNotification } = useNotification();
-
-/**
- * Carga los datos de un producto al montar el componente.
- */
-async function fetchProductData() {
-  try {
-    isLoading.value = true;
-    const product = await fetchProduct(productId);
-    if (product) {
-      // Asignamos el producto a 'form' para editarlo
-      form.value = product;
-    } else {
-      // Si no existe, redirige a 404
-      router.push('/404');
-    }
-  } catch (error) {
-    handleValidationError(error);
-  } finally {
-    isLoading.value = false;
-  }
-}
-
-/**
- * Carga las categorías disponibles.
- */
-async function fetchCategoriesData() {
-  try {
-    const fetchedCategories = await fetchCategories();
-    categories.value = fetchedCategories;
-    console.log('Categories loaded:', categories.value);
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-  }
-}
-
-/**
- * Envía la actualización del producto al backend.
- */
-async function handleEditProduct() {
-  isLoading.value = true;
-  try {
-    await updateProduct(productId, form.value);
-    await showSuccessNotification('Success!', 'Product updated successfully.', '/list-product');
-  } catch (error) {
-    handleValidationError(error);
-  } finally {
-    isLoading.value = false;
-  }
-}
-
-// Montar (cargar datos del producto y categorías)
-onMounted(async () => {
-  await fetchProductData();
-  await fetchCategoriesData();
-});
+// Usamos el composable pasándole el productId
+const {
+  form,
+  categories,
+  isLoading,
+  errors,
+  errorMessage,
+  handleEditProduct,
+} = useEditProduct(productId);
 
 </script>
 
