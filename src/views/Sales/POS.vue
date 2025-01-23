@@ -45,7 +45,7 @@ function navigateToCloseRegister() {
       <!-- Panel Central -->
       <div class="flex-1 bg-white p-4 flex flex-col">
         <!-- Componente de Búsqueda -->
-        <POSSearch @search="handleSearch" :error="searchError" />
+        <POSSearch @search="handleSearch" :error="searchError ?? undefined" />
 
         <!-- Tabla de Productos -->
         <POSProductTable
