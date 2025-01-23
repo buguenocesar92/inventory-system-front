@@ -1,109 +1,26 @@
-<!-- src/views/Products/ProductList.vue -->
 <script setup lang="ts">
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { fetchProducts, deleteProduct as deleteProductService  } from '@/services/ProductService';
-import { debounce } from '@/utils/debounce';
-import { useFormValidation } from '@/composables/useFormValidation';
-import { useNotification } from '@/composables/useNotification';
-import type { FetchProductsResponse, Product } from '@/types/ProductTypes';
+import { useProductList } from '@/composables/useProductList';
 
-/**
- * Estado local
- */
 const router = useRouter();
-const itemsPerPage = ref(5);
-const isLoading = ref(false);
-const serverItems = ref<Product[]>([]);
-const totalItems = ref(0);
-const search = ref('');
-const deletingProductId = ref<number | null>(null);
 
-// Para manejar validaciones y notificaciones
-const { showSuccessNotification } = useNotification();
-const { errorMessage, handleValidationError } = useFormValidation();
+// Obtenemos todo del composable
+const {
+  itemsPerPage,
+  isLoading,
+  serverItems,
+  totalItems,
+  search,
+  deletingProductId,
+  headers,
+  errorMessage,
 
-/**
- * Columnas de la tabla
- */
-const headers = ref([
-  { title: 'Name', value: 'name', sortable: true },
-  { title: 'Category', value: 'category.name', sortable: true },
-  { title: 'Unit Price', value: 'unit_price', sortable: true },
-  { title: 'Current Stock', value: 'current_stock', sortable: true },
-  { title: 'Actions', value: 'actions', sortable: false },
-]);
+  loadItems,
+  deleteProductHandler,
+  onSearchInput,
+} = useProductList();
 
-/**
- * Tipado de la configuración que VDataTableServer dispara
- * al hacer paginación, sort, etc.
- */
-interface DataTableParams {
-  page: number;
-  itemsPerPage: number;
-  sortBy: { key: string; order: string }[];
-}
-
-/**
- * Carga los productos del servidor según params
- */
-async function loadItems(params: DataTableParams) {
-  isLoading.value = true;
-  try {
-    const { items, total }: FetchProductsResponse = await fetchProducts({
-      page: params.page,
-      itemsPerPage: params.itemsPerPage,
-      sortBy: params.sortBy,
-      search: search.value,
-    });
-    serverItems.value = items;
-    totalItems.value = total;
-  } catch (error) {
-    handleValidationError(error);
-  } finally {
-    isLoading.value = false;
-  }
-}
-
-/**
- * Elimina un producto por su ID
- */
-async function deleteProductHandler(id: number) {
-  deletingProductId.value = id;
-  try {
-    await deleteProductService(id);
-    await showSuccessNotification('Success!', 'Product updated successfully.', '/list-product');
-    serverItems.value = serverItems.value.filter((product: Product) => product.id !== id);
-  } catch (error) {
-    handleValidationError(error);
-    // Si es un error de permisos:
-    if (errorMessage.value === 'You do not have permission to perform this action.') {
-      router.push('/403');
-    }
-  } finally {
-    deletingProductId.value = null;
-  }
-}
-
-/**
- * Debounce para no sobrecargar la búsqueda
- */
-const debouncedLoadItems = debounce((params: DataTableParams) => loadItems(params), 300);
-
-/**
- * Al escribir en el campo de búsqueda,
- * recargamos los items desde la página 1
- */
-function onSearchInput() {
-  debouncedLoadItems({
-    page: 1,
-    itemsPerPage: itemsPerPage.value,
-    sortBy: [],
-  });
-}
-
-// Exponemos funciones y estado para usarlas en el template
-// (Con <script setup> no hace falta "return", podemos usarlas directamente)
+// Función que llamamos en el template para eliminar producto
 function deleteProduct(id: number) {
   deleteProductHandler(id);
 }
@@ -193,5 +110,8 @@ function deleteProduct(id: number) {
         </v-btn>
       </template>
     </v-data-table-server>
+
+    <!-- Errores generales -->
+    <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>
   </div>
 </template>
