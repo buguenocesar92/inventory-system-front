@@ -1,28 +1,32 @@
-<!-- src/views/Products/EditProduct.vue -->
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import FormInput from '@/components/FormInput.vue';
 import { fetchProduct, updateProduct } from '@/services/ProductService';
+import { fetchCategories } from '@/services/CategoryService'; // Servicio para obtener categorías
 import { useFormValidation } from '@/composables/useFormValidation';
 import { useNotification } from '@/composables/useNotification';
 import type { ProductPayload } from '@/types/ProductTypes';
+import type { CategoryPayload } from '@/types/CategoryTypes'; // Define el tipo para categorías
 
 // Rutas
 const route = useRoute();
 const router = useRouter();
 const productId = Number(route.params.id);
 
-// Estado del formulario con valores por defecto (evitando 'undefined')
+// Estado del formulario con valores por defecto
 const form = ref<ProductPayload>({
   name: '',
-  category: '',
+  category_id: 0,
   brand: '',
   barcode: '',
   description: '',
   image_url: '',
   unit_price: 0,
 });
+
+// Estado para categorías disponibles
+const categories = ref<CategoryPayload[]>([]);
 
 // Loading y control de errores
 const isLoading = ref(false);
@@ -51,6 +55,19 @@ async function fetchProductData() {
 }
 
 /**
+ * Carga las categorías disponibles.
+ */
+async function fetchCategoriesData() {
+  try {
+    const fetchedCategories = await fetchCategories();
+    categories.value = fetchedCategories;
+    console.log('Categories loaded:', categories.value);
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+  }
+}
+
+/**
  * Envía la actualización del producto al backend.
  */
 async function handleEditProduct() {
@@ -65,9 +82,14 @@ async function handleEditProduct() {
   }
 }
 
-// Montar (cargar datos del producto)
-onMounted(fetchProductData);
+// Montar (cargar datos del producto y categorías)
+onMounted(async () => {
+  await fetchProductData();
+  await fetchCategoriesData();
+});
+
 </script>
+
 <template>
   <div class="container mx-auto">
     <h1 class="text-2xl font-bold mb-4">Edit Product</h1>
@@ -82,12 +104,16 @@ onMounted(fetchProductData);
         required
       />
 
-      <!-- Categoría -->
-      <FormInput
-        id="category"
+      <!-- Selector de Categorías -->
+      <v-select
+        v-model="form.category_id"
+        :items="categories"
+        item-title="name"
+        item-value="id"
         label="Category"
-        v-model="form.category"
-        :error="errors.category?.[0]"
+        outlined
+        dense
+        :error="errors.category_id?.[0]"
         required
       />
 

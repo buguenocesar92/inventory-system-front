@@ -6,7 +6,7 @@ import { fetchProducts, deleteProduct as deleteProductService  } from '@/service
 import { debounce } from '@/utils/debounce';
 import { useFormValidation } from '@/composables/useFormValidation';
 import { useNotification } from '@/composables/useNotification';
-import type { ProductPayload, FetchProductsResponse } from '@/types/ProductTypes';
+import type { FetchProductsResponse, Product } from '@/types/ProductTypes';
 
 /**
  * Estado local
@@ -14,7 +14,7 @@ import type { ProductPayload, FetchProductsResponse } from '@/types/ProductTypes
 const router = useRouter();
 const itemsPerPage = ref(5);
 const isLoading = ref(false);
-const serverItems = ref<ProductPayload[]>([]);
+const serverItems = ref<Product[]>([]);
 const totalItems = ref(0);
 const search = ref('');
 const deletingProductId = ref<number | null>(null);
@@ -28,7 +28,7 @@ const { errorMessage, handleValidationError } = useFormValidation();
  */
 const headers = ref([
   { title: 'Name', value: 'name', sortable: true },
-  { title: 'Category', value: 'category', sortable: true },
+  { title: 'Category', value: 'category.name', sortable: true },
   { title: 'Unit Price', value: 'unit_price', sortable: true },
   { title: 'Current Stock', value: 'current_stock', sortable: true },
   { title: 'Actions', value: 'actions', sortable: false },
@@ -73,7 +73,7 @@ async function deleteProductHandler(id: number) {
   try {
     await deleteProductService(id);
     await showSuccessNotification('Success!', 'Product updated successfully.', '/list-product');
-    serverItems.value = serverItems.value.filter((product) => product.id !== id);
+    serverItems.value = serverItems.value.filter((product: Product) => product.id !== id);
   } catch (error) {
     handleValidationError(error);
     // Si es un error de permisos:
