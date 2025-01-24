@@ -21,6 +21,7 @@ import CashRegisterClose from '@/views/Sales/CashRegisterClose.vue';
 import CashRegisterOpen from '@/views/Sales/CashRegisterOpen.vue';
 import CategoryManager from '@/views/Categories/CategoryManager.vue';
 import CategoryForm from '@/views/Categories/CategoryForm.vue';
+import InventoryMovementHistory from '@/views/Inventory/InventoryMovementHistory.vue';
 
 
 const routes = [
@@ -146,6 +147,15 @@ const routes = [
       sidebar: false
     },
     props: true
+  },
+  {
+    path: '/products/:productId/movements',
+    name: 'InventoryMovementHistory',
+    component: InventoryMovementHistory,
+    meta: {
+      requiresAuth: true,
+      permissions: ['inventory.movements.index']
+    }
   },
   {
     path: '/403',

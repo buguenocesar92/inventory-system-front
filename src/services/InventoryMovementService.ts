@@ -10,3 +10,7 @@ export const updateStockMovement = async (payload: InventoryMovementPayload): Pr
 }
 
 
+export const fetchProductMovements = async (productId: number): Promise<InventoryMovementPayload[]> => {
+  const response = await axios.get(`/inventory/products/${productId}/movements`);
+  return response.data;
+};

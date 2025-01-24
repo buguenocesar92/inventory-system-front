@@ -107,6 +107,14 @@ function deleteProduct(id: number) {
           <v-icon start>mdi-minus</v-icon>
           Remove Stock
         </v-btn>
+        <v-btn
+          color="info"
+          @click="router.push({ name: 'InventoryMovementHistory', params: { productId: item.id } })"
+          class="ma-2 mr-2"
+        >
+          <v-icon start>mdi-history</v-icon>
+          Movement History
+        </v-btn>
       </template>
     </v-data-table-server>
 
