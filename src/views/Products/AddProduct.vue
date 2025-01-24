@@ -1,46 +1,16 @@
-<!-- src/views/Products/AddProduct.vue -->
 <script setup lang="ts">
-import { ref } from 'vue';
+import { useAddProduct } from '@/composables/useAddProduct';
 import FormInput from '@/components/FormInput.vue';
-import { useFormValidation } from '@/composables/useFormValidation';
-import { useNotification } from '@/composables/useNotification';
-import { addProduct } from '@/services/ProductService';
-import type { ProductPayload } from '@/types/ProductTypes';
+import FormSelect from '@/components/CategorySelect.vue';
 
-const form = ref<ProductPayload>({
-  name: '',
-  category: '',
-  brand: '',
-  barcode: '',
-  description: '',
-  image_url: '',
-  unit_price: 0,
-});
-
-const isLoading = ref(false);
-
-// Composables para validación y notificaciones
-const { errors, errorMessage, handleValidationError } = useFormValidation();
-const { showSuccessNotification } = useNotification();
-
-// Lógica para crear un producto
-async function handleAddProduct() {
-  isLoading.value = true;
-  try {
-    await addProduct(form.value);
-
-    // Notificación de éxito y redirección
-    await showSuccessNotification(
-      'Success!',
-      'Product added successfully.',
-      '/list-product'
-    );
-  } catch (error) {
-    handleValidationError(error);
-  } finally {
-    isLoading.value = false;
-  }
-}
+const {
+  form,
+  categories,
+  isLoading,
+  errors,
+  errorMessage,
+  handleAddProduct,
+} = useAddProduct();
 </script>
 
 <template>
@@ -49,7 +19,8 @@ async function handleAddProduct() {
       <h1 class="text-2xl font-bold mb-4 text-center">Add Product</h1>
 
       <form @submit.prevent="handleAddProduct" class="space-y-6">
-        <!-- Campo Nombre del Producto -->
+
+        <!-- Nombre del Producto -->
         <FormInput
           v-model="form.name"
           id="name"
@@ -58,16 +29,19 @@ async function handleAddProduct() {
           required
         />
 
-        <!-- Campo Categoría -->
-        <FormInput
-          v-model="form.category"
-          id="category"
+        <!-- Select de categorías usando el componente FormSelect -->
+        <FormSelect
+          v-model="form.category_id"
+          id="category_id"
           label="Category"
-          :error="errors.category?.[0]"
+          :options="categories"
+          placeholder="Select a category"
+          placeholderValue="0"
+          :error="errors.category_id?.[0]"
           required
         />
 
-        <!-- Campo Marca -->
+        <!-- Marca -->
         <FormInput
           v-model="form.brand"
           id="brand"
@@ -75,7 +49,7 @@ async function handleAddProduct() {
           :error="errors.brand?.[0]"
         />
 
-        <!-- Campo Código de Barras -->
+        <!-- Código de Barras, etc. -->
         <FormInput
           v-model="form.barcode"
           id="barcode"
@@ -83,7 +57,7 @@ async function handleAddProduct() {
           :error="errors.barcode?.[0]"
         />
 
-        <!-- Campo Descripción -->
+        <!-- Descripción -->
         <FormInput
           v-model="form.description"
           id="description"
@@ -92,7 +66,7 @@ async function handleAddProduct() {
           textarea
         />
 
-        <!-- Campo URL de Imagen -->
+        <!-- URL de imagen -->
         <FormInput
           v-model="form.image_url"
           id="image_url"
@@ -101,7 +75,7 @@ async function handleAddProduct() {
           type="url"
         />
 
-        <!-- Campo Precio Unitario -->
+        <!-- Precio Unitario -->
         <FormInput
           v-model="form.unit_price"
           id="unit_price"
@@ -111,6 +85,7 @@ async function handleAddProduct() {
           required
         />
 
+        <!-- Botón Submit -->
         <button
           type="submit"
           :disabled="isLoading"

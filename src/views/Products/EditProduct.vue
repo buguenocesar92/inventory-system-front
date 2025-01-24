@@ -2,6 +2,7 @@
 import { useRoute } from 'vue-router';
 import { useEditProduct } from '@/composables/useEditProduct';
 import FormInput from '@/components/FormInput.vue';
+import FormSelect from '@/components/CategorySelect.vue';
 
 const route = useRoute();
 const productId = Number(route.params.id);
@@ -33,17 +34,16 @@ const {
       />
 
       <!-- Selector de Categorías -->
-      <v-select
-        v-model="form.category_id"
-        :items="categories"
-        item-title="name"
-        item-value="id"
-        label="Category"
-        outlined
-        dense
-        :error="errors.category_id?.[0]"
-        required
-      />
+      <FormSelect
+          v-model="form.category_id"
+          id="category_id"
+          label="Category"
+          :options="categories"
+          placeholder="Select a category"
+          placeholderValue="0"
+          :error="errors.category_id?.[0]"
+          required
+        />
 
       <!-- Marca -->
       <FormInput
