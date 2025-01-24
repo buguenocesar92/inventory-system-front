@@ -1,29 +1,3 @@
-<template>
-  <div>
-    <label :for="id" class="block font-medium">
-      {{ label }}
-    </label>
-    <select
-      :id="id"
-      v-model="selectedValue"
-      class="border rounded px-3 py-2 w-full"
-      :required="required"
-    >
-      <option disabled :value="placeholderValue">{{ placeholder }}</option>
-      <option
-        v-for="option in options"
-        :key="option.id"
-        :value="option.id"
-      >
-        {{ option.name }}
-      </option>
-    </select>
-    <p v-if="error" class="text-red-500 text-sm">
-      {{ error }}
-    </p>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 
@@ -80,3 +54,28 @@ watch(selectedValue, (newValue) => {
   emit('update:modelValue', newValue);
 });
 </script>
+<template>
+  <div>
+    <label :for="id" class="block font-medium">
+      {{ label }}
+    </label>
+    <select
+      :id="id"
+      v-model="selectedValue"
+      class="border rounded px-3 py-2 w-full"
+      :required="required"
+    >
+      <option disabled :value="placeholderValue">{{ placeholder }}</option>
+      <option
+        v-for="option in options"
+        :key="option.id"
+        :value="option.id"
+      >
+        {{ option.name }}
+      </option>
+    </select>
+    <p v-if="error" class="text-red-500 text-sm">
+      {{ error }}
+    </p>
+  </div>
+</template>
