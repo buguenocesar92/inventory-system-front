@@ -19,6 +19,9 @@ import RolePermissionManager from '@/views/RolesPermissions/RolePermissionManage
 import RolePermissionEdit from '@/views/RolesPermissions/RolePermissionEdit.vue';
 import CashRegisterClose from '@/views/Sales/CashRegisterClose.vue';
 import CashRegisterOpen from '@/views/Sales/CashRegisterOpen.vue';
+import CategoryManager from '@/views/Categories/CategoryManager.vue';
+import CategoryForm from '@/views/Categories/CategoryForm.vue';
+
 
 const routes = [
   {
@@ -110,6 +113,39 @@ const routes = [
     name: 'CashRegisterOpen',
     component: CashRegisterOpen,
     meta: { requiresAuth: true, permissions: ['cash-register.open'], sidebar: false },
+  },
+  {
+    path: '/categories',
+    name: 'Categories',
+    component: CategoryManager,
+    meta: {
+      requiresAuth: true,
+      permissions: ['categories.index'],
+      sidebar: true,
+      label: 'Categorías',
+      icon: 'M4 6h16M4 12h16m-7 6h7'
+    }
+  },
+  {
+    path: '/categories/create',
+    name: 'CategoryCreate',
+    component: CategoryForm,
+    meta: {
+      requiresAuth: true,
+      permissions: ['categories.store'],
+      sidebar: false
+    }
+  },
+  {
+    path: '/categories/:id/edit',
+    name: 'CategoryEdit',
+    component: CategoryForm,
+    meta: {
+      requiresAuth: true,
+      permissions: ['categories.update'],
+      sidebar: false
+    },
+    props: true
   },
   {
     path: '/403',
