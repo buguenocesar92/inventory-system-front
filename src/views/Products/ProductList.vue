@@ -14,7 +14,6 @@ const {
   deletingProductId,
   headers,
   errorMessage,
-
   loadItems,
   deleteProductHandler,
   onSearchInput,
