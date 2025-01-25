@@ -40,9 +40,11 @@ function getBaseURL(): string {
   }
 }
 
+
+
 // Determina la baseURL final
 const baseURL = getBaseURL();
-
+console.log('Base URL:', baseURL);
 /* -------------------------------------
  * 2. Creación de la instancia de Axios
  * ------------------------------------- */
