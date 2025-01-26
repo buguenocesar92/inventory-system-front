@@ -30,7 +30,7 @@ export function usePOS() {
         selectedItems.value.push({
           id: product.id,
           name: product.name,
-          category: product.category,
+          category_id: product.category_id,
           brand: product.brand,
           barcode: product.barcode,
           description: product.description,
