@@ -28,7 +28,7 @@ function getSubdomain(): string | null {
 function getBaseURL(): string {
   const protocol = import.meta.env.VITE_API_PROTOCOL || 'http';
   const baseDomain = import.meta.env.VITE_API_DOMAIN || 'api.localhost';
-  const fallbackUrl = import.meta.env.VITE_API_BASE_URL || 'http://api.localhost/api/';
+  const fallbackUrl = import.meta.env.VITE_API_BASE_URL || 'https://foo.api.cbm3lla.me/api';
 
   const subdomain = getSubdomain();
   if (subdomain) {
