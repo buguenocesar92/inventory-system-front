@@ -11,5 +11,5 @@ export function isSubdomain(): boolean {
   // Si esperas un host final "api.localhost" => 2 parts,
   // un subdominio sería 3 parts (p.ej. 'tenant1', 'api', 'localhost').
   // Ajusta la lógica según tu caso.
-  return parts.length > 2;
+  return parts.length > 1;
 }
