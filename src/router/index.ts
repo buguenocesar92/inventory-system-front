@@ -205,9 +205,10 @@ router.beforeEach(async (to, from, next) => {
     if (to.name === 'Register' && isSubdomain()) {
       return next('/dashboard');
     }
-   /*  if (to.name === 'Login' && !isSubdomain()) {
+
+    if (to.name === 'Login' && !isSubdomain()) {
       return next('/register');
-    } */
+    }
 
     // 4. Si la ruta requiere autenticación pero no estamos logueados
     if (to.meta.requiresAuth && !isAuthenticated.value) {
