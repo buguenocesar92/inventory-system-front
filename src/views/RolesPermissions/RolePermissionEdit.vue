@@ -15,6 +15,8 @@ import { useNotification } from '@/composables/useNotification';
 import { useFormValidation } from '@/composables/useFormValidation';
 import type { Role, Permission } from '@/types/RoleTypes';
 import type { User } from '@/types/UserTypes';
+import AdminWrapper from '@/components/AdminWrapper.vue';
+
 
 // State principal
 const role = ref<Role | null>(null);
@@ -104,63 +106,65 @@ onMounted(loadRoleData);
 </script>
 
 <template>
-  <div>
-    <h2 class="text-xl font-bold mb-4">Editar Rol: {{ role?.name }}</h2>
+  <AdminWrapper>
+    <div>
+      <h2 class="text-xl font-bold mb-4">Editar Rol: {{ role?.name }}</h2>
 
-    <!-- Mostrar todos los permisos con checkboxes -->
-    <div v-if="allPermissions.length > 0">
-      <h3 class="text-lg font-semibold mb-2">Permisos:</h3>
-      <ul>
-        <li
-          v-for="permission in allPermissions"
-          :key="permission.id"
-          class="mb-1 flex items-center"
-        >
-          <input
-            type="checkbox"
-            :value="permission.id"
-            v-model="selectedPermissions"
-            class="mr-2"
-          />
-          {{ permission.name }}
-        </li>
-      </ul>
-    </div>
-    <div v-else>
-      <p>Cargando permisos...</p>
-    </div>
+      <!-- Mostrar todos los permisos con checkboxes -->
+      <div v-if="allPermissions.length > 0">
+        <h3 class="text-lg font-semibold mb-2">Permisos:</h3>
+        <ul>
+          <li
+            v-for="permission in allPermissions"
+            :key="permission.id"
+            class="mb-1 flex items-center"
+          >
+            <input
+              type="checkbox"
+              :value="permission.id"
+              v-model="selectedPermissions"
+              class="mr-2"
+            />
+            {{ permission.name }}
+          </li>
+        </ul>
+      </div>
+      <div v-else>
+        <p>Cargando permisos...</p>
+      </div>
 
-    <!-- Mostrar todos los usuarios con checkboxes -->
-    <div v-if="allUsers.length > 0" class="mt-4">
-      <h3 class="text-lg font-semibold mb-2">Usuarios:</h3>
-      <p>Selecciona quién tendrá este rol:</p>
-      <ul>
-        <li
-          v-for="user in allUsers"
-          :key="user.id"
-          class="mb-1 flex items-center"
-        >
-          <input
-            type="checkbox"
-            :value="user.id"
-            v-model="selectedUsers"
-            class="mr-2"
-          />
-          <span><strong>{{ user.name }}</strong> ({{ user.email }})</span>
-        </li>
-      </ul>
-    </div>
-    <div v-else class="mt-4">
-      <p>No hay usuarios disponibles.</p>
-    </div>
+      <!-- Mostrar todos los usuarios con checkboxes -->
+      <div v-if="allUsers.length > 0" class="mt-4">
+        <h3 class="text-lg font-semibold mb-2">Usuarios:</h3>
+        <p>Selecciona quién tendrá este rol:</p>
+        <ul>
+          <li
+            v-for="user in allUsers"
+            :key="user.id"
+            class="mb-1 flex items-center"
+          >
+            <input
+              type="checkbox"
+              :value="user.id"
+              v-model="selectedUsers"
+              class="mr-2"
+            />
+            <span><strong>{{ user.name }}</strong> ({{ user.email }})</span>
+          </li>
+        </ul>
+      </div>
+      <div v-else class="mt-4">
+        <p>No hay usuarios disponibles.</p>
+      </div>
 
-    <div class="mt-4">
-      <v-btn color="primary" @click="saveChanges">
-        Guardar Cambios
-      </v-btn>
-      <v-btn color="secondary" @click="goBack">
-        Volver
-      </v-btn>
+      <div class="mt-4">
+        <v-btn color="primary" @click="saveChanges">
+          Guardar Cambios
+        </v-btn>
+        <v-btn color="secondary" @click="goBack">
+          Volver
+        </v-btn>
+      </div>
     </div>
-  </div>
+  </AdminWrapper>
 </template>
