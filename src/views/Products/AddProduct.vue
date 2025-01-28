@@ -18,15 +18,15 @@ const {
   <AdminWrapper>
     <div class="flex flex-col items-center justify-center py-20">
       <div class="w-full max-w-md bg-white shadow-md rounded px-8 py-6">
-        <h1 class="text-2xl font-bold mb-4 text-center">Add Product</h1>
+        <h1 class="text-2xl font-bold mb-4 text-center">Agregar Producto</h1>
 
         <form @submit.prevent="handleAddProduct" class="space-y-6">
-
           <!-- Nombre del Producto -->
           <FormInput
             v-model="form.name"
             id="name"
-            label="Product Name"
+            label="Nombre del Producto"
+            placeholder="Ingrese el nombre del producto"
             :error="errors.name?.[0]"
             required
           />
@@ -35,9 +35,9 @@ const {
           <FormSelect
             v-model="form.category_id"
             id="category_id"
-            label="Category"
+            label="Categoría"
             :options="categories"
-            placeholder="Select a category"
+            placeholder="Seleccione una categoría"
             placeholderValue="0"
             :error="errors.category_id?.[0]"
             required
@@ -47,15 +47,17 @@ const {
           <FormInput
             v-model="form.brand"
             id="brand"
-            label="Brand"
+            label="Marca"
+            placeholder="Ingrese la marca del producto"
             :error="errors.brand?.[0]"
           />
 
-          <!-- Código de Barras, etc. -->
+          <!-- Código de Barras -->
           <FormInput
             v-model="form.barcode"
             id="barcode"
-            label="Barcode"
+            label="Código de Barras"
+            placeholder="Ingrese el código de barras"
             :error="errors.barcode?.[0]"
           />
 
@@ -63,7 +65,8 @@ const {
           <FormInput
             v-model="form.description"
             id="description"
-            label="Description"
+            label="Descripción"
+            placeholder="Ingrese una descripción del producto"
             :error="errors.description?.[0]"
             textarea
           />
@@ -72,7 +75,8 @@ const {
           <FormInput
             v-model="form.image_url"
             id="image_url"
-            label="Image URL"
+            label="URL de la Imagen"
+            placeholder="Ingrese la URL de la imagen"
             :error="errors.image_url?.[0]"
             type="url"
           />
@@ -81,7 +85,8 @@ const {
           <FormInput
             v-model="form.unit_price"
             id="unit_price"
-            label="Unit Price"
+            label="Precio Unitario"
+            placeholder="Ingrese el precio unitario"
             :error="errors.unit_price?.[0]"
             type="number"
             required
@@ -93,7 +98,7 @@ const {
             :disabled="isLoading"
             class="w-full bg-blue-500 text-white font-medium py-2 rounded hover:bg-blue-600 transition-colors disabled:opacity-50"
           >
-            {{ isLoading ? 'Adding...' : 'Add Product' }}
+            {{ isLoading ? 'Agregando...' : 'Agregar Producto' }}
           </button>
         </form>
 

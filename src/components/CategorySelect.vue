@@ -61,7 +61,7 @@ watch(selectedValue, (newValue) => {
   <div class="form-select-container">
     <label :for="id" class="block font-medium mb-1">
       {{ label }}
-      <span v-if="required" class="text-red-500">*</span>
+<!--       <span v-if="required" class="text-red-500">*</span> -->
     </label>
 
     <select

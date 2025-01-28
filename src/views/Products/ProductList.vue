@@ -38,7 +38,7 @@ function deleteProduct(id: number) {
     <v-text-field
       v-model="search"
       label="Buscar"
-      class="mb-4 mt-4"
+      class="my-4 !rounded-lg !overflow-hidden"
       outlined
       dense
       @input="onSearchInput"
@@ -53,9 +53,9 @@ function deleteProduct(id: number) {
       :loading="isLoading"
       item-value="id"
       @update:options="loadItems"
-      class="elevation-1 container-fill2"
+      class="elevation-1 shadow-lg !rounded-lg !overflow-hidden"
       dense
-      loading-text="Loading products..."
+      loading-text="Cargando productos..."
     >
       <!-- Columna de acciones -->
       <!-- eslint-disable vue/valid-v-slot -->
@@ -66,7 +66,7 @@ function deleteProduct(id: number) {
           class="ma-2 mr-2"
         >
           <v-icon start>mdi-pencil</v-icon>
-          Edit
+          Editar
         </v-btn>
 
         <v-btn
@@ -83,7 +83,7 @@ function deleteProduct(id: number) {
               mdi-delete
             </template>
           </v-icon>
-          Delete
+          Eliminar
         </v-btn>
 
         <v-btn
@@ -92,7 +92,7 @@ function deleteProduct(id: number) {
           class="ma-2 mr-2"
         >
           <v-icon start>mdi-plus</v-icon>
-          Add Stock
+          Agregar Stock
         </v-btn>
 
         <v-btn
@@ -101,15 +101,16 @@ function deleteProduct(id: number) {
           class="ma-2 mr-2"
         >
           <v-icon start>mdi-minus</v-icon>
-          Remove Stock
+          Quitar Stock
         </v-btn>
+
         <v-btn
           color="info"
           @click="router.push({ name: 'InventoryMovementHistory', params: { productId: item.id } })"
           class="ma-2 mr-2"
         >
           <v-icon start>mdi-history</v-icon>
-          Movement History
+          Historial de Movimientos
         </v-btn>
       </template>
     </v-data-table-server>

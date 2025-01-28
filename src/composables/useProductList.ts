@@ -27,12 +27,13 @@ export function useProductList() {
 
   // Columnas de la tabla
   const headers = ref([
-    { title: 'Name', value: 'name', sortable: true },
-    { title: 'Category', value: 'category.name', sortable: true },
-    { title: 'Unit Price', value: 'unit_price', sortable: true },
-    { title: 'Current Stock', value: 'current_stock', sortable: true },
-    { title: 'Actions', value: 'actions', sortable: false },
+    { title: 'Nombre', value: 'name', sortable: true },
+    { title: 'Categoría', value: 'category.name', sortable: true },
+    { title: 'Precio', value: 'unit_price', sortable: true },
+    { title: 'Inventario', value: 'current_stock', sortable: true },
+    { title: 'Acciones', value: 'actions', sortable: false },
   ]);
+
 
   // Carga productos del servidor
   async function loadItems(params: DataTableParams) {
