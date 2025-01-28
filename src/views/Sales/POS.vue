@@ -7,6 +7,7 @@ import { useRouter } from 'vue-router'; // Importa el router para la redirecció
 import POSSearch from '@/components/Sales/POSSearch.vue';
 import POSProductTable from '@/components/Sales/POSProductTable.vue';
 import POSTotals from '@/components/Sales/POSTotals.vue';
+import AdminWrapper from '@/components/AdminWrapper.vue';
 
 const { isOpen, fetchCashRegisterStatus } = useCashRegister();
 const {
@@ -34,6 +35,7 @@ function navigateToCloseRegister() {
 </script>
 
 <template>
+<AdminWrapper>
   <div v-if="!isOpen" class="p-4 bg-gray-100 flex flex-col items-center">
     <h2 class="text-xl font-bold">Caja Cerrada</h2>
     <p class="text-gray-600">Por favor, abre la caja para continuar.</p>
@@ -73,4 +75,5 @@ function navigateToCloseRegister() {
       </v-btn>
     </div>
   </div>
+</AdminWrapper>
 </template>
