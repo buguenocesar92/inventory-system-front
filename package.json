@@ -19,6 +19,7 @@
     "@popperjs/core": "2.9.1",
     "@vuetify/vite-plugin": "1.0.0-alpha.11",
     "axios": "^1.7.9",
+    "chart.js": "2.9.4",
     "front-auth": "file:",
     "laravel-echo": "^1.18.0",
     "pinia": "^2.3.0",
