@@ -87,7 +87,7 @@ const { errors, handleValidationError } = useFormValidation();
                 :error="errors.tenant_id?.[0]"
                 required
                 label="Nombre de tu empresa u organización"
-                placeholder="Ejemplo: Mi Empresa S.A."
+                placeholder="Ejemplo: Mi-Empresa-S.A."
               />
             </div>
 
@@ -132,10 +132,12 @@ const { errors, handleValidationError } = useFormValidation();
             <button
               type="submit"
               :disabled="isLoading"
-              class="w-full bg-blue-500 text-white font-medium py-2 rounded hover:bg-blue-600 transition-colors disabled:opacity-50"
+              class="w-full bg-black text-white font-medium py-2 rounded hover:bg-green-500 transition-colors disabled:opacity-50"
             >
               {{ isLoading ? "Registrando..." : "Registrar" }}
             </button>
+
+
           </form>
         </div>
       </BackgroundSection>
