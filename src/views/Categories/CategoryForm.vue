@@ -6,6 +6,8 @@ import { fetchCategories, createCategory, updateCategory } from '@/services/Cate
 import { useNotification } from '@/composables/useNotification';
 import { useFormValidation } from '@/composables/useFormValidation';
 import type { CategoryPayload } from '@/types/CategoryTypes';
+import AdminWrapper from '@/components/AdminWrapper.vue';
+
 
 const route = useRoute();
 const router = useRouter();
@@ -57,30 +59,32 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="container mx-auto p-6 max-w-md">
-    <h2 class="text-2xl font-bold mb-6">
-      {{ isEditing ? 'Editar Categoría' : 'Nueva Categoría' }}
-    </h2>
+  <AdminWrapper>
+    <div class="container mx-auto p-6 max-w-md">
+      <h2 class="text-2xl font-bold mb-6">
+        {{ isEditing ? 'Editar Categoría' : 'Nueva Categoría' }}
+      </h2>
 
-    <form @submit.prevent="handleSubmit" class="space-y-4">
-      <div class="mb-4">
-        <label class="block text-gray-700 mb-2">Nombre</label>
-        <input
-          v-model="category.name"
-          type="text"
-          class="w-full px-3 py-2 border rounded"
-          :class="{ 'border-red-500': errors.name }"
-        />
-        <p v-if="errors.name" class="text-red-500 text-sm mt-1">{{ errors.name[0] }}</p>
-      </div>
+      <form @submit.prevent="handleSubmit" class="space-y-4">
+        <div class="mb-4">
+          <label class="block text-gray-700 mb-2">Nombre</label>
+          <input
+            v-model="category.name"
+            type="text"
+            class="w-full px-3 py-2 border rounded"
+            :class="{ 'border-red-500': errors.name }"
+          />
+          <p v-if="errors.name" class="text-red-500 text-sm mt-1">{{ errors.name[0] }}</p>
+        </div>
 
-      <button
-        type="submit"
-        :disabled="isLoading"
-        class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:opacity-50"
-      >
-        {{ isLoading ? 'Guardando...' : 'Guardar' }}
-      </button>
-    </form>
-  </div>
+        <button
+          type="submit"
+          :disabled="isLoading"
+          class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:opacity-50"
+        >
+          {{ isLoading ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </form>
+    </div>
+  </AdminWrapper>
 </template>
