@@ -1,12 +1,13 @@
 <template>
-  <div class="dashboard">
-    <h1>Dashboard</h1>
-    <p>¡Bienvenido(a) a tu panel!</p>
-  </div>
+  <AdminWrapper>
+    <h1>Contenido de la Vista</h1>
+  </AdminWrapper>
 </template>
 
-<script lang="ts">
+<script>
+import AdminWrapper from '@/components/AdminWrapper.vue';
+
 export default {
-  name: 'UserDashboard',
-}
+  components: { AdminWrapper },
+};
 </script>
