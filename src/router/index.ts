@@ -24,11 +24,12 @@ import CategoryForm from '@/views/Categories/CategoryForm.vue';
 import InventoryMovementHistory from '@/views/Inventory/InventoryMovementHistory.vue';
 
 
+import Landing from "@/views/Landing.vue";
 const routes = [
-/*   {
+  {
     path: '/',
-    redirect: () => (isSubdomain() ? '/dashboard' : '/register'),
-  }, */
+    component: Landing,
+  },
   {
     path: '/login',
     name: 'Login',

@@ -8,9 +8,15 @@ importers:
 
   .:
     dependencies:
+      '@fortawesome/fontawesome-free':
+        specifier: ^6.6.0
+        version: 6.7.2
       '@mdi/font':
         specifier: ^7.4.47
         version: 7.4.47
+      '@popperjs/core':
+        specifier: 2.9.1
+        version: 2.9.1
       '@vuetify/vite-plugin':
         specifier: 1.0.0-alpha.11
         version: 1.0.0-alpha.11(vite@6.0.6(@types/node@22.10.2)(jiti@1.21.7)(sass@1.83.1)(yaml@2.6.1))(vue@3.5.13(typescript@5.6.3))(vuetify@3.7.0-beta.1(typescript@5.6.3)(vue@3.5.13(typescript@5.6.3)))
@@ -592,6 +598,10 @@ packages:
     resolution: {integrity: sha512-zSkKow6H5Kdm0ZUQUB2kV5JIXqoG0+uH5YADhaEHswm664N9Db8dXSi0nMJpacpMf+MyyglF1vnZohpEg5yUtg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
+  '@fortawesome/fontawesome-free@6.7.2':
+    resolution: {integrity: sha512-JUOtgFW6k9u4Y+xeIaEiLr3+cjoUPiAuLXoyKOJSia6Duzb7pq+A76P9ZdPDoAoxHdHzq6gE9/jKBGXlZT8FbA==}
+    engines: {node: '>=6'}
+
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
     engines: {node: '>=18.18.0'}
@@ -744,6 +754,9 @@ packages:
 
   '@polka/url@1.0.0-next.28':
     resolution: {integrity: sha512-8LduaNlMZGwdZ6qWrKlfa+2M4gahzFkprZiAt2TF8uS0qQgBizKXpXURqvTJ4WtmupWxaLqjRb2UCTe72mu+Aw==}
+
+  '@popperjs/core@2.9.1':
+    resolution: {integrity: sha512-DvJbbn3dUgMxDnJLH+RZQPnXak1h4ZVYQ7CWiFWjQwBFkVajT4rfw2PdpHLTSTwxrYfnoEXkuBiwkDm6tPMQeA==}
 
   '@rollup/pluginutils@5.1.4':
     resolution: {integrity: sha512-USm05zrsFxYLPdWWq+K3STlWiT/3ELn3RcV5hJMghpeAIhxfsUIg6mt12CBJBInWMV4VneoV7SfGv8xIwo2qNQ==}
@@ -3085,6 +3098,8 @@ snapshots:
     dependencies:
       levn: 0.4.1
 
+  '@fortawesome/fontawesome-free@6.7.2': {}
+
   '@humanfs/core@0.19.1': {}
 
   '@humanfs/node@0.16.6':
@@ -3207,6 +3222,8 @@ snapshots:
   '@pkgr/core@0.1.1': {}
 
   '@polka/url@1.0.0-next.28': {}
+
+  '@popperjs/core@2.9.1': {}
 
   '@rollup/pluginutils@5.1.4(rollup@4.29.1)':
     dependencies:
@@ -4123,9 +4140,12 @@ snapshots:
   front-auth@file:(typescript@5.6.3)(vite@6.0.6(@types/node@22.10.2)(jiti@1.21.7)(sass@1.83.1)(yaml@2.6.1)):
     dependencies:
       '@mdi/font': 7.4.47
+      '@popperjs/core': 2.9.1
       '@vuetify/vite-plugin': 1.0.0-alpha.11(vite@6.0.6(@types/node@22.10.2)(jiti@1.21.7)(sass@1.83.1)(yaml@2.6.1))(vue@3.5.13(typescript@5.6.3))(vuetify@3.7.0-beta.1(typescript@5.6.3)(vue@3.5.13(typescript@5.6.3)))
       axios: 1.7.9
+      laravel-echo: 1.18.0
       pinia: 2.3.0(typescript@5.6.3)(vue@3.5.13(typescript@5.6.3))
+      pusher-js: 8.4.0-rc2
       sass: 1.83.1
       sass-loader: 16.0.4(sass@1.83.1)
       sweetalert2: 11.15.10
