@@ -2,6 +2,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useCashRegister } from '@/composables/useCashRegister';
+import AdminWrapper from '@/components/AdminWrapper.vue';
 
 const openingAmount = ref(0);
 const { isLoading, handleOpenCashRegister } = useCashRegister();
@@ -20,18 +21,20 @@ async function openCashRegister() {
 </script>
 
 <template>
-  <div class="p-4 bg-gray-100 flex flex-col items-center">
-    <h2 class="text-xl font-bold mb-4">Apertura de Caja</h2>
-    <v-text-field
-      label="Monto de Apertura"
-      v-model="openingAmount"
-      type="number"
-      outlined
-      dense
-      class="mb-4"
-    />
-    <v-btn :disabled="isLoading" color="success" @click="openCashRegister">
-      {{ isLoading ? 'Abriendo...' : 'Abrir Caja' }}
-    </v-btn>
-  </div>
+  <AdminWrapper>
+    <div class="p-4 bg-gray-100 flex flex-col items-center">
+      <h2 class="text-xl font-bold mb-4">Apertura de Caja</h2>
+      <v-text-field
+        label="Monto de Apertura"
+        v-model="openingAmount"
+        type="number"
+        outlined
+        dense
+        class="mb-4"
+      />
+      <v-btn :disabled="isLoading" color="success" @click="openCashRegister">
+        {{ isLoading ? 'Abriendo...' : 'Abrir Caja' }}
+      </v-btn>
+    </div>
+  </AdminWrapper>
 </template>
