@@ -1,8 +1,8 @@
 // src/router/index.ts
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthGuard } from '@/composables/useAuthGuard';
-import { isSubdomain } from '@/utils/domainUtils';
-
+/* import { isSubdomain } from '@/utils/domainUtils';
+ */
 // Vistas
 import Login from '@/views/Auth/Login.vue';
 import Register from '@/views/Auth/Register.vue';
@@ -25,10 +25,10 @@ import InventoryMovementHistory from '@/views/Inventory/InventoryMovementHistory
 
 
 const routes = [
-  {
+/*   {
     path: '/',
     redirect: () => (isSubdomain() ? '/dashboard' : '/register'),
-  },
+  }, */
   {
     path: '/login',
     name: 'Login',
@@ -202,13 +202,13 @@ router.beforeEach(async (to, from, next) => {
     }
 
     // 3. Redirecciones según subdominio y rutas públicas
-    if (to.name === 'Register' && isSubdomain()) {
+/*     if (to.name === 'Register' && isSubdomain()) {
       return next('/dashboard');
-    }
+    } */
 
-    if (to.name === 'Login' && !isSubdomain()) {
+/*     if (to.name === 'Login' && !isSubdomain()) {
       return next('/register');
-    }
+    } */
 
     // 4. Si la ruta requiere autenticación pero no estamos logueados
     if (to.meta.requiresAuth && !isAuthenticated.value) {
