@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
-import { useProductList } from '@/composables/useProductList';
+import { useRouter } from "vue-router";
+import { useProductList } from "@/composables/useProductList";
+import AdminWrapper from "@/components/AdminWrapper.vue";
 
 const router = useRouter();
 
-// Obtenemos todo del composable
 const {
   itemsPerPage,
   isLoading,
@@ -19,33 +19,32 @@ const {
   onSearchInput,
 } = useProductList();
 
-// Función que llamamos en el template para eliminar producto
 function deleteProduct(id: number) {
   deleteProductHandler(id);
 }
 </script>
-<!-- eslint-disable vue/valid-v-slot -->
-<template>
-  <div class="container mx-auto">
-    <h1 class="text-2xl font-bold mb-4">Product List</h1>
 
+<template>
+  <AdminWrapper>
+    <h1 class="text-2xl font-bold mb-4">Lista de Productos</h1>
     <RouterLink
       to="/add-product"
       class="bg-blue-500 text-white font-medium py-2 px-4 rounded hover:bg-blue-600 transition-colors mb-5"
     >
-      <span>Crear Producto</span>
+      Crear Producto
     </RouterLink>
 
     <!-- Barra de búsqueda -->
     <v-text-field
       v-model="search"
-      label="Search"
+      label="Buscar"
       class="mb-4 mt-4"
       outlined
       dense
       @input="onSearchInput"
     />
 
+    <!-- Tabla de datos -->
     <v-data-table-server
       v-model:items-per-page="itemsPerPage"
       :headers="headers"
@@ -59,8 +58,8 @@ function deleteProduct(id: number) {
       loading-text="Loading products..."
     >
       <!-- Columna de acciones -->
+      <!-- eslint-disable vue/valid-v-slot -->
       <template #item.actions="{ item }">
-        <!-- Botón Editar -->
         <v-btn
           color="primary"
           @click="router.push({ name: 'EditProduct', params: { id: item.id } })"
@@ -70,7 +69,6 @@ function deleteProduct(id: number) {
           Edit
         </v-btn>
 
-        <!-- Botón Eliminar -->
         <v-btn
           color="error"
           :disabled="deletingProductId === item.id"
@@ -88,7 +86,6 @@ function deleteProduct(id: number) {
           Delete
         </v-btn>
 
-        <!-- Botón Agregar Stock -->
         <v-btn
           color="success"
           @click="router.push({ name: 'MovementForm', params: { id: item.id, movementType: 'entry' } })"
@@ -98,7 +95,6 @@ function deleteProduct(id: number) {
           Add Stock
         </v-btn>
 
-        <!-- Botón Quitar Stock -->
         <v-btn
           color="warning"
           @click="router.push({ name: 'MovementForm', params: { id: item.id, movementType: 'exit' } })"
@@ -118,7 +114,6 @@ function deleteProduct(id: number) {
       </template>
     </v-data-table-server>
 
-    <!-- Errores generales -->
     <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>
-  </div>
+  </AdminWrapper>
 </template>
