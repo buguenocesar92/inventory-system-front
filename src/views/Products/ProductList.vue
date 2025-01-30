@@ -63,7 +63,7 @@ function deleteProduct(id: number) {
         :loading="isLoading"
         item-value="id"
         @update:options="loadItems"
-        class="elevation-1 shadow-lg rounded-lg overflow-hidden"
+        class="elevation-1 !shadow-lg !rounded-lg !overflow-hidden"
         dense
         loading-text="Cargando productos..."
       >
