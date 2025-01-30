@@ -1,19 +1,16 @@
 <script setup lang="ts">
 import { defineProps, defineEmits } from 'vue';
-import { useRouter } from 'vue-router'; // Importa el router para la redirección
-// Props y eventos
+import { useRouter } from 'vue-router';
+
 defineProps({
-  total: {
-    type: Number,
-    default: 0
-  },
+  total: { type: Number, default: 0 },
   isLoading: Boolean,
   hasItems: Boolean,
 });
 
 defineEmits(['confirm', 'clear']);
 
-const router = useRouter(); // Instancia del router
+const router = useRouter();
 
 // Función para redirigir al cierre de caja
 function navigateToCloseRegister() {
@@ -22,18 +19,18 @@ function navigateToCloseRegister() {
 </script>
 
 <template>
-  <div class="md:w-1/4 bg-gray-200 p-6 rounded-lg shadow-md">
+  <div class=" md:w-1/4 bg-gray-200 p-6 rounded-lg shadow-md flex flex-col gap-4">
     <!-- Totales -->
-    <div class="mb-4 text-center">
+    <div class="text-center">
       <h3 class="text-xl font-semibold">Totales</h3>
       <p class="text-lg text-gray-700 font-medium">Total: ${{ total.toFixed(2) }}</p>
     </div>
 
     <!-- Botones -->
-    <div class="flex flex-col gap-6">
+    <div class="flex flex-col gap-3">
       <v-btn
         color="success"
-        class="w-full text-lg font-medium"
+        class="w-full py-2 text-lg font-medium"
         :disabled="!hasItems || isLoading"
         @click="$emit('confirm')"
       >
@@ -42,14 +39,13 @@ function navigateToCloseRegister() {
 
       <v-btn
         color="error"
-        class="w-full text-lg font-medium"
+        class="w-full py-2 text-lg font-medium"
         @click="$emit('clear')"
       >
         Cancelar Venta
       </v-btn>
 
-      <!-- Botón para Cerrar Caja -->
-      <v-btn color="info" @click="navigateToCloseRegister">
+      <v-btn color="info" class="w-full py-2 text-lg font-medium" @click="navigateToCloseRegister">
         Cerrar Caja
       </v-btn>
     </div>

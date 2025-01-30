@@ -24,42 +24,40 @@ const {
 
 // Consultar el estado de la caja al montar el componente
 onMounted(fetchCashRegisterStatus);
-
 </script>
 
 <template>
-<AdminWrapper>
-  <div v-if="!isOpen" class="p-4 bg-gray-100 flex flex-col items-center">
-    <h2 class="text-xl font-bold">Caja Cerrada</h2>
-    <p class="text-gray-600">Por favor, abre la caja para continuar.</p>
-    <v-btn color="primary" to="/cash-register-open">Ir a Apertura de Caja</v-btn>
-  </div>
+  <AdminWrapper>
+    <!-- Mensaje si la caja está cerrada -->
+    <div v-if="!isOpen" class="p-6 bg-gray-100 flex flex-col items-center text-center">
+      <h2 class="text-xl font-bold">Caja Cerrada</h2>
+      <p class="text-gray-600 mb-4">Por favor, abre la caja para continuar.</p>
+      <v-btn color="primary" to="/cash-register-open">Ir a Apertura de Caja</v-btn>
+    </div>
 
-  <div v-else class="flex flex-col bg-gray-100 shadow-lg rounded-lg overflow-hidden">
-    <div class="flex flex-1 overflow-hidden">
-      <!-- Panel Central -->
-      <div class="flex-1 bg-white p-4 flex flex-col">
-        <!-- Componente de Búsqueda -->
-        <POSSearch @search="handleSearch" :error="searchError ?? undefined" />
+    <div v-else class="bg-gray-100 shadow-lg rounded-lg p-4">
+      <!-- Distribución flexible -->
+      <div class="flex flex-col md:flex-row gap-4">
+        <!-- Panel de Productos -->
+        <div class="flex-1 bg-white p-4 rounded-lg shadow-md">
+          <POSSearch @search="handleSearch" :error="searchError ?? undefined" />
+          <POSProductTable
+            :items="selectedItems"
+            @remove="removeItem"
+            @update-quantity="updateQuantity"
+          />
+        </div>
 
-        <!-- Tabla de Productos -->
-        <POSProductTable
-          :items="selectedItems"
-          @remove="removeItem"
-          @update-quantity="updateQuantity"
+        <!-- Panel Totales -->
+        <POSTotals
+          :total="totalAmount"
+          :is-loading="isLoading"
+          :has-items="selectedItems.length > 0"
+          @confirm="confirmSale"
+          @clear="clearSale"
+          :sale-error="saleError"
         />
       </div>
-
-      <!-- Panel Derecho -->
-      <POSTotals
-        :total="totalAmount"
-        :is-loading="isLoading"
-        :has-items="selectedItems.length > 0"
-        @confirm="confirmSale"
-        @clear="clearSale"
-        :sale-error="saleError"
-      />
     </div>
-  </div>
-</AdminWrapper>
+  </AdminWrapper>
 </template>
