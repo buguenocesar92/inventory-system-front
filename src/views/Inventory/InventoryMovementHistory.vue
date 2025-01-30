@@ -1,16 +1,15 @@
 <!-- src/views/Inventory/InventoryMovementHistory.vue -->
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { fetchProductMovements } from '@/services/InventoryMovementService';
 import { useNotification } from '@/composables/useNotification';
 import { useFormValidation } from '@/composables/useFormValidation';
 import type { InventoryMovementPayload } from '@/types/InventoryMovementTypes';
 import AdminWrapper from '@/components/AdminWrapper.vue';
-
+import GoBackButton from '@/components/GoBackButton.vue';
 
 const route = useRoute();
-const router = useRouter();
 const { showErrorNotification } = useNotification();
 const { errorMessage, handleValidationError } = useFormValidation();
 
@@ -42,10 +41,6 @@ onMounted(async () => {
   }
 });
 
-// Función para volver a la lista de productos
-function goBack() {
-  router.push({ name: 'ProductList' });
-}
 </script>
 <!-- eslint-disable vue/valid-v-slot -->
 <template>
@@ -54,13 +49,9 @@ function goBack() {
         <!-- Encabezado -->
         <div class="flex justify-between items-center mb-6">
           <h1 class="text-2xl font-bold">Historial de Movimientos</h1>
-          <v-btn
-            color="primary"
-            @click="goBack"
-          >
-            <v-icon start>mdi-arrow-left</v-icon>
-            Volver
-          </v-btn>
+
+          <GoBackButton />
+
         </div>
 
         <!-- Tabla de movimientos -->
@@ -68,7 +59,7 @@ function goBack() {
           :headers="headers"
           :items="movements"
           :loading="isLoading"
-          class="elevation-1"
+          class="elevation-1 !shadow-lg !rounded-lg"
           :items-per-page="10"
         >
           <!-- Formato de fecha -->
@@ -103,23 +94,3 @@ function goBack() {
       </div>
     </AdminWrapper>
 </template>
-
-<style scoped>
-/* Estilos personalizados */
-.container {
-  max-width: 1200px;
-}
-
-.v-data-table {
-  background-color: white;
-  border-radius: 8px;
-}
-
-.text-green-600 {
-  color: #16a34a;
-}
-
-.text-red-600 {
-  color: #dc2626;
-}
-</style>

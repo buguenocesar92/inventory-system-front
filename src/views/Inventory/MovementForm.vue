@@ -8,7 +8,7 @@ import { useFormValidation } from '@/composables/useFormValidation';
 import { useNotification } from '@/composables/useNotification';
 import type { InventoryMovementPayload } from '@/types/InventoryMovementTypes';
 import AdminWrapper from '@/components/AdminWrapper.vue';
-
+import GoBackButton from '@/components/GoBackButton.vue';
 
 // 1. Obtener parámetros de ruta
 const route = useRoute();
@@ -51,49 +51,59 @@ async function handleUpdateStock() {
 
 <template>
   <AdminWrapper>
-    <div class="container mx-auto">
-      <h1 class="text-2xl font-bold mb-4">Agregar/Quitar Stock</h1>
+    <div class="container mx-auto p-6">
+      <!-- Encabezado con botón de regreso -->
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Actualizar Stock</h1>
+        <GoBackButton />
+      </div>
 
-      <form @submit.prevent="handleUpdateStock" class="space-y-6">
-        <!-- Campo Movimiento (oculto si no quieres que el usuario lo cambie) -->
-        <FormInput
-          v-model="form.movement_type"
-          id="movement_type"
-          label="Movement Type"
-          :error="errors.movement_type?.[0]"
-          hidden
-        />
+      <!-- Contenedor del formulario -->
+      <div class="flex justify-center items-center h-[calc(100vh-310px)]">
+        <div class="bg-white shadow-2xl rounded-lg p-8 w-full max-w-md text-center">
+          <form @submit.prevent="handleUpdateStock" class="space-y-6">
+            <!-- Campo Movimiento (oculto si no quieres que el usuario lo cambie) -->
+            <FormInput
+              v-model="form.movement_type"
+              id="movement_type"
+              label="Movement Type"
+              :error="errors.movement_type?.[0]"
+              hidden
+            />
 
-        <!-- Campo Cantidad -->
-        <FormInput
-          v-model="form.quantity"
-          id="quantity"
-          label="Quantity"
-          :error="errors.quantity?.[0]"
-          required
-        />
+            <!-- Campo Cantidad -->
+            <FormInput
+              v-model="form.quantity"
+              id="quantity"
+              label="Cantidad"
+              :error="errors.quantity?.[0]"
+              required
+            />
 
-        <!-- Campo Descripción -->
-        <FormInput
-          v-model="form.description"
-          id="description"
-          label="Description"
-          :error="errors.description?.[0]"
-        />
+            <!-- Campo Descripción -->
+            <FormInput
+              v-model="form.description"
+              id="description"
+              label="Descripción"
+              :error="errors.description?.[0]"
+            />
 
-        <button
-          type="submit"
-          :disabled="isLoading"
-          class="w-full bg-blue-500 text-white font-medium py-2 rounded hover:bg-blue-600 transition-colors disabled:opacity-50"
-        >
-          {{ isLoading ? 'Updating...' : 'Update Stock' }}
-        </button>
-      </form>
+            <button
+              type="submit"
+              :disabled="isLoading"
+              class="w-full bg-blue-500 text-white font-medium py-3 text-lg rounded-lg transition-transform transform hover:scale-105 disabled:opacity-50"
+            >
+              {{ isLoading ? 'Actualizando...' : 'Actualizar Stock' }}
+            </button>
+          </form>
 
-      <!-- Mensaje de error si lo hay -->
-      <p v-if="errorMessage" class="text-red-500 mt-2">
-        {{ errorMessage }}
-      </p>
+          <!-- Mensaje de error si lo hay -->
+          <p v-if="errorMessage" class="text-red-500 mt-2">
+            {{ errorMessage }}
+          </p>
+        </div>
+      </div>
     </div>
   </AdminWrapper>
 </template>
+
