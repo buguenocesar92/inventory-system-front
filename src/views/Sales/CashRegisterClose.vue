@@ -7,9 +7,14 @@ import AdminWrapper from '@/components/AdminWrapper.vue';
 const closingAmount = ref(0);
 const { isLoading, handleCloseCashRegister } = useCashRegister();
 
-function closeRegister() {
+async function closeRegister() {
   if (closingAmount.value > 0) {
-    handleCloseCashRegister(closingAmount.value);
+    try {
+      await handleCloseCashRegister(closingAmount.value);
+      console.log('Caja cerrada correctamente.');
+    } catch (error) {
+      console.error('Error al cerrar la caja:', error);
+    }
   } else {
     alert('El monto de cierre debe ser mayor a 0.');
   }
@@ -17,22 +22,30 @@ function closeRegister() {
 </script>
 
 <template>
-    <AdminWrapper>
-      <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-        <div class="w-full max-w-md bg-white shadow-md rounded px-8 py-6">
-          <h2 class="text-xl font-bold mb-4 text-center">Cierre de Caja</h2>
-          <v-text-field
-            v-model="closingAmount"
-            label="Monto de Cierre"
-            type="number"
-            outlined
-            dense
-            class="mb-4"
-          />
-          <v-btn :disabled="isLoading" color="error" block @click="closeRegister">
-            {{ isLoading ? 'Cerrando...' : 'Cerrar Caja' }}
-          </v-btn>
-        </div>
+  <AdminWrapper>
+    <div class="flex justify-center items-center h-[calc(100vh-190px)]">
+      <div class="bg-white shadow-2xl rounded-lg p-8 w-full max-w-md text-center">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Cierre de Caja</h2>
+
+        <v-text-field
+          v-model="closingAmount"
+          label="Monto de Cierre"
+          type="number"
+          outlined
+          dense
+          class="mb-6 text-lg"
+        />
+
+        <v-btn
+          :disabled="isLoading"
+          color="error"
+          class="w-full py-3 text-lg font-semibold rounded-lg transition-transform transform hover:scale-105"
+          @click="closeRegister"
+        >
+          {{ isLoading ? 'Cerrando...' : 'Cerrar Caja' }}
+        </v-btn>
       </div>
-    </AdminWrapper>
+    </div>
+  </AdminWrapper>
 </template>
+

@@ -22,19 +22,28 @@ async function openCashRegister() {
 
 <template>
   <AdminWrapper>
-    <div class="p-4 bg-gray-100 flex flex-col items-center">
-      <h2 class="text-xl font-bold mb-4">Apertura de Caja</h2>
-      <v-text-field
-        label="Monto de Apertura"
-        v-model="openingAmount"
-        type="number"
-        outlined
-        dense
-        class="mb-4"
-      />
-      <v-btn :disabled="isLoading" color="success" @click="openCashRegister">
-        {{ isLoading ? 'Abriendo...' : 'Abrir Caja' }}
-      </v-btn>
+    <div class="flex justify-center items-center h-[calc(100vh-190px)]">
+      <div class="bg-white shadow-2xl rounded-lg p-8 w-full max-w-md text-center">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Apertura de Caja</h2>
+
+        <v-text-field
+          v-model="openingAmount"
+          label="Monto de Apertura"
+          type="number"
+          outlined
+          dense
+          class="mb-6 text-lg"
+        />
+
+        <v-btn
+          :disabled="isLoading"
+          color="success"
+          class="w-full py-3 text-lg font-semibold rounded-lg transition-transform transform hover:scale-105"
+          @click="openCashRegister"
+        >
+          {{ isLoading ? 'Abriendo...' : 'Abrir Caja' }}
+        </v-btn>
+      </div>
     </div>
   </AdminWrapper>
 </template>
