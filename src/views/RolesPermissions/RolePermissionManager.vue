@@ -65,52 +65,58 @@ onMounted(fetchRoles);
 </script>
 <template>
   <AdminWrapper>
-    <div class="flex flex-col bg-gray-100">
-      <!-- Botón para registro (opcional) -->
-      <GoToRegisterButton />
+    <div class="container mx-auto p-6">
+      <!-- Encabezado y botón de nuevo rol -->
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Gestión de Roles y Permisos</h1>
+<!--         <v-btn color="primary" @click="goToRegister">
+          <v-icon start>mdi-plus</v-icon>
+          Nuevo Rol
+        </v-btn> -->
+        <GoToRegisterButton />
 
-      <div class="flex flex-1 overflow-hidden">
-        <!-- Tabla de Roles -->
-        <div class="flex-1 bg-white p-4 flex flex-col">
-          <v-data-table
-            :headers="headers"
-            :items="roles"
-            class="elevation-1 flex-1"
-            dense
-          >
-            <template #body="{ items }">
-              <tr v-for="(role, index) in items" :key="index">
-                <td class="border px-2 py-1">{{ role.name }}</td>
-
-                <!-- Permisos (asociados a cada rol) -->
-                <td class="border px-2 py-1">
-                  <ul>
-                    <li v-for="permission in role.permissions" :key="permission.id">
-                      {{ permission.name }}
-                    </li>
-                  </ul>
-                </td>
-
-                <!-- Usuarios asociados al rol -->
-                <td class="border px-2 py-1">
-                  <ul>
-                    <li v-for="user in role.users" :key="user.id">
-                      {{ user.name }} ({{ user.email }})
-                    </li>
-                  </ul>
-                </td>
-
-                <!-- Columna Acciones (Editar) -->
-                <td class="border px-2 py-1">
-                  <v-btn color="primary" @click="goToRoleEdit(role.id)">
-                    Editar
-                  </v-btn>
-                </td>
-              </tr>
-            </template>
-          </v-data-table>
-        </div>
       </div>
+
+      <!-- Tabla de Roles -->
+      <v-data-table
+        :headers="headers"
+        :items="roles"
+        class="elevation-1"
+        dense
+      >
+        <template #item.permissions="{ item }">
+          <ul class="text-gray-700 text-sm">
+            <li v-for="permission in item.permissions" :key="permission.id">
+              {{ permission.name }}
+            </li>
+          </ul>
+        </template>
+
+        <template #item.users="{ item }">
+          <ul class="text-gray-700 text-sm">
+            <li v-for="user in item.users" :key="user.id">
+              {{ user.name }} ({{ user.email }})
+            </li>
+          </ul>
+        </template>
+
+        <template #item.actions="{ item }">
+          <div class="flex gap-2">
+            <!-- Botón Editar -->
+            <v-btn color="primary" @click="goToRoleEdit(item.id)" class="ma-2 mr-2">
+              <v-icon start>mdi-pencil</v-icon>
+              Editar
+            </v-btn>
+          </div>
+        </template>
+
+        <template #no-data>
+          <div class="text-center py-4 text-gray-500">
+            No se encontraron roles
+          </div>
+        </template>
+      </v-data-table>
     </div>
   </AdminWrapper>
 </template>
+

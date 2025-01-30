@@ -34,8 +34,8 @@ async function handleRegister() {
 
     // Notificación de éxito
     await showSuccessNotification(
-      'User Registered',
-      'The user has been registered successfully.'
+      'Usuario registrado',
+      'El usuario ha sido registrado con éxito.'
     );
 
     resetForm();
@@ -57,32 +57,35 @@ function resetForm() {
   <AdminWrapper>
     <div class="flex flex-col items-center justify-center py-20">
       <div class="w-full max-w-md bg-white shadow-md rounded px-8 py-6">
-        <h1 class="text-2xl font-bold mb-4 text-center">Register User</h1>
+        <h1 class="text-2xl font-bold mb-4 text-center">Registrar Usuario</h1>
 
         <form @submit.prevent="handleRegister" class="space-y-6">
-          <!-- Campo Name -->
+          <!-- Campo Nombre -->
           <FormInput
             id="name"
-            label="Name"
+            label="Nombre"
+            placeholder="Ingrese su nombre"
             v-model="form.name"
             :error="errors.name?.[0]"
             required
           />
 
-          <!-- Campo Email -->
+          <!-- Campo Correo Electrónico -->
           <FormInput
             id="email"
-            label="Email"
+            label="Correo Electrónico"
+            placeholder="Ingrese su correo electrónico"
             v-model="form.email"
             :error="errors.email?.[0]"
             type="email"
             required
           />
 
-          <!-- Campo Password -->
+          <!-- Campo Contraseña -->
           <FormInput
             id="password"
-            label="Password"
+            label="Contraseña"
+            placeholder="Ingrese su contraseña"
             v-model="form.password"
             :error="errors.password?.[0]"
             type="password"
@@ -95,7 +98,7 @@ function resetForm() {
             :disabled="isLoading"
             class="w-full bg-blue-500 text-white font-medium py-2 rounded hover:bg-blue-600 transition-colors disabled:opacity-50"
           >
-            {{ isLoading ? 'Registering...' : 'Register' }}
+            {{ isLoading ? 'Registrando...' : 'Registrar' }}
           </button>
         </form>
       </div>
