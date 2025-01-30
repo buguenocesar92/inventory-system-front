@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthGuard } from '@/composables/useAuthGuard';
+import { useCashRegister } from '@/composables/useCashRegister';
 
 // Vistas
 import Login from '@/views/Auth/Login.vue';
@@ -101,6 +102,7 @@ const routes = [
     component: CashRegisterClose,
     meta: {
       requiresAuth: true,
+      requiresOpenCashRegister: true,
       permissions: ['cash-register.close'],
       sidebar: false,
       label: 'Cerrar Caja',
@@ -168,14 +170,8 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-  const {
-    isAuthenticated,
-    checkAuth,
-    fetchUserDataIfNeeded,
-    hasAnyRole,
-    hasAllPermissions,
-    doLogout,
-  } = useAuthGuard();
+  const { isAuthenticated, checkAuth, fetchUserDataIfNeeded, hasAnyRole, hasAllPermissions, doLogout } = useAuthGuard();
+  const { isOpen, fetchCashRegisterStatus } = useCashRegister();
 
   try {
     if (!isAuthenticated.value) {
@@ -186,20 +182,32 @@ router.beforeEach(async (to, from, next) => {
       await fetchUserDataIfNeeded();
     }
 
+    // 🔹 Bloquear rutas que requieren autenticación
     if (to.meta.requiresAuth && !isAuthenticated.value) {
       return next('/login');
     }
 
+    // 🔹 Bloquear rutas para invitados
     if (to.meta.requiresGuest && isAuthenticated.value) {
       return next('/dashboard');
     }
 
+    // 🔹 Verificar roles
     if (to.meta.roles && !hasAnyRole(to.meta.roles as string[])) {
       return next('/403');
     }
 
+    // 🔹 Verificar permisos
     if (to.meta.permissions && !hasAllPermissions(to.meta.permissions as string[])) {
       return next('/403');
+    }
+
+    // 🔹 Verificar si la caja está abierta antes de permitir el cierre
+    if (to.meta.requiresOpenCashRegister) {
+      await fetchCashRegisterStatus();
+      if (!isOpen.value) {
+        return next('/cash-register-open');
+      }
     }
 
     next();
