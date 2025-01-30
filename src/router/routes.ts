@@ -48,6 +48,31 @@ export const routes = [
     meta: { requiresAuth: true, roles: ['admin'], sidebar: false, label: 'Registrar Usuario', icon: 'M4 6h16M4 12h16m-7 6h7' },
   },
   {
+    path: '/categories',
+    name: 'Categories',
+    component: CategoryManager,
+    meta: {
+      requiresAuth: true,
+      permissions: ['categories.index'],
+      sidebar: true,
+      label: 'Categorías',
+      icon: 'M4 6h16M4 12h16m-7 6h7',
+    },
+  },
+  {
+    path: '/categories/create',
+    name: 'CategoryCreate',
+    component: CategoryForm,
+    meta: { requiresAuth: true, permissions: ['categories.store'], sidebar: false },
+  },
+  {
+    path: '/categories/:id/edit',
+    name: 'CategoryEdit',
+    component: CategoryForm,
+    meta: { requiresAuth: true, permissions: ['categories.update'], sidebar: false },
+    props: true,
+  },
+  {
     path: '/add-product',
     name: 'AddProduct',
     component: AddProduct,
@@ -109,31 +134,6 @@ export const routes = [
     name: 'CashRegisterOpen',
     component: CashRegisterOpen,
     meta: { requiresAuth: true, permissions: ['cash-register.open'], sidebar: false },
-  },
-  {
-    path: '/categories',
-    name: 'Categories',
-    component: CategoryManager,
-    meta: {
-      requiresAuth: true,
-      permissions: ['categories.index'],
-      sidebar: true,
-      label: 'Categorías',
-      icon: 'M4 6h16M4 12h16m-7 6h7',
-    },
-  },
-  {
-    path: '/categories/create',
-    name: 'CategoryCreate',
-    component: CategoryForm,
-    meta: { requiresAuth: true, permissions: ['categories.store'], sidebar: false },
-  },
-  {
-    path: '/categories/:id/edit',
-    name: 'CategoryEdit',
-    component: CategoryForm,
-    meta: { requiresAuth: true, permissions: ['categories.update'], sidebar: false },
-    props: true,
   },
   {
     path: '/products/:productId/movements',
