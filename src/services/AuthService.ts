@@ -11,9 +11,11 @@ export const logoutUser = async (): Promise<void> => {
   await axios.post('/auth/logout');
 };
 
-export const fetchUserData = async (): Promise<{ roles: string[]; permissions: string[] }> => {
+export const fetchUserData = async (): Promise<{ name: string; email: string; roles: string[]; permissions: string[] }> => {
   const response = await axios.post('/auth/me');
   return {
+    name: response.data.name || '',
+    email: response.data.email || '',
     roles: response.data.roles || [],
     permissions: response.data.permissions || [],
   };
