@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { defineProps, defineEmits } from 'vue';
 
 // Props y eventos
@@ -11,6 +11,7 @@ defineProps({
 const emit = defineEmits(['search']);
 
 const search = ref('');
+const inputRef = ref<HTMLInputElement | null>(null);
 
 /**
  * Emitir búsqueda
@@ -21,6 +22,13 @@ function handleSearch() {
     search.value = '';
   }
 }
+
+// Enfocar el input al montar el componente
+onMounted(() => {
+  if (inputRef.value) {
+    inputRef.value.focus();
+  }
+});
 </script>
 
 <template>
@@ -28,6 +36,7 @@ function handleSearch() {
     <label for="product-code" class="mr-2 font-medium">Código del Producto:</label>
     <v-text-field
       id="product-code"
+      ref="inputRef"
       v-model="search"
       placeholder="Buscar producto"
       outlined
