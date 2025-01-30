@@ -32,6 +32,14 @@ const {
       <div class="flex justify-center items-center h-[calc(100vh-250px)]">
         <div class="w-full max-w-md bg-white shadow-md rounded px-8 py-6">
           <form @submit.prevent="handleEditProduct" class="space-y-6">
+            <!-- Código de Barras -->
+            <FormInput
+              id="barcode"
+              label="Código de Barras"
+              placeholder="Ingrese el código de barras"
+              v-model="form.barcode"
+              :error="errors.barcode?.[0]"
+            />
             <!-- Nombre -->
             <FormInput
               id="name"
@@ -61,15 +69,6 @@ const {
               placeholder="Ingrese la marca del producto"
               v-model="form.brand"
               :error="errors.brand?.[0]"
-            />
-
-            <!-- Código de Barras -->
-            <FormInput
-              id="barcode"
-              label="Código de Barras"
-              placeholder="Ingrese el código de barras"
-              v-model="form.barcode"
-              :error="errors.barcode?.[0]"
             />
 
             <!-- Descripción -->

@@ -29,10 +29,20 @@ onMounted(fetchCashRegisterStatus);
 <template>
   <AdminWrapper>
     <!-- Mensaje si la caja está cerrada -->
-    <div v-if="!isOpen" class="p-6 bg-gray-100 flex flex-col items-center text-center">
-      <h2 class="text-xl font-bold">Caja Cerrada</h2>
-      <p class="text-gray-600 mb-4">Por favor, abre la caja para continuar.</p>
-      <v-btn color="primary" to="/cash-register-open">Ir a Apertura de Caja</v-btn>
+
+    <div v-if="!isOpen" class="flex justify-center items-center h-[calc(100vh-190px)]">
+      <div class="bg-white shadow-2xl rounded-lg p-8 w-full max-w-md text-center">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Caja Cerrada</h2>
+        <p class="text-gray-600 text-lg mb-6">Por favor, abre la caja para continuar.</p>
+
+        <v-btn
+          color="primary"
+          to="/cash-register-open"
+          class="w-full py-3 text-lg font-semibold rounded-lg transition-transform transform hover:scale-105"
+        >
+          Ir a Apertura de Caja
+        </v-btn>
+      </div>
     </div>
 
     <div v-else class="bg-gray-100 shadow-lg rounded-lg p-4">
