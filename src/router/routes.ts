@@ -7,16 +7,15 @@ import AddProduct from '@/views/Products/AddProduct.vue';
 import ProductList from '@/views/Products/ProductList.vue';
 import EditProduct from '@/views/Products/EditProduct.vue';
 import MovementForm from '@/views/Inventory/MovementForm.vue';
-import POS from '@/views/Sales/POS.vue';
 import AccessDenied from '@/views/AccessDenied.vue';
 import RolePermissionManager from '@/views/RolesPermissions/RolePermissionManager.vue';
 import RolePermissionEdit from '@/views/RolesPermissions/RolePermissionEdit.vue';
-import CashRegisterClose from '@/views/Sales/CashRegisterClose.vue';
-import CashRegisterOpen from '@/views/Sales/CashRegisterOpen.vue';
 import CategoryManager from '@/views/Categories/CategoryManager.vue';
 import CategoryForm from '@/views/Categories/CategoryForm.vue';
 import InventoryMovementHistory from '@/views/Inventory/InventoryMovementHistory.vue';
 import Landing from '@/views/Landing.vue';
+import SalesHistoryList from '@/views/Sales/SalesHistoryList.vue';
+
 
 export const routes = [
   {
@@ -92,12 +91,6 @@ export const routes = [
     meta: { requiresAuth: true, sidebar: false, label: 'Movimientos de Stock', icon: 'mdi-swap-horizontal' },
   },
   {
-    path: '/pos',
-    name: 'POS',
-    component: POS,
-    meta: { requiresAuth: true, sidebar: true, label: 'Punto de Venta', icon: 'mdi-cart' },
-  },
-  {
     path: '/roles-permissions',
     name: 'RolePermissionManager',
     component: RolePermissionManager,
@@ -109,18 +102,6 @@ export const routes = [
     component: RolePermissionEdit,
     meta: { requiresAuth: true, sidebar: false },
     props: true,
-  },
-  {
-    path: '/close-cash-register',
-    name: 'CashRegisterClose',
-    component: CashRegisterClose,
-    meta: { requiresAuth: true, sidebar: false, label: 'Cerrar Caja', icon: 'mdi-lock' },
-  },
-  {
-    path: '/cash-register-open',
-    name: 'CashRegisterOpen',
-    component: CashRegisterOpen,
-    meta: { requiresAuth: true, sidebar: false, label: 'Abrir Caja', icon: 'mdi-lock-open' },
   },
   {
     path: '/products/:productId/movements',
@@ -143,5 +124,16 @@ export const routes = [
   {
     path: '/:pathMatch(.*)*',
     redirect: '/404',
+  },
+  {
+    path: '/sales-history',
+    name: 'SalesHistory',
+    component: SalesHistoryList,
+    meta: {
+      requiresAuth: true,
+      sidebar: true,
+      label: 'Historial de Ventas',
+      icon: 'mdi-history',
+    },
   },
 ];
