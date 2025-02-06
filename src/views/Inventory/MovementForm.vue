@@ -1,4 +1,3 @@
-<!-- src/views/Inventory/MovementForm.vue -->
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
@@ -21,6 +20,7 @@ const form = ref<InventoryMovementPayload>({
   movement_type: movementType,
   quantity: 0,
   description: '',
+  location_id: 0, // Campo obligatorio, siempre se enviará
 });
 
 const isLoading = ref(false);
@@ -88,6 +88,15 @@ async function handleUpdateStock() {
               :error="errors.description?.[0]"
             />
 
+            <!-- Campo de Localización (Siempre Visible) -->
+            <FormInput
+              v-model="form.location_id"
+              id="location_id"
+              label="Sucursal"
+              :error="errors.location_id?.[0]"
+              required
+            />
+
             <button
               type="submit"
               :disabled="isLoading"
@@ -106,4 +115,3 @@ async function handleUpdateStock() {
     </div>
   </AdminWrapper>
 </template>
-

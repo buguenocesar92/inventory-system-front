@@ -3,4 +3,5 @@ export interface InventoryMovementPayload {
   movement_type: 'entry' | 'exit' | 'adjustment'
   quantity: number
   description: string
+  location_id: number
 }
