@@ -15,6 +15,8 @@ import CategoryForm from '@/views/Categories/CategoryForm.vue';
 import InventoryMovementHistory from '@/views/Inventory/InventoryMovementHistory.vue';
 import Landing from '@/views/Landing.vue';
 import SalesHistoryList from '@/views/Sales/SalesHistoryList.vue';
+import UsersManager from '@/views/Users/UserManager.vue';
+import LocationManager from '@/views/Locations/LocationManager.vue';
 
 
 export const routes = [
@@ -134,6 +136,28 @@ export const routes = [
       sidebar: true,
       label: 'Historial de Ventas',
       icon: 'mdi-history',
+    },
+  },
+  {
+    path : '/users',
+    name: 'UsersManager',
+    component: UsersManager,
+    meta: {
+      requiresAuth: true,
+      sidebar: true,
+      label: 'Usuarios',
+      icon: 'mdi-account-group',
+    },
+  },
+  {
+    path : '/locations',
+    name: 'LocationManager',
+    component: LocationManager,
+    meta: {
+      requiresAuth: true,
+      sidebar: true,
+      label: 'Locales',
+      icon: 'mdi-map-marker',
     },
   },
 ];
