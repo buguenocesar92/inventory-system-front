@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAddProduct } from '@/composables/useAddProduct';
 import FormInput from '@/components/FormInput.vue';
-import FormSelect from '@/components/CategorySelect.vue';
+import FormSelect from '@/components/FormSelect.vue';
 import AdminWrapper from '@/components/AdminWrapper.vue';
 
 const {
