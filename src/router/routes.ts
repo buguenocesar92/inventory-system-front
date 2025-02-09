@@ -17,6 +17,7 @@ import Landing from '@/views/Landing.vue';
 import SalesHistoryList from '@/views/Sales/SalesHistoryList.vue';
 import UsersManager from '@/views/Users/UserManager.vue';
 import LocationManager from '@/views/Locations/LocationManager.vue';
+import LocationForm from '@/views/Locations/LocationForm.vue';
 
 
 export const routes = [
@@ -159,5 +160,24 @@ export const routes = [
       label: 'Locales',
       icon: 'mdi-map-marker',
     },
+  },
+  {
+    path : '/locations/create',
+    name: 'LocationCreate',
+    component: LocationForm,
+    meta: {
+      requiresAuth: true,
+      sidebar: false,
+    },
+  },
+  {
+    path : '/locations/:id/edit',
+    name: 'LocationEdit',
+    component: LocationForm,
+    meta: {
+      requiresAuth: true,
+      sidebar: false,
+    },
+    props: true,
   },
 ];
