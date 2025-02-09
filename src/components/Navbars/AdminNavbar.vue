@@ -1,44 +1,46 @@
 <template>
   <!-- Navbar -->
   <nav
-    class="relative top-0 left-0 w-full bg-black md:flex-row md:flex-nowrap md:justify-start flex items-center md:p-4"
+    class="relative top-0 left-0 w-full bg-black md:flex-row md:flex-nowrap md:justify-between flex items-center md:p-4 px-4"
   >
-    <div
-      class="w-full mx-autp items-center flex justify-between md:flex-nowrap flex-wrap md:px-10 px-4"
-    >
-      <!-- Brand -->
+    <div class="w-full flex items-center justify-between">
+      <!-- 📌 Brand -->
       <a
-        class="text-white text-sm uppercase hidden lg:inline-block font-semibold"
+        class="text-white text-sm uppercase font-semibold"
         href="javascript:void(0)"
       >
         Dashboard
       </a>
-      <!-- Form -->
-<!--       <form
-        class="md:flex hidden flex-row flex-wrap items-center lg:ml-auto mr-3"
-      >
-        <div class="relative flex w-full flex-wrap items-stretch">
-          <span
-            class="z-10 h-full leading-snug font-normal text-center text-blueGray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3"
-          >
-            <i class="fas fa-search"></i>
-          </span>
-          <input
-            type="text"
-            placeholder="Search here..."
-            class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:ring w-full pl-10"
+
+      <!-- 📌 Contenedor de Select y User -->
+      <div class="flex items-center gap-6">
+        <!-- 🔹 Select de Locales alineado verticalmente -->
+        <div class="flex flex-col items-center">
+          <FormSelect
+            v-model="selectedLocation"
+            id="location_id"
+            :options="locations"
+            placeholder="Seleccione un local"
+            placeholderValue="0"
+            required
+            @change="handleLocationChange"
+            class="w-52"
           />
         </div>
-      </form> -->
-      <!-- User -->
-      <ul class="flex-col md:flex-row list-none items-center hidden md:flex">
+
+        <!-- 👤 User Dropdown -->
         <user-dropdown />
-      </ul>
+      </div>
     </div>
   </nav>
-  <!-- End Navbar -->
 </template>
 
 <script setup lang="ts">
+import { useLocationSelect } from "@/composables/useLocationSelect";
+import FormSelect from '@/components/FormSelect.vue';
 import UserDropdown from "@/components/Dropdowns/UserDropdown.vue";
+
+// Usamos el composable para manejar los locales
+const { locations, selectedLocation, handleLocationChange } = useLocationSelect();
 </script>
+
