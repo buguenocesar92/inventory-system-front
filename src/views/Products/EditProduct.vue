@@ -2,7 +2,7 @@
 import { useRoute } from 'vue-router';
 import { useEditProduct } from '@/composables/useEditProduct';
 import FormInput from '@/components/FormInput.vue';
-import FormSelect from '@/components/CategorySelect.vue';
+import FormSelect from '@/components/FormSelect.vue';
 import AdminWrapper from '@/components/AdminWrapper.vue';
 import GoBackButton from '@/components/GoBackButton.vue';
 
