@@ -47,7 +47,7 @@ export function useProductList() {
     { title: "Nombre", value: "name", sortable: true },
     { title: "Categoría", value: "category.name", sortable: true },
     { title: "Precio", value: "unit_price", sortable: true },
-    { title: "Inventario", value: "current_stock", sortable: true },
+    { title: "Inventario", value: "total_stock", sortable: true },
     { title: "Acciones", value: "actions", sortable: false },
   ]);
 
