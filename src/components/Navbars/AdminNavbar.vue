@@ -1,18 +1,14 @@
 <template>
-  <!-- Navbar -->
   <nav
     class="relative top-0 left-0 w-full bg-black md:flex-row md:flex-nowrap md:justify-between flex items-center md:p-4 px-4"
   >
     <div class="w-full flex items-center justify-between">
-      <!-- 📌 Brand -->
-      <a
-        class="text-white text-sm uppercase font-semibold"
-        href="javascript:void(0)"
-      >
+      <!-- Brand -->
+      <a class="text-white text-sm uppercase font-semibold" href="#">
         Dashboard
       </a>
 
-      <!-- 📌 Contenedor de Selects y User -->
+      <!-- Contenedor de Selects y User -->
       <div class="flex items-center space-x-4">
         <!-- 🔹 Select de Locales -->
         <div class="w-52">
@@ -34,7 +30,7 @@
             v-model="selectedWarehouse"
             id="warehouse_id"
             label="Seleccionar Bodega"
-            :options="warehouses"
+            :options="locationWarehouseStore.warehouseList"
             placeholder="Seleccione una bodega"
             placeholderValue="0"
             required
@@ -42,7 +38,7 @@
           />
         </div>
 
-        <!-- 👤 User Dropdown -->
+        <!-- Dropdown de usuario, etc. -->
         <user-dropdown />
       </div>
     </div>
@@ -51,9 +47,16 @@
 
 <script setup lang="ts">
 import { useLocationWarehouseSelect } from "@/composables/useLocationWarehouseSelect";
-import FormSelect from '@/components/FormSelect.vue';
+import FormSelect from "@/components/FormSelect.vue";
 import UserDropdown from "@/components/Dropdowns/UserDropdown.vue";
 
-// Usamos el composable para manejar los selects de locales y bodegas
-const { locations, selectedLocation, handleLocationChange, warehouses, selectedWarehouse, handleWarehouseChange } = useLocationWarehouseSelect();
+// Usamos el composable
+const {
+  locationWarehouseStore,   // con la lista de bodegas global
+  locations,
+  selectedLocation,
+  selectedWarehouse,
+  handleLocationChange,
+  handleWarehouseChange,
+} = useLocationWarehouseSelect();
 </script>
