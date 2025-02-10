@@ -1,7 +1,5 @@
 <template>
-  <nav
-    class="relative top-0 left-0 w-full bg-black md:flex-row md:flex-nowrap md:justify-between flex items-center md:p-4 px-4"
-  >
+  <nav class="relative top-0 left-0 w-full bg-black md:flex-row md:flex-nowrap md:justify-between flex items-center md:p-4 px-4">
     <div class="w-full flex items-center justify-between">
       <!-- Brand -->
       <a class="text-white text-sm uppercase font-semibold" href="#">
@@ -50,9 +48,8 @@ import { useLocationWarehouseSelect } from "@/composables/useLocationWarehouseSe
 import FormSelect from "@/components/FormSelect.vue";
 import UserDropdown from "@/components/Dropdowns/UserDropdown.vue";
 
-// Usamos el composable
 const {
-  locationWarehouseStore,   // con la lista de bodegas global
+  locationWarehouseStore,
   locations,
   selectedLocation,
   selectedWarehouse,

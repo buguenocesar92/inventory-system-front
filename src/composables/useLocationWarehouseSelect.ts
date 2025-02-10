@@ -1,5 +1,5 @@
 // src/composables/useLocationWarehouseSelect.ts
-import { ref, onMounted, watch, computed } from "vue";
+import { computed, onMounted, watch } from "vue";
 import { fetchLocations } from "@/services/LocationService";
 import { fetchWarehousesByLocation } from "@/services/WarehouseService";
 import { useNotification } from "@/composables/useNotification";
@@ -7,18 +7,21 @@ import { useLocationWarehouseStore } from "@/stores/locationWarehouseStore";
 
 export function useLocationWarehouseSelect() {
   const { showErrorNotification } = useNotification();
-  // Accedemos a la store
   const locationWarehouseStore = useLocationWarehouseStore();
 
-  // Lista de locales (opcional quedarla local)
-  const locations = ref<{ id: number; name: string }[]>([]);
+  // Usamos un computed para los locales, de modo que si la store ya tiene datos se usen inmediatamente
+  const locations = computed(() => locationWarehouseStore.locationList);
 
   /**
-   * Cargar locales
+   * Cargar locales:
+   * - Si ya hay datos en la store, el computed se encargará de mostrarlos.
+   * - Luego se hace el fetch para actualizar la información.
    */
   async function loadLocations() {
     try {
-      locations.value = await fetchLocations();
+      const data = await fetchLocations();
+      // Actualizamos la store con la lista de locales obtenida
+      locationWarehouseStore.setLocationList(data);
     } catch {
       showErrorNotification("Error", "No se pudieron cargar los locales");
     }
@@ -30,9 +33,7 @@ export function useLocationWarehouseSelect() {
   async function loadWarehouses(locationId: number) {
     try {
       const data = await fetchWarehousesByLocation(locationId);
-      // Guardar la lista de bodegas en la store
       locationWarehouseStore.setWarehouseList(data);
-      // Resetear bodega seleccionada (si así lo deseas)
       locationWarehouseStore.setWarehouse(null);
     } catch {
       showErrorNotification("Error", "No se pudieron cargar las bodegas");
@@ -40,11 +41,10 @@ export function useLocationWarehouseSelect() {
   }
 
   /**
-   * Cuando cambie la local
+   * Cuando cambia el local
    */
   function handleLocationChange() {
     if (!locationWarehouseStore.selectedLocation) {
-      // Si local es null => limpiar lista de bodegas
       locationWarehouseStore.setWarehouseList([]);
       locationWarehouseStore.setWarehouse(null);
     } else {
@@ -53,28 +53,28 @@ export function useLocationWarehouseSelect() {
   }
 
   /**
-   * Cuando cambie la bodega
+   * Cuando cambia la bodega
    */
   function handleWarehouseChange() {
     console.log("Bodega seleccionada:", locationWarehouseStore.selectedWarehouse);
   }
 
-  // Cargar locales al montar
+  // Al montar la vista se realiza el fetch de locales
   onMounted(loadLocations);
 
-  // Watch: cada vez que cambie la local en la store, manejarlo
+  // Watch para detectar cambios en la selección del local y cargar las bodegas correspondientes
   watch(
     () => locationWarehouseStore.selectedLocation,
     handleLocationChange
   );
 
-  // Watch: cada vez que cambie la bodega
+  // Watch para detectar cambios en la selección de la bodega
   watch(
     () => locationWarehouseStore.selectedWarehouse,
     handleWarehouseChange
   );
 
-  // Computeds para v-model
+  // Computeds para usar en v-model de los selects
   const selectedLocation = computed({
     get: () => locationWarehouseStore.selectedLocation,
     set: (val: number | null) => locationWarehouseStore.setLocation(val),
@@ -86,17 +86,10 @@ export function useLocationWarehouseSelect() {
   });
 
   return {
-    // Store para acceder a la lista de bodegas o setear algo directo
     locationWarehouseStore,
-
-    // Lista local de locales
     locations,
-
-    // "Accesos" directos a la selección
     selectedLocation,
     selectedWarehouse,
-
-    // Métodos
     handleLocationChange,
     handleWarehouseChange,
   };
