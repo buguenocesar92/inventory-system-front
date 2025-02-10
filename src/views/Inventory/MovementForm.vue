@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { updateStockMovement } from '@/services/InventoryMovementService';
 import FormInput from '@/components/FormInput.vue';
@@ -9,15 +9,18 @@ import { useNotification } from '@/composables/useNotification';
 import type { InventoryMovementPayload } from '@/types/InventoryMovementTypes';
 import AdminWrapper from '@/components/AdminWrapper.vue';
 import GoBackButton from '@/components/GoBackButton.vue';
-// Importamos el composable para locales y bodegas
+// Composable para locales y bodegas (para movimientos entry y exit y para la sección de origen en transfer)
 import { useLocationWarehouseSelect } from '@/composables/useLocationWarehouseSelect';
+// Función para obtener bodegas según el local (la misma que usas en tu composable)
+import { fetchWarehousesByLocation } from '@/services/WarehouseService';
 
-// 1. Obtener parámetros de ruta
+// 1. Obtener parámetros de ruta y definir el tipo de movimiento
 const route = useRoute();
 const productId = Number(route.params.id);
-const movementType = (route.params.movementType as 'entry' | 'exit' | 'adjustment') || 'entry';
+// Se espera que la ruta envíe 'entry', 'exit' o 'transfer'
+const movementType = (route.params.movementType as 'entry' | 'exit' | 'transfer') || 'entry';
 
-// 2. Estado del formulario (según tu tipo, puedes agregarle location_id y warehouse_id en el envío)
+// 2. Estado del formulario
 const form = ref<InventoryMovementPayload>({
   product_id: productId,
   movement_type: movementType,
@@ -25,7 +28,7 @@ const form = ref<InventoryMovementPayload>({
   description: '',
 });
 
-// 3. Extraemos la lógica y los valores de locales y bodegas
+// 3. Para movimientos que no sean transfer (entry y exit) y para la sección de origen en transfer se usa el composable
 const {
   locationWarehouseStore,
   locations,
@@ -37,35 +40,66 @@ const {
 
 const isLoading = ref(false);
 
-// 4. Composables para validación y notificación
+// 4. Variables y funciones para el modo transfer (sección de destino)
+// Para la sección de destino se usan nuevos selects
+const selectedDestinationLocation = ref<number | null>(null);
+const destinationWarehouseList = ref<Array<{ id: number; name: string }>>([]);
+const selectedDestinationWarehouse = ref<number | null>(null);
+
+// Función para cargar bodegas del local de destino
+async function loadDestinationWarehouses(locationId: number) {
+  try {
+    const data = await fetchWarehousesByLocation(locationId);
+    destinationWarehouseList.value = data;
+    selectedDestinationWarehouse.value = null;
+  } catch (error) {
+    console.error('Error cargando bodegas de destino', error);
+  }
+}
+
+// Cuando cambie el local de destino se cargan sus bodegas
+watch(selectedDestinationLocation, (newVal) => {
+  if (newVal) {
+    loadDestinationWarehouses(newVal);
+  } else {
+    destinationWarehouseList.value = [];
+    selectedDestinationWarehouse.value = null;
+  }
+});
+
+// 5. Composables para validación y notificación
 const { errors, errorMessage, handleValidationError } = useFormValidation();
 const { showSuccessNotification } = useNotification();
 
-// 5. Lógica para enviar el formulario, combinando el form con los selects
+// 6. Función para enviar el formulario
 async function handleUpdateStock() {
   isLoading.value = true;
   try {
-    // Creamos el payload inicial
     const payload: any = {
       ...form.value,
-      location_id: selectedLocation.value, // Agregamos el local
+      product_id: productId,
     };
 
-    // Validar y asignar el campo de bodega según el tipo de movimiento:
     if (form.value.movement_type === 'entry') {
-      // Para entrada, el backend espera destination_warehouse_id
+      // Para entrada se usa el local y bodega globales
+      payload.location_id = selectedLocation.value;
       payload.destination_warehouse_id = selectedWarehouse.value;
     } else if (form.value.movement_type === 'exit') {
-      // Para salida, el backend espera origin_warehouse_id
+      // Para salida se usa el local y bodega globales
+      payload.location_id = selectedLocation.value;
       payload.origin_warehouse_id = selectedWarehouse.value;
-    } else {
-      // Para otros movimientos, se asigna warehouse_id
-      payload.warehouse_id = selectedWarehouse.value;
+    } else if (form.value.movement_type === 'transfer') {
+      // Para transfer se envían ambos sets:
+      // - Origen: se usan los selects globales
+      payload.origin_location_id = selectedLocation.value;
+      payload.origin_warehouse_id = selectedWarehouse.value;
+      // - Destino: se usan los selects locales para destino
+      payload.destination_location_id = selectedDestinationLocation.value;
+      payload.destination_warehouse_id = selectedDestinationWarehouse.value;
     }
 
     await updateStockMovement(payload);
 
-    // Mostrar notificación y redirigir
     await showSuccessNotification(
       'Success!',
       `Stock updated successfully as ${form.value.movement_type.toUpperCase()}.`,
@@ -82,7 +116,7 @@ async function handleUpdateStock() {
 <template>
   <AdminWrapper>
     <div class="container mx-auto p-6">
-      <!-- Encabezado con botón de regreso -->
+      <!-- Encabezado -->
       <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold">Actualizar Stock</h1>
         <GoBackButton />
@@ -92,31 +126,74 @@ async function handleUpdateStock() {
       <div class="flex justify-center items-center h-[calc(100vh-310px)]">
         <div class="bg-white shadow-2xl rounded-lg p-8 w-full max-w-md">
           <form @submit.prevent="handleUpdateStock" class="space-y-6">
-            <!-- Select de Locales -->
-            <FormSelect
-              v-model="selectedLocation"
-              id="location_id"
-              label="Seleccionar Local"
-              :options="locations"
-              placeholder="Seleccione un local"
-              placeholderValue="0"
-              required
-              @change="handleLocationChange"
-            />
+            <!-- Bloque condicional según el tipo de movimiento -->
+            <div v-if="form.movement_type === 'transfer'">
+              <!-- Sección de Origen: se usan los selects globales -->
+<!--               <FormSelect
+                v-model="selectedLocation"
+                id="origin_location_id"
+                label="Seleccionar Local Origen"
+                :options="locations"
+                placeholder="Seleccione local origen"
+                placeholderValue="0"
+                required
+                @change="handleLocationChange"
+              />
+              <FormSelect
+                v-model="selectedWarehouse"
+                id="origin_warehouse_id"
+                label="Seleccionar Bodega Origen"
+                :options="locationWarehouseStore.warehouseList"
+                placeholder="Seleccione bodega de origen"
+                placeholderValue="0"
+                required
+                @change="handleWarehouseChange"
+              /> -->
+              <!-- Sección de Destino: se usan selects locales -->
+              <FormSelect
+                v-model="selectedDestinationLocation"
+                id="destination_location_id"
+                label="Seleccionar Local Destino"
+                :options="locations"
+                placeholder="Seleccione local destino"
+                placeholderValue="0"
+                required
+              />
+              <FormSelect
+                v-model="selectedDestinationWarehouse"
+                id="destination_warehouse_id"
+                label="Seleccionar Bodega Destino"
+                :options="destinationWarehouseList"
+                placeholder="Seleccione bodega de destino"
+                placeholderValue="0"
+                required
+              />
+            </div>
+            <div v-else>
+              <!-- Para entry y exit se usan los selects globales -->
+              <FormSelect
+                v-model="selectedLocation"
+                id="location_id"
+                label="Seleccionar Local"
+                :options="locations"
+                placeholder="Seleccione un local"
+                placeholderValue="0"
+                required
+                @change="handleLocationChange"
+              />
+              <FormSelect
+                v-model="selectedWarehouse"
+                id="warehouse_id"
+                :label="form.movement_type === 'entry' ? 'Seleccionar Bodega Destino' : 'Seleccionar Bodega Origen'"
+                :options="locationWarehouseStore.warehouseList"
+                :placeholder="form.movement_type === 'entry' ? 'Seleccione bodega destino' : 'Seleccione bodega origen'"
+                placeholderValue="0"
+                required
+                @change="handleWarehouseChange"
+              />
+            </div>
 
-            <!-- Select de Bodegas -->
-            <FormSelect
-              v-model="selectedWarehouse"
-              id="warehouse_id"
-              label="Seleccionar Bodega"
-              :options="locationWarehouseStore.warehouseList"
-              placeholder="Seleccione una bodega"
-              placeholderValue="0"
-              required
-              @change="handleWarehouseChange"
-            />
-
-            <!-- Campo Movimiento (oculto si no se quiere modificar) -->
+            <!-- Campo oculto para movement_type -->
             <FormInput
               v-model="form.movement_type"
               id="movement_type"
@@ -151,7 +228,7 @@ async function handleUpdateStock() {
             </button>
           </form>
 
-          <!-- Mensaje de error, si lo hay -->
+          <!-- Mensaje de error -->
           <p v-if="errorMessage" class="text-red-500 mt-2">
             {{ errorMessage }}
           </p>

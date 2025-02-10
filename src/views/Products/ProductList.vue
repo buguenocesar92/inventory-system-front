@@ -119,6 +119,16 @@ function deleteProduct(id: number) {
               Quitar Stock
             </v-btn>
 
+            <!-- Botón Quitar Stock -->
+            <v-btn
+              color="warning"
+              @click="router.push({ name: 'MovementForm', params: { id: item.id, movementType: 'transfer' } })"
+              class="ma-2 mr-2"
+            >
+              <v-icon start>mdi-minus</v-icon>
+              Transferir Stock
+            </v-btn>
+
             <!-- Botón Historial de Movimientos -->
             <v-btn
               color="info"
