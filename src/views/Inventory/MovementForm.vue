@@ -14,6 +14,17 @@ import { useLocationWarehouseSelect } from '@/composables/useLocationWarehouseSe
 // Función para obtener bodegas según el local (la misma que usas en tu composable)
 import { fetchWarehousesByLocation } from '@/services/WarehouseService';
 
+// Definir un tipo extendido para el payload
+type StockMovementPayload = InventoryMovementPayload & {
+  // Para entry y exit
+  location_id?: number;
+  origin_warehouse_id?: number;
+  destination_warehouse_id?: number;
+  // Para transfer
+  origin_location_id?: number;
+  destination_location_id?: number;
+};
+
 // 1. Obtener parámetros de ruta y definir el tipo de movimiento
 const route = useRoute();
 const productId = Number(route.params.id);
@@ -47,7 +58,7 @@ const destinationWarehouseList = ref<Array<{ id: number; name: string }>>([]);
 const selectedDestinationWarehouse = ref<number | null>(null);
 
 // Función para cargar bodegas del local de destino
-async function loadDestinationWarehouses(locationId: number) {
+async function loadDestinationWarehouses(locationId: number): Promise<void> {
   try {
     const data = await fetchWarehousesByLocation(locationId);
     destinationWarehouseList.value = data;
@@ -72,30 +83,30 @@ const { errors, errorMessage, handleValidationError } = useFormValidation();
 const { showSuccessNotification } = useNotification();
 
 // 6. Función para enviar el formulario
-async function handleUpdateStock() {
+async function handleUpdateStock(): Promise<void> {
   isLoading.value = true;
   try {
-    const payload: any = {
+    const payload: StockMovementPayload = {
       ...form.value,
       product_id: productId,
     };
 
     if (form.value.movement_type === 'entry') {
       // Para entrada se usa el local y bodega globales
-      payload.location_id = selectedLocation.value;
-      payload.destination_warehouse_id = selectedWarehouse.value;
+      payload.location_id = selectedLocation.value || undefined;
+      payload.destination_warehouse_id = selectedWarehouse.value || undefined;
     } else if (form.value.movement_type === 'exit') {
       // Para salida se usa el local y bodega globales
-      payload.location_id = selectedLocation.value;
-      payload.origin_warehouse_id = selectedWarehouse.value;
+      payload.location_id = selectedLocation.value || undefined;
+      payload.origin_warehouse_id = selectedWarehouse.value || undefined;
     } else if (form.value.movement_type === 'transfer') {
       // Para transfer se envían ambos sets:
       // - Origen: se usan los selects globales
-      payload.origin_location_id = selectedLocation.value;
-      payload.origin_warehouse_id = selectedWarehouse.value;
+      payload.origin_location_id = selectedLocation.value || undefined;
+      payload.origin_warehouse_id = selectedWarehouse.value || undefined;
       // - Destino: se usan los selects locales para destino
-      payload.destination_location_id = selectedDestinationLocation.value;
-      payload.destination_warehouse_id = selectedDestinationWarehouse.value;
+      payload.destination_location_id = selectedDestinationLocation.value || undefined;
+      payload.destination_warehouse_id = selectedDestinationWarehouse.value || undefined;
     }
 
     await updateStockMovement(payload);
