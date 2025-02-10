@@ -9,12 +9,16 @@ import type {
 /**
  * Parámetros para filtrar, paginar y buscar productos.
  */
+// src/services/ProductService.ts
 interface FetchProductsParams {
   page: number;
   itemsPerPage: number;
   sortBy: { key: string; order: string }[];
-  search: string;
+  search?: string;
+  locationId?: number | null;
+  warehouseId?: number | null;
 }
+
 
 /**
  * Obtener productos con paginación, búsqueda y ordenamiento.
@@ -24,10 +28,23 @@ export async function fetchProducts({
   itemsPerPage,
   sortBy,
   search,
+  locationId,
+  warehouseId,
 }: FetchProductsParams): Promise<FetchProductsResponse> {
-  const response = await axios.get('/products', {
-    params: { page, itemsPerPage, sortBy, search },
+  const response = await axios.get("/products", {
+    params: {
+      page,
+      itemsPerPage,
+      // Si tu backend requiere sortBy como string
+      // (por ejemplo, si no soporta arrays directos):
+      sortBy: sortBy,
+      search,
+      // Solo se incluyen si no son nulos
+      ...(locationId != null && { locationId }),
+      ...(warehouseId != null && { warehouseId }),
+    },
   });
+
   return {
     items: response.data.items,
     total: response.data.total,
