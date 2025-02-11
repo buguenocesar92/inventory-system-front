@@ -2,6 +2,8 @@
 import { useRouter } from "vue-router";
 import { useProductList } from "@/composables/useProductList";
 import AdminWrapper from "@/components/AdminWrapper.vue";
+import LocationWarehouseSelects from "@/components/LocationWarehouseSelects.vue"; // Componente reutilizable con los selects
+import FormInput from '@/components/FormInput.vue';
 
 const router = useRouter();
 
@@ -27,32 +29,33 @@ function deleteProduct(id: number) {
 <template>
   <AdminWrapper>
     <div class="px-4 sm:px-6 lg:px-8 py-4">
+      <!-- Contenedor de filtros alineados en una sola línea -->
+      <div class="flex flex-wrap sm:flex-nowrap items-center justify-between mb-4 gap-4">
+        <div class="flex items-center gap-4 w-full sm:w-auto">
+          <LocationWarehouseSelects />
+
+          <FormInput
+           v-model="search"
+            id="name"
+            label="Nombre del Producto"
+            placeholder="Ingrese el nombre del producto"
+             @input="onSearchInput"
+            required
+          />
+
+          <RouterLink
+            to="/add-product"
+            class="bg-blue-500 text-white font-medium py-2 px-4 rounded hover:bg-blue-600 transition-colors whitespace-nowrap mt-7"
+          >
+            Crear Producto
+          </RouterLink>
+        </div>
+      </div>
+
       <!-- Título -->
       <h1 class="text-xl sm:text-2xl font-bold mb-4 text-center sm:text-left">
         Lista de Productos
       </h1>
-
-      <!-- Botón Crear Producto -->
-      <div class="flex justify-center sm:justify-start mb-5">
-        <RouterLink
-          to="/add-product"
-          class="bg-blue-500 text-white font-medium py-2 px-4 rounded hover:bg-blue-600 transition-colors"
-        >
-          Crear Producto
-        </RouterLink>
-      </div>
-
-      <!-- Barra de búsqueda -->
-      <div class="flex justify-center sm:justify-start mb-4">
-        <v-text-field
-          v-model="search"
-          label="Buscar"
-          class="w-full sm:w-96 rounded-lg overflow-hidden"
-          outlined
-          dense
-          @input="onSearchInput"
-        />
-      </div>
 
       <!-- Tabla de datos -->
       <v-data-table-server
@@ -119,7 +122,7 @@ function deleteProduct(id: number) {
               Quitar Stock
             </v-btn>
 
-            <!-- Botón Quitar Stock -->
+            <!-- Botón Transferir Stock -->
             <v-btn
               color="warning"
               @click="router.push({ name: 'MovementForm', params: { id: item.id, movementType: 'transfer' } })"
