@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { updateStockMovement } from '@/services/InventoryMovementService';
 import FormInput from '@/components/FormInput.vue';
@@ -9,10 +9,10 @@ import { useNotification } from '@/composables/useNotification';
 import type { InventoryMovementPayload } from '@/types/InventoryMovementTypes';
 import AdminWrapper from '@/components/AdminWrapper.vue';
 import GoBackButton from '@/components/GoBackButton.vue';
-// Composable para locales y bodegas (para movimientos entry y exit y para la sección de origen en transfer)
+// Composable para locales y bodegas (para movimientos entry/exit y para la sección de origen en transfer)
 import { useLocationWarehouseSelect } from '@/composables/useLocationWarehouseSelect';
-// Función para obtener bodegas según el local (la misma que usas en tu composable)
-import { fetchWarehousesByLocation } from '@/services/WarehouseService';
+// Importamos el composable creado para la sección de destino en transfer
+import { useTransferDestinationSelect } from '@/composables/useTransferDestinationSelect';
 
 // Definir un tipo extendido para el payload
 type StockMovementPayload = InventoryMovementPayload & {
@@ -28,7 +28,6 @@ type StockMovementPayload = InventoryMovementPayload & {
 // 1. Obtener parámetros de ruta y definir el tipo de movimiento
 const route = useRoute();
 const productId = Number(route.params.id);
-// Se espera que la ruta envíe 'entry', 'exit' o 'transfer'
 const movementType = (route.params.movementType as 'entry' | 'exit' | 'transfer') || 'entry';
 
 // 2. Estado del formulario
@@ -39,7 +38,7 @@ const form = ref<InventoryMovementPayload>({
   description: '',
 });
 
-// 3. Para movimientos que no sean transfer (entry y exit) y para la sección de origen en transfer se usa el composable
+// 3. Usar el composable global para locales y bodegas (y para la sección de origen en transfer)
 const {
   locationWarehouseStore,
   locations,
@@ -51,32 +50,12 @@ const {
 
 const isLoading = ref(false);
 
-// 4. Variables y funciones para el modo transfer (sección de destino)
-// Para la sección de destino se usan nuevos selects
-const selectedDestinationLocation = ref<number | null>(null);
-const destinationWarehouseList = ref<Array<{ id: number; name: string }>>([]);
-const selectedDestinationWarehouse = ref<number | null>(null);
-
-// Función para cargar bodegas del local de destino
-async function loadDestinationWarehouses(locationId: number): Promise<void> {
-  try {
-    const data = await fetchWarehousesByLocation(locationId);
-    destinationWarehouseList.value = data;
-    selectedDestinationWarehouse.value = null;
-  } catch (error) {
-    console.error('Error cargando bodegas de destino', error);
-  }
-}
-
-// Cuando cambie el local de destino se cargan sus bodegas
-watch(selectedDestinationLocation, (newVal) => {
-  if (newVal) {
-    loadDestinationWarehouses(newVal);
-  } else {
-    destinationWarehouseList.value = [];
-    selectedDestinationWarehouse.value = null;
-  }
-});
+// 4. Usar el composable para la sección de destino en transfer
+const {
+  selectedDestinationLocation,
+  destinationWarehouseList,
+  selectedDestinationWarehouse,
+} = useTransferDestinationSelect();
 
 // 5. Composables para validación y notificación
 const { errors, errorMessage, handleValidationError } = useFormValidation();
@@ -92,19 +71,17 @@ async function handleUpdateStock(): Promise<void> {
     };
 
     if (form.value.movement_type === 'entry') {
-      // Para entrada se usa el local y bodega globales
       payload.location_id = selectedLocation.value || undefined;
       payload.destination_warehouse_id = selectedWarehouse.value || undefined;
     } else if (form.value.movement_type === 'exit') {
-      // Para salida se usa el local y bodega globales
       payload.location_id = selectedLocation.value || undefined;
       payload.origin_warehouse_id = selectedWarehouse.value || undefined;
     } else if (form.value.movement_type === 'transfer') {
-      // Para transfer se envían ambos sets:
-      // - Origen: se usan los selects globales
+      // Para transfer se usan:
+      // - Los selects globales para origen
       payload.origin_location_id = selectedLocation.value || undefined;
       payload.origin_warehouse_id = selectedWarehouse.value || undefined;
-      // - Destino: se usan los selects locales para destino
+      // - Los selects del composable para destino
       payload.destination_location_id = selectedDestinationLocation.value || undefined;
       payload.destination_warehouse_id = selectedDestinationWarehouse.value || undefined;
     }
@@ -132,7 +109,6 @@ async function handleUpdateStock(): Promise<void> {
         <h1 class="text-2xl font-bold">Actualizar Stock</h1>
         <GoBackButton />
       </div>
-
       <!-- Contenedor del formulario -->
       <div class="flex justify-center items-center h-[calc(100vh-310px)]">
         <div class="bg-white shadow-2xl rounded-lg p-8 w-full max-w-md">
@@ -140,7 +116,7 @@ async function handleUpdateStock(): Promise<void> {
             <!-- Bloque condicional según el tipo de movimiento -->
             <div v-if="form.movement_type === 'transfer'">
               <!-- Sección de Origen: se usan los selects globales -->
-<!--               <FormSelect
+              <FormSelect
                 v-model="selectedLocation"
                 id="origin_location_id"
                 label="Seleccionar Local Origen"
@@ -159,8 +135,8 @@ async function handleUpdateStock(): Promise<void> {
                 placeholderValue="0"
                 required
                 @change="handleWarehouseChange"
-              /> -->
-              <!-- Sección de Destino: se usan selects locales -->
+              />
+              <!-- Sección de Destino: se usan los selects del composable de destino -->
               <FormSelect
                 v-model="selectedDestinationLocation"
                 id="destination_location_id"
