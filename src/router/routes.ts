@@ -18,6 +18,7 @@ import SalesHistoryList from '@/views/Sales/SalesHistoryList.vue';
 import UsersManager from '@/views/Users/UserManager.vue';
 import LocationManager from '@/views/Locations/LocationManager.vue';
 import LocationForm from '@/views/Locations/LocationForm.vue';
+import UserForm from '@/views/Users/UserForm.vue';
 
 
 export const routes = [
@@ -148,6 +149,22 @@ export const routes = [
       sidebar: true,
       label: 'Usuarios',
       icon: 'mdi-account-group',
+    },
+  },
+  {
+    path: '/users/:id/edit',
+    name: 'UserEdit',
+    component: UserForm,
+    meta: { requiresAuth: true, sidebar: false },
+    props: true,
+  },
+  {
+    path : '/users/create',
+    name: 'UserCreate',
+    component: UserForm,
+    meta: {
+      requiresAuth: true,
+      sidebar: false,
     },
   },
   {

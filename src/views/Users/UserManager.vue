@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { fetchAllUsersWithLocations, /* deleteUser */ } from '@/services/UserService';
+import { fetchAllUsersWithLocations, deleteUser } from '@/services/UserService';
 import { useNotification } from '@/composables/useNotification';
 import { useFormValidation } from '@/composables/useFormValidation';
 import type { User } from '@/types/UserTypes';
 import AdminWrapper from '@/components/AdminWrapper.vue';
 
+// Inicializamos router y composables de notificaciones y validación
 const router = useRouter();
-const { /* showSuccessNotification, */ showErrorNotification } = useNotification();
+const { showSuccessNotification, showErrorNotification } = useNotification();
 const { errorMessage, handleValidationError } = useFormValidation();
 
+// Variables reactivas para la lista de usuarios y el estado de carga
 const users = ref<User[]>([]);
 const isLoading = ref(false);
 
+// Configuración de las columnas de la tabla
 const headers = [
   { title: 'ID', value: 'id' },
   { title: 'Nombre', value: 'name' },
@@ -22,6 +25,7 @@ const headers = [
   { title: 'Acciones', value: 'actions', sortable: false },
 ];
 
+// Función para cargar los usuarios
 async function loadUsers() {
   try {
     isLoading.value = true;
@@ -36,10 +40,11 @@ async function loadUsers() {
   }
 }
 
-/* async function handleDelete(id: number) {
+// Función para eliminar un usuario y recargar la lista
+async function handleDelete(id: number) {
   try {
     await deleteUser(id);
-    await showSuccessNotification('Éxito', 'Usuario eliminado correctamente');
+    showSuccessNotification('Éxito', 'Usuario eliminado correctamente');
     await loadUsers();
   } catch (error) {
     handleValidationError(error);
@@ -47,16 +52,19 @@ async function loadUsers() {
       showErrorNotification('Error', errorMessage.value);
     }
   }
-} */
+}
 
+// Función para redirigir a la vista de creación de usuario
 function goToCreate() {
   router.push({ name: 'RegisterUser' });
 }
 
-/* function goToEdit(id: number) {
+// Función para redirigir a la vista de edición del usuario
+function goToEdit(id: number) {
   router.push({ name: 'UserEdit', params: { id: id.toString() } });
 }
- */
+
+// Cargar los usuarios al montar el componente
 onMounted(() => {
   loadUsers();
 });
@@ -79,20 +87,20 @@ onMounted(() => {
         :loading="isLoading"
         class="elevation-1"
       >
-        <!-- eslint-disable vue/valid-v-slot -->
-<!--         <template #item.actions="{ item }">
+        <!-- Template para mostrar los botones de acciones (Editar / Eliminar) -->
+         <!-- eslint-disable vue/valid-v-slot -->
+        <template #item.actions="{ item }">
           <div class="flex gap-2">
-            <v-btn color="primary" @click="goToEdit(item.id!)">
+            <v-btn color="primary" @click="goToEdit(item.id)">
               <v-icon start>mdi-pencil</v-icon>
               Editar
             </v-btn>
-
-            <v-btn color="error" @click="handleDelete(item.id!)">
+            <v-btn color="error" @click="handleDelete(item.id)">
               <v-icon start>mdi-delete</v-icon>
               Eliminar
             </v-btn>
           </div>
-        </template> -->
+        </template>
 
         <template #no-data>
           <div class="text-center py-4 text-gray-500">
