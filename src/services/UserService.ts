@@ -20,6 +20,13 @@ export async function fetchAllUsers(): Promise<User[]> {
 }
 
 /**
+ * Eliminar usuario.
+ */
+export async function deleteUser(id: number): Promise<void> {
+  await axios.delete(`/users/${id}`);
+}
+
+/**
  * Actualiza la asociación de usuarios a un rol determinado.
  * @param roleId  El ID (o string) del rol
  * @param userIds Array de IDs de usuarios que se van a asociar a ese rol
