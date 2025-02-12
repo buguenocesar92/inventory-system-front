@@ -18,7 +18,7 @@ const headers = [
   { title: 'ID', value: 'id' },
   { title: 'Nombre', value: 'name' },
   { title: 'Email', value: 'email' },
-  { title: 'Rol', value: 'role' },
+  { title: 'Location', value: 'location.name' },
   { title: 'Acciones', value: 'actions', sortable: false },
 ];
 
