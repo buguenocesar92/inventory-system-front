@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { fetchAllUsers, /* deleteUser */ } from '@/services/UserService';
+import { fetchAllUsersWithLocations, /* deleteUser */ } from '@/services/UserService';
 import { useNotification } from '@/composables/useNotification';
 import { useFormValidation } from '@/composables/useFormValidation';
 import type { User } from '@/types/UserTypes';
@@ -25,7 +25,7 @@ const headers = [
 async function loadUsers() {
   try {
     isLoading.value = true;
-    users.value = await fetchAllUsers();
+    users.value = await fetchAllUsersWithLocations();
   } catch (error) {
     handleValidationError(error);
     if (errorMessage.value) {

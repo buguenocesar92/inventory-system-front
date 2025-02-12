@@ -34,3 +34,9 @@ export async function deleteUser(id: number): Promise<void> {
 export async function updateRoleUsers(roleId: string, userIds: number[]): Promise<void> {
   await axios.put(`/roles/${roleId}/users`, { users: userIds });
 }
+
+
+export async function fetchAllUsersWithLocations(): Promise<User[]> {
+  const response = await axios.get('/users/with-locations');
+  return response.data;
+}
