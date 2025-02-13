@@ -22,4 +22,15 @@ export interface User {
   password?: string;
   created_at?: string;
   updated_at?: string;
+  location_id?: number;
+}
+
+export interface Location {
+  id: number;
+  name: string;
+  address?: string;
+  phone?: string | null;
+  status?: string;
+  created_at?: string;
+  updated_at?: string;
 }

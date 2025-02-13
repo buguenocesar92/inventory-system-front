@@ -36,6 +36,12 @@ export async function fetchAllUsers(): Promise<User[]> {
   return response.data;
 }
 
+export async function fetchUserById(id: number): Promise<User> {
+  const response = await axios.get(`/users/${id}`);
+  return response.data;
+}
+
+
 /**
  * Elimina un usuario.
  */
