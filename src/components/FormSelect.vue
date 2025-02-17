@@ -42,7 +42,7 @@ const computedValue = computed({
       :class="{ 'border-red-500': error }"
       :required="required"
     >
-      <option disabled :value="placeholderValue" class="text-gray-400">
+      <option :value="placeholderValue" class="text-gray-400">
         {{ placeholder }}
       </option>
 
