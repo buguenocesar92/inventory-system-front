@@ -63,7 +63,7 @@ async function handleSubmit() {
   try {
     isLoading.value = true;
     if (isEditing.value) {
-      await updateWarehouse(warehouse.value.id, warehouse.value);
+      await updateWarehouse(warehouse.value.id!, warehouse.value);
       await showSuccessNotification('Éxito', 'Almacén actualizado correctamente');
     } else {
       await createWarehouse(warehouse.value);
