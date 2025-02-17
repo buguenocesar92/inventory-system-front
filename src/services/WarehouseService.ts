@@ -47,3 +47,11 @@ export async function updateWarehouse(id: number, data: WarehousePayload): Promi
   const response = await axios.put(`/warehouses/${id}`, data);
   return response.data;
 }
+
+/**
+ * Establece el estado de bodega de ventas para una warehouse.
+ */
+export async function setSalesWarehouse(id: number, isSalesWarehouse = true): Promise<WarehousePayload> {
+  const response = await axios.put(`/warehouses/${id}/sales-status`, { is_sales_warehouse: isSalesWarehouse });
+  return response.data.warehouse; // Ajusta según la respuesta de tu API.
+}
