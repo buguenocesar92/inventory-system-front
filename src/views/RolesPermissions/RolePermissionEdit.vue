@@ -1,4 +1,3 @@
-<!-- src/views/RolesPermissions/RolePermissionEdit.vue -->
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -17,8 +16,7 @@ import type { Role, Permission } from '@/types/RoleTypes';
 import type { User } from '@/types/UserTypes';
 import AdminWrapper from '@/components/AdminWrapper.vue';
 
-
-// State principal
+// Estado principal
 const role = ref<Role | null>(null);
 const allPermissions = ref<Permission[]>([]);
 const allUsers = ref<User[]>([]);
@@ -31,7 +29,7 @@ const router = useRouter();
 const { showSuccessNotification, showErrorNotification } = useNotification();
 const { errorMessage, handleValidationError } = useFormValidation();
 
-// Obtenemos el parámetro 'roleId' de la URL
+// Obtener el parámetro 'roleId' de la URL
 const roleId = route.params.roleId as string;
 
 /**
@@ -125,7 +123,8 @@ onMounted(loadRoleData);
               v-model="selectedPermissions"
               class="mr-2"
             />
-            {{ permission.name }}
+            <span class="font-semibold text-blue-600">{{ permission.readable_name }}</span>
+            <span class="text-gray-500 text-xs"> ({{ permission.name }})</span>
           </li>
         </ul>
       </div>

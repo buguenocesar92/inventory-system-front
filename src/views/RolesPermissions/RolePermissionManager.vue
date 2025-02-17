@@ -1,4 +1,3 @@
-<!-- src/views/RolesPermissions/RolePermissionManager.vue -->
 <script setup lang="ts">
 import { ref, onMounted, defineOptions } from 'vue';
 import { useRouter } from 'vue-router';
@@ -63,18 +62,14 @@ function goToRoleEdit(roleId: number) {
 // Cargar roles al montar el componente
 onMounted(fetchRoles);
 </script>
+
 <template>
   <AdminWrapper>
     <div class="container mx-auto p-6">
       <!-- Encabezado y botón de nuevo rol -->
       <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold">Gestión de Roles y Permisos</h1>
-<!--         <v-btn color="primary" @click="goToRegister">
-          <v-icon start>mdi-plus</v-icon>
-          Nuevo Rol
-        </v-btn> -->
         <GoToRegisterButton />
-
       </div>
 
       <!-- Tabla de Roles -->
@@ -84,14 +79,17 @@ onMounted(fetchRoles);
         class="elevation-1"
         dense
       >
+        <!-- Permisos -->
         <template #item.permissions="{ item }">
           <ul class="text-gray-700 text-sm">
             <li v-for="permission in item.permissions" :key="permission.id">
-              {{ permission.name }}
+              <span class="font-semibold text-blue-600">{{ permission.readable_name }}</span>
+              <span class="text-gray-500 text-xs"> ({{ permission.name }})</span>
             </li>
           </ul>
         </template>
 
+        <!-- Usuarios -->
         <template #item.users="{ item }">
           <ul class="text-gray-700 text-sm">
             <li v-for="user in item.users" :key="user.id">
@@ -100,6 +98,7 @@ onMounted(fetchRoles);
           </ul>
         </template>
 
+        <!-- Acciones -->
         <template #item.actions="{ item }">
           <div class="flex gap-2">
             <!-- Botón Editar -->
@@ -119,4 +118,3 @@ onMounted(fetchRoles);
     </div>
   </AdminWrapper>
 </template>
-
