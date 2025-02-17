@@ -19,6 +19,8 @@ import UsersManager from '@/views/Users/UserManager.vue';
 import LocationManager from '@/views/Locations/LocationManager.vue';
 import LocationForm from '@/views/Locations/LocationForm.vue';
 import UserForm from '@/views/Users/UserForm.vue';
+import WarehouseForm from '@/views/Warehouses/WarehouseForm.vue';
+import WarehouseManager from '@/views/Warehouses/WarehouseManager.vue';
 
 
 export const routes = [
@@ -191,6 +193,36 @@ export const routes = [
     path : '/locations/:id/edit',
     name: 'LocationEdit',
     component: LocationForm,
+    meta: {
+      requiresAuth: true,
+      sidebar: false,
+    },
+    props: true,
+  },
+  {
+    path : '/warehouses',
+    name: 'WarehouseManager',
+    component: WarehouseManager,
+    meta: {
+      requiresAuth: true,
+      sidebar: true,
+      label: 'Almacenes',
+      icon: 'mdi-package-variant-closed',
+    },
+  },
+  {
+    path : '/warehouses/create',
+    name: 'WarehouseCreate',
+    component: WarehouseForm,
+    meta: {
+      requiresAuth: true,
+      sidebar: false,
+    },
+  },
+  {
+    path : '/warehouses/:id/edit',
+    name: 'WarehouseEdit',
+    component: WarehouseForm,
     meta: {
       requiresAuth: true,
       sidebar: false,
