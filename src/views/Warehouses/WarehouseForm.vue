@@ -2,11 +2,14 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { createWarehouse, updateWarehouse, fetchWarehouseById } from '@/services/WarehouseService';
+import { fetchLocations } from '@/services/LocationService';
 import { useNotification } from '@/composables/useNotification';
 import { useFormValidation } from '@/composables/useFormValidation';
 import type { WarehousePayload } from '@/types/WarehouseTypes';
+import type { LocationPayload } from '@/types/LocationTypes';
 import AdminWrapper from '@/components/AdminWrapper.vue';
 import GoBackButton from '@/components/GoBackButton.vue';
+import FormSelect from '@/components/FormSelect.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -15,6 +18,7 @@ const { errors, errorMessage, handleValidationError } = useFormValidation();
 
 const isEditing = ref<boolean>(!!route.params.id);
 const isLoading = ref(false);
+
 const warehouse = ref<WarehousePayload>({
   id: 0,
   location_id: 0,
@@ -22,7 +26,21 @@ const warehouse = ref<WarehousePayload>({
   type: ''
 });
 
-// Cargar datos si es edición
+const locations = ref<LocationPayload[]>([]);
+
+// Función para cargar las locaciones disponibles
+async function loadLocations() {
+  try {
+    locations.value = await fetchLocations();
+  } catch (error) {
+    handleValidationError(error);
+    if (errorMessage.value) {
+      showErrorNotification('Error al cargar locaciones', errorMessage.value);
+    }
+  }
+}
+
+// Cargar datos del almacén si es edición
 async function loadWarehouse() {
   if (isEditing.value) {
     try {
@@ -40,7 +58,7 @@ async function loadWarehouse() {
   }
 }
 
-// Manejar envío del formulario
+// Manejar el envío del formulario
 async function handleSubmit() {
   try {
     isLoading.value = true;
@@ -63,6 +81,7 @@ async function handleSubmit() {
 }
 
 onMounted(() => {
+  loadLocations();
   if (isEditing.value) {
     loadWarehouse();
   }
@@ -82,20 +101,23 @@ onMounted(() => {
 
       <div class="bg-white shadow-lg rounded-lg p-6 max-w-lg mx-auto">
         <form @submit.prevent="handleSubmit">
-          <!-- ID de Local -->
+          <!-- Select para elegir el local -->
           <div class="mb-4">
-            <label class="block text-gray-700 font-bold mb-2" for="location_id">ID de Local</label>
-            <input
+            <FormSelect
               v-model="warehouse.location_id"
-              type="number"
               id="location_id"
-              class="w-full px-3 py-2 border rounded-lg"
+              label="Seleccionar Local"
+              :options="locations"
+              placeholder="Seleccione un local"
+              :placeholderValue="0"
               required
             />
-            <p v-if="errors.location_id" class="text-red-500 text-sm">{{ errors.location_id[0] }}</p>
+            <p v-if="errors.location_id" class="text-red-500 text-sm">
+              {{ errors.location_id[0] }}
+            </p>
           </div>
 
-          <!-- Nombre -->
+          <!-- Campo para Nombre -->
           <div class="mb-4">
             <label class="block text-gray-700 font-bold mb-2" for="name">Nombre</label>
             <input
@@ -105,10 +127,12 @@ onMounted(() => {
               class="w-full px-3 py-2 border rounded-lg"
               required
             />
-            <p v-if="errors.name" class="text-red-500 text-sm">{{ errors.name[0] }}</p>
+            <p v-if="errors.name" class="text-red-500 text-sm">
+              {{ errors.name[0] }}
+            </p>
           </div>
 
-          <!-- Tipo -->
+          <!-- Campo para Tipo -->
           <div class="mb-4">
             <label class="block text-gray-700 font-bold mb-2" for="type">Tipo</label>
             <input
@@ -118,7 +142,9 @@ onMounted(() => {
               class="w-full px-3 py-2 border rounded-lg"
               required
             />
-            <p v-if="errors.type" class="text-red-500 text-sm">{{ errors.type[0] }}</p>
+            <p v-if="errors.type" class="text-red-500 text-sm">
+              {{ errors.type[0] }}
+            </p>
           </div>
 
           <!-- Botón de Guardar -->

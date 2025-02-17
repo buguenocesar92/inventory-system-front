@@ -17,7 +17,7 @@ const isLoading = ref(false);
 const headers = [
   { title: 'ID', value: 'id' },
   { title: 'Nombre', value: 'name' },
-  { title: 'ID de Local', value: 'location_id' },
+  { title: 'Local', value: 'location.name' },
   { title: 'Tipo', value: 'type' },
   { title: 'Acciones', value: 'actions', sortable: false },
 ];
