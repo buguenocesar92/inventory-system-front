@@ -20,7 +20,7 @@ const headers = [
   { title: 'Nombre', value: 'name' },
   { title: 'Local', value: 'location.name' },
   { title: 'Tipo', value: 'type' },
-  { title: 'Ventas', value: 'is_sales_warehouse', sortable: false },
+  { title: 'Status', value: 'is_sales_warehouse', sortable: false },
   { title: 'Acciones', value: 'actions', sortable: false },
 ];
 
